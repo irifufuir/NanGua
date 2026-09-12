@@ -8,23 +8,19 @@
     <title>Man Gua Login</title>
     <link rel="stylesheet" href="style.css">
 
-    <!-- ============================================================
-         Supabase SDK（必须在主脚本之前加载）
-         ============================================================ -->
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- ==================== 背景层（图片 + 视频） ==================== -->
+    <!-- 背景层 -->
     <div class="bg-container">
         <div class="bg-image" id="bgImage"></div>
         <video class="bg-video" id="bgVideo" autoplay muted loop playsinline></video>
     </div>
 
-    <!-- ==================== 右上角：语言 + 背景切换 ==================== -->
+    <!-- 右上角控制 -->
     <div class="top-right-controls">
-
-        <!-- 语言切换 -->
         <div class="lang-switcher">
             <button class="lang-btn" id="langBtn">🌐 简体中文</button>
             <div class="lang-dropdown" id="langDropdown">
@@ -36,17 +32,13 @@
                 <a href="#" data-lang="es">Español</a>
             </div>
         </div>
-
-        <!-- 背景切换 -->
         <div class="bg-switcher">
             <button class="bg-btn" id="bgBtn">🎨 背景</button>
-            <div class="bg-dropdown" id="bgDropdown">
-                <!-- 分类和条目由 JS 动态生成 -->
-            </div>
+            <div class="bg-dropdown" id="bgDropdown"></div>
         </div>
     </div>
 
-    <!-- ==================== 登录 / 注册主盒子 ==================== -->
+    <!-- 主盒子 -->
     <div class="box">
         <h2 id="title">Nan Gua</h2>
 
@@ -56,7 +48,6 @@
                 <label>邮箱</label>
                 <input type="email" id="loginEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
             </div>
-
             <div class="input-box">
                 <label>验证码</label>
                 <div class="code-box">
@@ -65,7 +56,6 @@
                     <button type="button" id="loginSendBtn" class="code-btn">获取验证码</button>
                 </div>
             </div>
-
             <div class="btn-box">
                 <a href="#" id="forgotLink">忘记密码?</a>
                 <div>
@@ -81,7 +71,6 @@
                 <label>邮箱</label>
                 <input type="email" id="regEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
             </div>
-
             <div class="input-box">
                 <label>验证码</label>
                 <div class="code-box">
@@ -90,17 +79,14 @@
                     <button type="button" id="regSendBtn" class="code-btn">获取验证码</button>
                 </div>
             </div>
-
             <div class="input-box">
                 <label>设置密码</label>
                 <input type="password" id="regPwd" placeholder="至少 6 位" autocomplete="new-password"/>
             </div>
-
             <div class="input-box">
                 <label>确认密码</label>
                 <input type="password" id="regPwd2" placeholder="再次输入密码" autocomplete="new-password"/>
             </div>
-
             <div class="btn-box">
                 <a href="#" id="backLoginLink">已有账号？返回登录</a>
                 <div>
@@ -109,11 +95,10 @@
             </div>
         </div>
 
-        <!-- 全局提示 -->
         <p class="tip" id="tip"></p>
     </div>
 
-    <!-- ==================== 忘记密码：反馈表单弹窗 ==================== -->
+    <!-- 忘记密码弹窗 -->
     <div class="modal-mask" id="forgotModal" style="display:none;">
         <div class="modal-box">
             <h3 id="forgotTitle">找回密码</h3>
@@ -123,13 +108,11 @@
                 <input type="email" id="forgotEmail"
                        placeholder="请输入注册时使用的邮箱" autocomplete="off"/>
             </div>
-
             <div class="input-box">
                 <label id="forgotContactLabel">联系方式</label>
                 <input type="text" id="forgotContact"
                        placeholder="手机号 / 其他邮箱（便于管理员联系您）" autocomplete="off"/>
             </div>
-
             <div class="input-box">
                 <label id="forgotReasonLabel">问题描述</label>
                 <textarea id="forgotReason" rows="3"
@@ -148,12 +131,12 @@
     </div>
 
 <!-- ============================================================
-     1. 背景资源清单
+     背景资源清单
      ============================================================ -->
 <script type="text/javascript" src="other/backgrounds.js"></script>
 
 <!-- ============================================================
-     2. 主逻辑脚本
+     主逻辑脚本
      ============================================================ -->
 <script type="text/javascript">
 
@@ -162,8 +145,6 @@
      * ======================================================== */
     var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
     var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
-
-    // 用 supabaseClient 而不是 supabase，避免覆盖全局 window.supabase
     var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     /* ========================================================
@@ -177,16 +158,10 @@
         fr: { video: '📹 Vidéo', image: '🖼️ Image' },
         es: { video: '📹 Vídeo', image: '🖼️ Imagen' }
     };
-
     var CATEGORY_ORDER = ['video', 'image'];
-
     var BG_BTN_LABELS = {
-        zh: '🎨 背景',
-        en: '🎨 Background',
-        ja: '🎨 背景',
-        ko: '🎨 배경',
-        fr: '🎨 Fond',
-        es: '🎨 Fondo'
+        zh: '🎨 背景', en: '🎨 Background', ja: '🎨 背景',
+        ko: '🎨 배경', fr: '🎨 Fond', es: '🎨 Fondo'
     };
 
     /* ========================================================
@@ -429,14 +404,10 @@
         var dict = i18n[currentLang] || i18n.zh;
         var msg = dict[key] || key;
         tipEl.textContent = msg;
-        tipEl.style.color = ok
-            ? 'rgba(130, 225, 160, 0.95)'
-            : 'rgba(248, 108, 76, 0.95)';
+        tipEl.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
         tipEl.classList.add('show');
         clearTimeout(tipTimer);
-        tipTimer = setTimeout(function () {
-            tipEl.classList.remove('show');
-        }, 2500);
+        tipTimer = setTimeout(function () { tipEl.classList.remove('show'); }, 2500);
     }
 
     var forgotTipTimer = null;
@@ -444,14 +415,10 @@
         var dict = i18n[currentLang] || i18n.zh;
         var msg = dict[key] || key;
         forgotTip.textContent = msg;
-        forgotTip.style.color = ok
-            ? 'rgba(130, 225, 160, 0.95)'
-            : 'rgba(248, 108, 76, 0.95)';
+        forgotTip.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
         forgotTip.classList.add('show');
         clearTimeout(forgotTipTimer);
-        forgotTipTimer = setTimeout(function () {
-            forgotTip.classList.remove('show');
-        }, 2500);
+        forgotTipTimer = setTimeout(function () { forgotTip.classList.remove('show'); }, 2500);
     }
 
     function onlySixDigits(inputEl) {
@@ -505,7 +472,6 @@
             titleEl.textContent = dict.registerTitle;
         }
 
-        // 登录视图
         document.querySelector('#loginView .input-box:nth-child(1) label').textContent = dict.emailLabel;
         loginEmail.placeholder = dict.emailPlaceholder;
         document.querySelector('#loginView .input-box:nth-child(2) label').textContent = dict.codeLabel;
@@ -515,7 +481,6 @@
         loginBtn.textContent = dict.loginBtn;
         toRegisterBtn.textContent = dict.registerBtn;
 
-        // 注册视图
         document.querySelector('#registerView .input-box:nth-child(1) label').textContent = dict.emailLabel;
         regEmail.placeholder = dict.emailPlaceholder;
         document.querySelector('#registerView .input-box:nth-child(2) label').textContent = dict.codeLabel;
@@ -528,7 +493,6 @@
         backLoginLink.textContent = dict.backLogin;
         registerBtn.textContent = dict.registerBtn;
 
-        // 忘记密码弹窗
         forgotTitle.textContent      = dict.forgotTitle;
         forgotEmailLabel.textContent = dict.forgotEmailLabel;
         forgotEmail.placeholder      = dict.forgotEmailPlaceholder;
@@ -577,10 +541,8 @@
     });
 
     /* ========================================================
-     *  七、发送验证码（真实调用 Supabase）
+     *  七、发送验证码
      * ======================================================== */
-
-    // —— 登录：发送验证码（不自动创建用户）——
     loginSendBtn.addEventListener('click', function () {
         var email = loginEmail.value.trim();
         if (!isValidEmail(email)) {
@@ -588,16 +550,14 @@
             loginEmail.focus();
             return;
         }
-
         loginSendBtn.disabled = true;
         loginSendBtn.textContent = '发送中...';
 
         supabaseClient.auth.signInWithOtp({
             email: email,
-            options: { shouldCreateUser: false }   // 登录时不允许自动注册
+            options: { shouldCreateUser: false }
         }).then(function (res) {
             if (res.error) {
-                // 常见错误：Email address not authorized（收件邮箱不在 Team 里）
                 showTip('发送失败：' + res.error.message, false);
                 loginSendBtn.disabled = false;
                 loginSendBtn.textContent = i18n[currentLang].sendCodeBtn;
@@ -613,7 +573,6 @@
         });
     });
 
-    // —— 注册：发送验证码（允许自动创建用户）——
     regSendBtn.addEventListener('click', function () {
         var email = regEmail.value.trim();
         if (!isValidEmail(email)) {
@@ -621,13 +580,12 @@
             regEmail.focus();
             return;
         }
-
         regSendBtn.disabled = true;
         regSendBtn.textContent = '发送中...';
 
         supabaseClient.auth.signInWithOtp({
             email: email,
-            options: { shouldCreateUser: true }    // 注册时允许自动创建
+            options: { shouldCreateUser: true }
         }).then(function (res) {
             if (res.error) {
                 showTip('发送失败：' + res.error.message, false);
@@ -646,7 +604,7 @@
     });
 
     /* ========================================================
-     *  八、登录逻辑（真实调用 Supabase）
+     *  八、登录逻辑
      * ======================================================== */
     function doLogin() {
         var email = loginEmail.value.trim();
@@ -674,10 +632,8 @@
                 showTip('登录失败：' + res.error.message, false);
                 return;
             }
-            // 登录成功
             showTip('tipLoginSuccess', true);
             console.log('[登录成功]', res.data);
-            // TODO: 这里可以跳转，比如 location.href = 'home.html';
         }).catch(function (err) {
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
@@ -693,8 +649,7 @@
     });
 
     /* ========================================================
-     *  九、注册逻辑（真实调用 Supabase）
-     *  OTP 验证通过后，再用 updateUser 设置密码
+     *  九、注册逻辑
      * ======================================================== */
     function doRegister() {
         var email = regEmail.value.trim();
@@ -718,16 +673,12 @@
         registerBtn.disabled = true;
         registerBtn.textContent = '注册中...';
 
-        // 第一步：校验验证码（成功即已登录/创建）
         supabaseClient.auth.verifyOtp({
             email: email,
             token: code,
             type: 'email'
         }).then(function (res) {
-            if (res.error) {
-                throw res.error;
-            }
-            // 第二步：设置密码
+            if (res.error) throw res.error;
             return supabaseClient.auth.updateUser({ password: pwd });
         }).then(function (res2) {
             registerBtn.disabled = false;
@@ -739,7 +690,6 @@
             }
             showTip('tipRegSuccess', true);
             console.log('[注册成功]');
-            // 注册成功 → 切回登录视图
             setTimeout(showLoginView, 1500);
         }).catch(function (err) {
             registerBtn.disabled = false;
@@ -762,7 +712,7 @@
     });
 
     /* ========================================================
-     *  十、忘记密码弹窗
+     *  十、忘记密码弹窗（写入 Supabase）
      * ======================================================== */
     function openForgotModal() {
         forgotModal.style.display = 'flex';
@@ -792,25 +742,35 @@
         var email   = forgotEmail.value.trim();
         var contact = forgotContact.value.trim();
         var reason  = forgotReason.value.trim();
+
         if (!isValidEmail(email)) {
             showForgotTip('tipForgotEmail', false); forgotEmail.focus(); return;
         }
         if (!contact) {
             showForgotTip('tipForgotContact', false); forgotContact.focus(); return;
         }
-        var mailData = {
-            to:      'admin@yourdomain.com',
-            subject: '【找回密码申请】' + email,
-            body:
-                '用户邮箱：' + email + '\n' +
-                '联系方式：' + contact + '\n' +
-                '问题描述：' + (reason || '（用户未填写）') + '\n' +
-                '提交时间：' + new Date().toLocaleString(),
-            time: new Date().toISOString()
-        };
-        console.log('[找回密码] 待发送邮件内容：', mailData);
-        showForgotTip('tipForgotSent', true);
-        setTimeout(closeForgotModal, 1500);
+
+        forgotSubmitBtn.disabled = true;
+        forgotSubmitBtn.textContent = '提交中...';
+
+        supabaseClient
+            .from('forgot_requests')
+            .insert([{ email: email, contact: contact, reason: reason }])
+            .then(function (res) {
+                forgotSubmitBtn.disabled = false;
+                forgotSubmitBtn.textContent = i18n[currentLang].forgotSubmit;
+
+                if (res.error) {
+                    showForgotTip('提交失败：' + res.error.message, false);
+                    return;
+                }
+                showForgotTip('tipForgotSent', true);
+                setTimeout(closeForgotModal, 1500);
+            }).catch(function (err) {
+                forgotSubmitBtn.disabled = false;
+                forgotSubmitBtn.textContent = i18n[currentLang].forgotSubmit;
+                showForgotTip('提交失败：' + (err && err.message ? err.message : err), false);
+            });
     }
     forgotSubmitBtn.addEventListener('click', submitForgotForm);
     forgotEmail.addEventListener('keydown', function (e) {
@@ -829,11 +789,9 @@
         bgDropdown.classList.remove('show');
         langDropdown.classList.toggle('show', willShow);
     });
-
     langDropdown.addEventListener('click', function (e) {
         e.stopPropagation();
     });
-
     document.querySelectorAll('#langDropdown a').forEach(function (link) {
         link.addEventListener('click', function (e) {
             e.preventDefault();
@@ -944,11 +902,9 @@
         }
         bgDropdown.classList.toggle('show', willShow);
     });
-
     bgDropdown.addEventListener('click', function (e) {
         e.stopPropagation();
     });
-
     document.addEventListener('click', function () {
         langDropdown.classList.remove('show');
         bgDropdown.classList.remove('show');
@@ -963,10 +919,6 @@
 
 </script>
 
-<!-- ============================================================
-     3. 防调试保护
-     ⚠️ 如果发现 Supabase 请求发不出去，先把这行注释掉试试
-     ============================================================ -->
 <script type="text/javascript" src="other/protect.js"></script>
 </body>
 </html>

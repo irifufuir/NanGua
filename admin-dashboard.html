@@ -2,28 +2,405 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理后台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>管理后台 · Nan Gua</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #1a1a1a;
-            color: #fff;
-            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-        }
-        .wrap { text-align: center; }
-        h1 { font-size: 24px; margin-bottom: 12px; }
-        p  { color: rgba(255,255,255,0.6); font-size: 14px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        color: rgba(255,255,255,0.9);
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding: 20px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 30px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    header h1 {
+        font-size: 22px;
+        font-weight: 600;
+        color: rgba(255, 220, 140, 0.95);
+        letter-spacing: 1px;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font-size: 13px;
+    }
+    .user-info .email {
+        color: rgba(255,255,255,0.7);
+        max-width: 220px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .logout-btn {
+        padding: 8px 16px;
+        background: rgba(220, 60, 60, 0.55);
+        border: 1px solid rgba(255, 100, 100, 0.8);
+        color: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 13px;
+    }
+    .logout-btn:hover { background: rgba(255, 80, 80, 0.8); }
+
+    main {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+    }
+    .stat-card {
+        background: rgba(50, 50, 50, 0.35);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .stat-card .stat-label {
+        font-size: 12px;
+        color: rgba(255,255,255,0.55);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .stat-card .stat-value {
+        font-size: 28px;
+        font-weight: 600;
+        color: rgba(255, 220, 140, 0.95);
+    }
+
+    .card {
+        background: rgba(50, 50, 50, 0.3);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+    .card h2 {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 16px;
+        color: rgba(255, 220, 140, 0.9);
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 8px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        min-width: 520px;
+    }
+    th, td {
+        padding: 12px 10px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        vertical-align: top;
+    }
+    th {
+        color: rgba(255,255,255,0.55);
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    td { color: rgba(255,255,255,0.9); word-break: break-all; }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .empty, .loading {
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+        padding: 30px 0;
+        font-size: 14px;
+    }
+
+    .del-btn {
+        background: rgba(220, 60, 60, 0.35);
+        border: 1px solid rgba(255, 100, 100, 0.55);
+        color: #ffaaaa;
+        padding: 5px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: 0.2s;
+        white-space: nowrap;
+    }
+    .del-btn:hover {
+        background: rgba(255, 80, 80, 0.65);
+        color: #fff;
+    }
+
+    @media (max-width: 480px) {
+        body { padding: 14px; }
+        header { margin-bottom: 22px; padding-bottom: 14px; }
+        header h1 { font-size: 18px; }
+        .user-info .email { max-width: 130px; font-size: 12px; }
+        .logout-btn { padding: 7px 12px; font-size: 12px; }
+        .card { padding: 16px; border-radius: 12px; }
+        .card h2 { font-size: 15px; }
+        .stat-card { padding: 14px 16px; border-radius: 12px; }
+        .stat-card .stat-value { font-size: 22px; }
+        table { font-size: 13px; min-width: 460px; }
+        th, td { padding: 10px 8px; }
+    }
     </style>
 </head>
 <body>
-    <div class="wrap">
-        <h1>🎉 欢迎，管理员</h1>
-        <p>后台正在建设中……</p>
+
+<header>
+    <h1>🔧 管理后台</h1>
+    <div class="user-info">
+        <span class="email" id="adminEmail">加载中...</span>
+        <button class="logout-btn" id="logoutBtn">退出登录</button>
     </div>
+</header>
+
+<main>
+    <div class="stats">
+        <div class="stat-card">
+            <span class="stat-label">忘记密码申请</span>
+            <span class="stat-value" id="statForgot">—</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">注册用户</span>
+            <span class="stat-value" id="statProfiles">—</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📝 忘记密码申请</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>邮箱</th>
+                        <th>联系方式</th>
+                        <th>问题描述</th>
+                        <th>提交时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="forgotBody">
+                    <tr><td colspan="5" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>👥 注册用户</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>邮箱</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="profilesBody">
+                    <tr><td colspan="3" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script>
+var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
+var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+var adminEmailEl   = document.getElementById('adminEmail');
+var logoutBtn      = document.getElementById('logoutBtn');
+var forgotBody     = document.getElementById('forgotBody');
+var profilesBody   = document.getElementById('profilesBody');
+var statForgotEl   = document.getElementById('statForgot');
+var statProfilesEl = document.getElementById('statProfiles');
+
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+function formatTime(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleString('zh-CN', { hour12: false }); }
+    catch (e) { return iso; }
+}
+
+/* 权限守卫：refreshSession + 校验 role */
+supabaseClient.auth.getSession().then(function (res) {
+    var session = res.data && res.data.session;
+    if (!session) { location.href = 'admin.html'; return; }
+
+    supabaseClient.auth.refreshSession().then(function (rr) {
+        if (rr.error || !rr.data.session) { location.href = 'admin.html'; return; }
+
+        var user = rr.data.session.user;
+        var role = user.app_metadata && user.app_metadata.role;
+
+        if (role !== 'admin') {
+            supabaseClient.auth.signOut().then(function () {
+                location.href = 'admin.html';
+            });
+            return;
+        }
+
+        adminEmailEl.textContent = user.email;
+        loadAll();
+    });
+});
+
+logoutBtn.addEventListener('click', function () {
+    supabaseClient.auth.signOut().then(function () {
+        location.href = 'admin.html';
+    });
+});
+
+function loadAll() {
+    loadForgotRequests();
+    loadProfiles();
+}
+
+function loadForgotRequests() {
+    forgotBody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+
+    supabaseClient
+        .from('forgot_requests')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                forgotBody.innerHTML = '<tr><td colspan="5" class="empty">加载失败：' +
+                    escapeHtml(res.error.message) + '</td></tr>';
+                return;
+            }
+            var data = res.data || [];
+            statForgotEl.textContent = data.length;
+
+            if (data.length === 0) {
+                forgotBody.innerHTML = '<tr><td colspan="5" class="empty">暂无申请</td></tr>';
+                return;
+            }
+            var html = '';
+            data.forEach(function (item) {
+                html += '<tr>' +
+                    '<td>' + escapeHtml(item.email) + '</td>' +
+                    '<td>' + escapeHtml(item.contact) + '</td>' +
+                    '<td>' + escapeHtml(item.reason || '—') + '</td>' +
+                    '<td>' + escapeHtml(formatTime(item.created_at)) + '</td>' +
+                    '<td><button class="del-btn" data-id="' + item.id + '" data-table="forgot_requests">删除</button></td>' +
+                    '</tr>';
+            });
+            forgotBody.innerHTML = html;
+            bindDelete();
+        });
+}
+
+function loadProfiles() {
+    profilesBody.innerHTML = '<tr><td colspan="3" class="loading">加载中...</td></tr>';
+
+    supabaseClient
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                profilesBody.innerHTML = '<tr><td colspan="3" class="empty">加载失败：' +
+                    escapeHtml(res.error.message) + '</td></tr>';
+                return;
+            }
+            var data = res.data || [];
+            statProfilesEl.textContent = data.length;
+
+            if (data.length === 0) {
+                profilesBody.innerHTML = '<tr><td colspan="3" class="empty">暂无用户</td></tr>';
+                return;
+            }
+            var html = '';
+            data.forEach(function (item) {
+                html += '<tr>' +
+                    '<td>' + escapeHtml(item.email) + '</td>' +
+                    '<td>' + escapeHtml(formatTime(item.created_at)) + '</td>' +
+                    '<td><button class="del-btn" data-id="' + item.id + '" data-table="profiles">删除</button></td>' +
+                    '</tr>';
+            });
+            profilesBody.innerHTML = html;
+            bindDelete();
+        });
+}
+
+function bindDelete() {
+    document.querySelectorAll('.del-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id    = this.getAttribute('data-id');
+            var table = this.getAttribute('data-table');
+            if (!confirm('确定要删除这条记录吗？')) return;
+
+            supabaseClient
+                .from(table)
+                .delete()
+                .eq('id', id)
+                .then(function (res) {
+                    if (res.error) {
+                        alert('删除失败：' + res.error.message);
+                    } else {
+                        if (table === 'forgot_requests') loadForgotRequests();
+                        else                              loadProfiles();
+                    }
+                });
+        });
+    });
+}
+</script>
+
 </body>
 </html>
