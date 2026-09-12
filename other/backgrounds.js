@@ -26,9 +26,9 @@ window.BACKGROUND_CONFIG = {
     video: [
         // 'video/文件名.mp4',
         // 'dynamic/文件名.mp4',
-        'video/DJG.mp4',
-        'video/啥子龙.mp4',
-        'video/哥伦比娅木偶喵.mp4',
+        //'video/DJG.mp4',
+        //'video/啥子龙.mp4',
+        //'video/哥伦比娅木偶喵.mp4',
         //'dynamic/文件名.mp4'
     ],
 
