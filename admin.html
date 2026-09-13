@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+   <title>齿轮盛宴 · 管理登录</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="admin.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="admin-body">
+
+    <!-- 背景层：固定一张深色背景，不用切换器 -->
+    <div class="bg-container">
+        <div class="bg-image" id="bgImage"></div>
+    </div>
+
+    <!-- 管理员登录盒子 -->
+    <div class="box admin-box">
+        <h2 id="title">🔐 管理员登录</h2>
+
+        <div class="input-box">
+            <label>管理员邮箱</label>
+            <input type="email" id="adminEmail"
+                   placeholder="请输入管理员邮箱" autocomplete="off"/>
+        </div>
+
+        <div class="input-box">
+            <label>密码</label>
+            <input type="password" id="adminPwd"
+                   placeholder="请输入密码" autocomplete="current-password"/>
+        </div>
+
+        <p class="tip" id="tip"></p>
+
+        <div class="btn-box">
+            <a href="index.html" class="back-link">← 返回普通登录</a>
+            <div>
+                <button type="button" id="adminLoginBtn" class="single-btn">
+                    登录管理后台
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+    /* ========================================================
+     *  0. Supabase 初始化（与主站用同一个项目）
+     * ======================================================== */
+    var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
+
+    var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    /* ========================================================
+     *  1. 元素引用
+     * ======================================================== */
+    var adminEmail   = document.getElementById('adminEmail');
+    var adminPwd     = document.getElementById('adminPwd');
+    var adminLoginBtn= document.getElementById('adminLoginBtn');
+    var tipEl        = document.getElementById('tip');
+    var bgImage      = document.getElementById('bgImage');
+
+    /* ========================================================
+     *  2. 背景图（固定一张，不用 backgrounds.js）
+     *     想换成你自己的图，改下面这一行即可
+     * ======================================================== */
+    bgImage.style.backgroundImage = 'url("image/bg.jpg")';
+    bgImage.style.opacity = '1';
+
+    /* ========================================================
+     *  3. 提示
+     * ======================================================== */
+    var tipTimer = null;
+    function showTip(msg, ok) {
+        tipEl.textContent = msg;
+        tipEl.style.color = ok
+            ? 'rgba(130, 225, 160, 0.95)'
+            : 'rgba(248, 108, 76, 0.95)';
+        tipEl.classList.add('show');
+        clearTimeout(tipTimer);
+        tipTimer = setTimeout(function () {
+            tipEl.classList.remove('show');
+        }, 3000);
+    }
+
+    /* ========================================================
+     *  4. 邮箱校验
+     * ======================================================== */
+    var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
+    function isValidEmail(email) {
+        return EMAIL_RE.test(email);
+    }
+
+    /* ========================================================
+     *  5. 登录逻辑
+     * ======================================================== */
+    function doAdminLogin() {
+        var email = adminEmail.value.trim();
+        var pwd   = adminPwd.value;
+
+        if (!isValidEmail(email)) {
+            showTip('请输入正确的管理员邮箱');
+            adminEmail.focus();
+            return;
+        }
+        if (pwd.length < 6) {
+            showTip('密码长度至少 6 位');
+            adminPwd.focus();
+            return;
+        }
+
+        adminLoginBtn.disabled = true;
+        adminLoginBtn.textContent = '登录中...';
+
+        // 第一步：用邮箱 + 密码登录（Supabase Auth 密码登录）
+        supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: pwd
+        }).then(function (res) {
+            if (res.error) {
+                throw res.error;
+            }
+
+            // 第二步：检查用户身份是否是管理员
+            var user = res.data.user;
+            var role = user.app_metadata && user.app_metadata.role;
+
+            if (role !== 'admin') {
+                // 不是管理员 → 强制登出，提示
+                return supabaseClient.auth.signOut().then(function () {
+                    throw new Error('该账号不是管理员，无权访问');
+                });
+            }
+
+            // 是管理员 → 登录成功
+            adminLoginBtn.disabled = false;
+            adminLoginBtn.textContent = '登录管理后台';
+            showTip('登录成功，正在进入管理后台...', true);
+
+            // 保存会话（Supabase 默认已保存到 localStorage）
+
+            // 跳转到管理后台
+            setTimeout(function () {
+                // TODO: 改成你的后台页面
+                location.href = 'admin-dashboard.html';
+            }, 800);
+
+        }).catch(function (err) {
+            adminLoginBtn.disabled = false;
+            adminLoginBtn.textContent = '登录管理后台';
+            var msg = (err && err.message) ? err.message : String(err);
+            showTip('登录失败：' + msg, false);
+            adminPwd.value = '';
+            adminPwd.focus();
+        });
+    }
+
+    adminLoginBtn.addEventListener('click', doAdminLogin);
+
+    adminEmail.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') adminPwd.focus();
+    });
+    adminPwd.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') doAdminLogin();
+    });
+
+    /* ========================================================
+     *  6. 如果已经登录且是管理员，直接跳后台
+     * ======================================================== */
+    supabaseClient.auth.getSession().then(function (res) {
+        var session = res.data && res.data.session;
+        if (!session) return;
+
+        var user = session.user;
+        var role = user.app_metadata && user.app_metadata.role;
+
+        if (role === 'admin') {
+            location.href = 'admin-dashboard.html';
+        }
+    });
+
+</script>
+</body>
+</html>
