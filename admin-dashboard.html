@@ -621,6 +621,74 @@
         line-height: 1.7; margin-bottom: var(--space-7); max-width: 520px;
     }
 
+    /* ========== 音效拨杆 ========== */
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding: 14px 18px;
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        margin-bottom: 12px;
+        transition: border-color var(--transition-base);
+    }
+    .toggle-row:hover { border-color: var(--theme-border); }
+
+    .toggle-label {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        flex: 1;
+    }
+    .toggle-label .title {
+        font-size: 0.94em;
+        font-weight: 500;
+        color: var(--theme-text);
+    }
+    .toggle-label .desc {
+        font-size: 0.78em;
+        color: var(--theme-text-faint);
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 54px;
+        height: 30px;
+        flex-shrink: 0;
+        background: var(--theme-border);
+        border-radius: 999px;
+        cursor: pointer;
+        border: none;
+        outline: none;
+        padding: 0;
+        transition: background 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    .toggle-switch::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--theme-text-dim);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+        transition: transform 0.3s cubic-bezier(.34,1.2,.64,1),
+                    background 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    .toggle-switch.active { background: var(--theme-accent); }
+    .toggle-switch.active::after {
+        transform: translateX(24px);
+        background: #ffffff;
+    }
+    .toggle-switch:active::after { width: 28px; }
+    .toggle-switch:focus-visible {
+        box-shadow: 0 0 0 4px var(--theme-accent-soft);
+    }
+
     /* ========== 我的签到 ========== */
     .checkin-hero {
         display: flex; flex-direction: column; align-items: center;
@@ -1143,13 +1211,12 @@
                 <span class="nav-text">📊 服务端信息</span>
             </div>
 
-            <div class="nav-group" data-group="myzone">
-                <span class="nav-text">🙋 我的空间</span>
-                <span class="nav-arrow" data-arrow="myzone">▾</span>
+            <div class="nav-item" data-tab="myCheckin">
+                <span class="nav-text">📅 我的签到</span>
             </div>
-            <div class="nav-sub" data-sub="myzone">
-                <div class="nav-sub-item" data-tab="myCheckin">📅 我的签到</div>
-                <div class="nav-sub-item" data-tab="myFriends">💬 我的好友</div>
+
+            <div class="nav-item" data-tab="myFriends">
+                <span class="nav-text">💬 我的好友</span>
             </div>
 
             <div class="nav-group" data-group="theme">
@@ -1158,7 +1225,7 @@
             </div>
             <div class="nav-sub" data-sub="theme">
                 <div class="nav-sub-item" data-tab="theme">🎨 主题设置</div>
-                <div class="nav-sub-item" data-tab="sound">🔊 登录音效</div>
+                <div class="nav-sub-item" data-tab="sound">🔊 音效设置</div>
             </div>
 
         </nav>
@@ -1382,7 +1449,7 @@
                     </div>
                     <button class="checkin-btn" id="myCheckinBtn">签 到</button>
                     <div class="checkin-calendar" id="myCheckinCalendar"></div>
-                    <div class="checkin-stats">
+                    <div class="checkin-stats" style="grid-template-columns: 1fr 1fr 1fr; max-width: 520px;">
                         <div class="checkin-stat">
                             <span class="v" id="myStreak">0</span>
                             <span class="k">连续签到</span>
@@ -1390,6 +1457,10 @@
                         <div class="checkin-stat">
                             <span class="v" id="myTodayReward">—</span>
                             <span class="k">今日奖励</span>
+                        </div>
+                        <div class="checkin-stat">
+                            <span class="v" id="myAdminRank">—</span>
+                            <span class="k">积分排名</span>
                         </div>
                     </div>
                 </div>
@@ -1510,31 +1581,41 @@
                 </div>
             </div>
 
-            <!-- 登录音效 -->
+            <!-- 音效设置 -->
             <div class="card" id="cardSound">
                 <div class="card-head">
-                    <h2>🔊 登录音效</h2>
+                    <h2>🔊 音效设置</h2>
                     <span class="badge">全站生效</span>
                 </div>
                 <div class="theme-section-hint">
-                    开启后，用户登录成功时会播放提示音。设置保存到浏览器，所有页面共享。
+                    音效设置保存在浏览器本地，所有页面共享。
                 </div>
-                <div class="setting-group">
-                    <div class="setting-label">
-                        <span class="setting-title">音效开关</span>
-                        <span class="setting-desc">是否在登录成功时播放提示音</span>
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span class="title">🔔 登录音效</span>
+                        <span class="desc">用户登录成功时播放提示音</span>
                     </div>
-                    <div class="setting-options" data-setting="loginSound">
-                        <button class="setting-btn" data-value="on">🔊 开启</button>
-                        <button class="setting-btn" data-value="off">🔇 关闭</button>
-                    </div>
+                    <button type="button" class="toggle-switch" id="toggleLoginSound" aria-label="登录音效开关"></button>
                 </div>
-                <div class="setting-group">
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span class="title">💬 消息提示音</span>
+                        <span class="desc">好友发来新消息时播放提示音</span>
+                    </div>
+                    <button type="button" class="toggle-switch" id="toggleMessageSound" aria-label="消息提示音开关"></button>
+                </div>
+
+                <div class="setting-group" style="margin-top: 28px;">
                     <div class="setting-label">
                         <span class="setting-title">试听</span>
-                        <span class="setting-desc">点击按钮试听提示音</span>
+                        <span class="setting-desc">点击按钮试听两种音效</span>
                     </div>
-                    <button class="setting-btn" id="testSoundBtn" style="max-width: 180px;">▶ 播放提示音</button>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                        <button class="setting-btn" id="testLoginSoundBtn" style="max-width: 160px;">▶ 登录音效</button>
+                        <button class="setting-btn" id="testMessageSoundBtn" style="max-width: 160px;">▶ 消息提示音</button>
+                    </div>
                 </div>
             </div>
 
@@ -2430,7 +2511,7 @@ function loadServerInfo() {
 document.getElementById('refreshServerBtn').addEventListener('click', loadServerInfo);
 
 /* ========================================================
- *  我的签到（管理员自己的签到功能）
+ *  我的签到
  * ======================================================== */
 function myToDateStr(d) {
     var y = d.getFullYear();
@@ -2498,7 +2579,6 @@ function myRenderCalendar(monday, cfg, checked) {
     document.getElementById('myCheckinCalendar').innerHTML = html;
 }
 
-/* ⭐ 修复：改查 checkins 表，与日历同数据源 */
 function myRefreshCheckinUI() {
     if (!currentAdmin) return;
     var today = myToDateStr(new Date());
@@ -2531,7 +2611,36 @@ function myRefreshCheckinUI() {
             btn.disabled = false;
             document.getElementById('myTodayReward').textContent = '—';
         }
+
+        /* 加载积分排名 */
+        myLoadRank(currentAdmin.id);
     });
+}
+
+/* 加载当前管理员的积分排名 */
+function myLoadRank(userId) {
+    supabaseClient.from('profiles')
+        .select('points')
+        .eq('id', userId)
+        .maybeSingle()
+        .then(function (r) {
+            if (r.error || !r.data) return;
+            var myPoints = r.data.points || 0;
+
+            Promise.all([
+                supabaseClient.from('profiles')
+                    .select('id', { count: 'exact', head: true })
+                    .gt('points', myPoints),
+                supabaseClient.from('profiles')
+                    .select('id', { count: 'exact', head: true })
+            ]).then(function (res) {
+                var higher = (res[0] && res[0].count) || 0;
+                var total  = (res[1] && res[1].count) || 0;
+                var rank   = higher + 1;
+                var el = document.getElementById('myAdminRank');
+                if (el) el.textContent = rank + ' / ' + total;
+            });
+        });
 }
 
 document.getElementById('myCheckinBtn').addEventListener('click', function () {
@@ -2568,7 +2677,7 @@ document.getElementById('myCheckinBtn').addEventListener('click', function () {
 });
 
 /* ========================================================
- *  我的好友（管理员自己的好友系统）
+ *  我的好友
  * ======================================================== */
 var myFriendsCache = [];
 var myCurrentChatFriend = null;
@@ -2757,8 +2866,11 @@ document.getElementById('myAddFriendBtn').addEventListener('click', function () 
         });
 });
 
+var myLastMsgTs = null;
+
 function myOpenChat(friend) {
     myCurrentChatFriend = friend;
+    myLastMsgTs = null;   /* 重置，避免重新打开时误报新消息 */
     document.getElementById('myChatFriendName').textContent = friend.full_name || friend.email;
     document.getElementById('myChatFriendAvatar').src = friend.avatar_url || DEFAULT_AVATAR;
     document.getElementById('myChatModal').style.display = 'flex';
@@ -2795,6 +2907,25 @@ function myLoadMessages() {
             if (data.length === 0) {
                 body.innerHTML = '<div class="empty-state">还没有聊天记录，说点什么吧~</div>';
                 return;
+            }
+
+            /* 检测对方新消息 → 播放提示音 */
+            var latestFromFriend = null;
+            data.forEach(function (m) {
+                if (m.from_user !== currentAdmin.id) {
+                    if (!latestFromFriend || new Date(m.created_at) > new Date(latestFromFriend)) {
+                        latestFromFriend = m.created_at;
+                    }
+                }
+            });
+            if (latestFromFriend) {
+                var isFirst = (myLastMsgTs === null);
+                if (!isFirst && new Date(latestFromFriend) > new Date(myLastMsgTs)) {
+                    if (window.LoginSound && window.LoginSound.playMessageIfEnabled) {
+                        window.LoginSound.playMessageIfEnabled();
+                    }
+                }
+                myLastMsgTs = latestFromFriend;
             }
 
             var html = '';
@@ -2844,23 +2975,48 @@ document.getElementById('myChatInput').addEventListener('keydown', function (e) 
 });
 
 /* ========================================================
- *  登录音效（使用共享模块 other/sound.js）
+ *  音效设置（拨杆开关 + 试听）
  * ======================================================== */
 (function initSoundSetting() {
-    var val = localStorage.getItem('nangua_loginSound') || 'off';
-    document.querySelectorAll('[data-setting="loginSound"] .setting-btn').forEach(function (btn) {
-        btn.classList.toggle('active', btn.getAttribute('data-value') === val);
-        btn.addEventListener('click', function () {
-            var v = this.getAttribute('data-value');
-            localStorage.setItem('nangua_loginSound', v);
-            document.querySelectorAll('[data-setting="loginSound"] .setting-btn').forEach(function (b) {
-                b.classList.toggle('active', b.getAttribute('data-value') === v);
-            });
+    var pairs = [
+        { elId: 'toggleLoginSound',   key: 'nangua_loginSound'   },
+        { elId: 'toggleMessageSound', key: 'nangua_messageSound' }
+    ];
+
+    pairs.forEach(function (p) {
+        var el = document.getElementById(p.elId);
+        if (!el) return;
+
+        function syncUI() {
+            var on = localStorage.getItem(p.key) === 'on';
+            el.classList.toggle('active', on);
+            el.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+        syncUI();
+
+        el.addEventListener('click', function () {
+            var willBeOn = !el.classList.contains('active');
+            localStorage.setItem(p.key, willBeOn ? 'on' : 'off');
+            syncUI();
         });
     });
 
-    document.getElementById('testSoundBtn').addEventListener('click', function () {
-        if (window.LoginSound) window.LoginSound.play();
+    var t1 = document.getElementById('testLoginSoundBtn');
+    if (t1) t1.addEventListener('click', function () {
+        if (window.LoginSound && window.LoginSound.play) {
+            window.LoginSound.play();
+        } else {
+            alert('音效模块未加载，请检查 other/sound.js');
+        }
+    });
+
+    var t2 = document.getElementById('testMessageSoundBtn');
+    if (t2) t2.addEventListener('click', function () {
+        if (window.LoginSound && window.LoginSound.playMessage) {
+            window.LoginSound.playMessage();
+        } else {
+            alert('音效模块未加载，请检查 other/sound.js');
+        }
     });
 })();
 
@@ -2868,6 +3024,7 @@ document.getElementById('myChatInput').addEventListener('keydown', function (e) 
 
 <script src="other/theme.js"></script>
 <script src="other/sound.js"></script>
+<script src="other/message-notify.js"></script>
 
 </body>
 </html>

@@ -26,8 +26,8 @@ window.BACKGROUND_CONFIG = {
     video: [
         // 'video/文件名.mp4',
         // 'dynamic/文件名.mp4',
-        //'video/conan.mp4',
-        //'video/aot.mp4',
+        'video/哥伦比亚.mp4',
+        'video/株.mp4',
         //'dynamic/hutao.mp4'
     ],
 

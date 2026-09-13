@@ -557,12 +557,12 @@
         });
     }
     loginBtn.addEventListener('click', doLogin);
-    loginEmail.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') loginPwd.focus();
-    });
-    loginPwd.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') doLogin();
-    });
+    loginBtn.addEventListener('click', function () {
+          if (window.LoginSound && window.LoginSound.unlock) {
+        window.LoginSound.unlock();
+    }
+    doLogin();
+});
 
     /* ========================================================
      *  八、注册逻辑
