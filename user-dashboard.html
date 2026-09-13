@@ -7,6 +7,7 @@
     <title>齿轮盛宴 · 用户中心</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 
+    <link rel="stylesheet" href="other/theme.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -15,8 +16,9 @@
     body {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
                      "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        color: rgba(255,255,255,0.9);
+        background: linear-gradient(135deg, var(--theme-bg-start) 0%, var(--theme-bg-end) 100%);
+        color: var(--theme-text);
+        font-size: calc(14px * var(--ui-font-scale, 1));
         min-height: 100vh;
         min-height: 100dvh;
         display: flex;
@@ -28,8 +30,8 @@
        ============================================================ */
     .sidebar {
         width: 260px;
-        background: rgba(25, 25, 25, 0.95);
-        border-right: 1px solid rgba(255,255,255,0.08);
+        background: var(--theme-sidebar);
+        border-right: 1px solid var(--theme-border);
         display: flex;
         flex-direction: column;
         padding: 24px 0;
@@ -40,7 +42,7 @@
         display: flex;
         align-items: center;
         padding: 0 20px 20px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
+        border-bottom: 1px solid var(--theme-border);
         margin-bottom: 15px;
         gap: 12px;
     }
@@ -55,14 +57,14 @@
         height: 100%;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid rgba(255, 200, 100, 0.6);
-        background: rgba(255, 200, 100, 0.1);
+        border: 2px solid var(--theme-accent);
+        background: var(--theme-accent-soft);
     }
     .avatar-edit {
         position: absolute;
         bottom: 0; right: 0;
         width: 18px; height: 18px;
-        background: rgba(255, 200, 100, 0.9);
+        background: var(--theme-accent);
         color: #1a1a1a;
         border-radius: 50%;
         display: flex;
@@ -82,8 +84,8 @@
         gap: 6px;
     }
     .user-details .email {
-        font-size: 14px;
-        color: rgba(255,255,255,0.9);
+        font-size: 1em;
+        color: var(--theme-text);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -94,10 +96,10 @@
         gap: 8px;
     }
     .user-details .role {
-        font-size: 11px;
-        color: rgba(140, 200, 255, 0.95);
-        background: rgba(100, 180, 255, 0.15);
-        border: 1px solid rgba(100, 180, 255, 0.3);
+        font-size: 0.78em;
+        color: var(--theme-accent);
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
         padding: 2px 8px;
         border-radius: 10px;
     }
@@ -105,7 +107,7 @@
         background: rgba(220, 60, 60, 0.4);
         border: 1px solid rgba(255, 100, 100, 0.6);
         color: #ffaaaa;
-        font-size: 11px;
+        font-size: 0.78em;
         padding: 3px 8px;
         border-radius: 6px;
         cursor: pointer;
@@ -120,20 +122,20 @@
     .nav-menu { flex: 1; overflow-y: auto; }
     .nav-item {
         padding: 14px 22px;
-        color: rgba(255,255,255,0.65);
+        color: var(--theme-text-dim);
         cursor: pointer;
         transition: 0.2s;
         border-left: 3px solid transparent;
-        font-size: 14px;
+        font-size: 1em;
         display: flex;
         align-items: center;
         gap: 10px;
     }
-    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item:hover { background: var(--theme-hover); color: var(--theme-text); }
     .nav-item.active {
-        background: rgba(100, 180, 255, 0.1);
-        color: rgba(140, 200, 255, 0.95);
-        border-left-color: rgba(100, 180, 255, 0.85);
+        background: var(--theme-accent-soft);
+        color: var(--theme-accent);
+        border-left-color: var(--theme-accent);
     }
 
     /* ============================================================
@@ -143,11 +145,11 @@
     .main-content { flex: 1; padding: 28px; overflow-y: auto; }
 
     .card {
-        background: rgba(45, 45, 45, 0.4);
+        background: var(--theme-card);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 14px;
+        border: 1px solid var(--theme-border);
+        border-radius: var(--ui-radius-card, 14px);
         padding: 22px;
         box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         display: none;
@@ -163,19 +165,19 @@
         gap: 12px;
     }
     .card-head h2 {
-        font-size: 16px;
+        font-size: 1.15em;
         font-weight: 500;
-        color: rgba(140, 200, 255, 0.9);
+        color: var(--theme-accent);
         letter-spacing: 1px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
     .card-head .badge {
-        background: rgba(100, 180, 255, 0.15);
-        border: 1px solid rgba(100, 180, 255, 0.35);
-        color: rgba(140, 200, 255, 0.95);
-        font-size: 12px;
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        font-size: 0.85em;
         padding: 3px 10px;
         border-radius: 20px;
     }
@@ -196,25 +198,25 @@
         width: 120px;
         height: 120px;
         border-radius: 50%;
-        border: 3px solid rgba(100, 180, 255, 0.55);
-        background: rgba(255, 255, 255, 0.05);
+        border: 3px solid var(--theme-accent);
+        background: var(--theme-hover);
         object-fit: cover;
-        box-shadow: 0 4px 30px rgba(100, 180, 255, 0.15);
+        box-shadow: 0 4px 30px var(--theme-accent-soft);
     }
     .welcome-title {
-        font-size: 22px;
+        font-size: 1.6em;
         font-weight: 600;
-        color: rgba(140, 200, 255, 0.95);
+        color: var(--theme-accent);
         letter-spacing: 1px;
     }
     .welcome-email {
-        font-size: 14px;
-        color: rgba(255, 255, 255, 0.55);
+        font-size: 1em;
+        color: var(--theme-text-dim);
         word-break: break-all;
     }
     .welcome-hint {
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.35);
+        font-size: 0.93em;
+        color: var(--theme-text-faint);
         line-height: 1.8;
         margin-top: 10px;
         max-width: 420px;
@@ -230,28 +232,34 @@
         margin-top: 6px;
     }
     .info-box {
-        background: rgba(30, 30, 30, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.06);
-        border-radius: 12px;
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border);
+        border-radius: var(--ui-radius-inner, 12px);
         padding: 18px 20px;
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
     .info-box .label {
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85em;
+        color: var(--theme-text-dim);
         letter-spacing: 0.5px;
     }
     .info-box .value {
-        font-size: 16px;
+        font-size: 1.15em;
         font-weight: 500;
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--theme-text);
         word-break: break-all;
     }
-    .info-box .value.empty {
-        color: rgba(255, 255, 255, 0.3);
-        font-style: italic;
+
+    /* ============================================================
+       外观设置区
+       ============================================================ */
+    .theme-section-hint {
+        font-size: 0.93em;
+        color: var(--theme-text-dim);
+        line-height: 1.7;
+        margin-bottom: 20px;
     }
 
     /* ============================================================
@@ -261,9 +269,9 @@
         body { flex-direction: column; }
         .sidebar {
             width: 100%;
-            padding: 15px 0;
+            padding: 15px 0 0;
             border-right: none;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid var(--theme-border);
             flex-direction: row;
             flex-wrap: wrap;
             align-items: center;
@@ -279,7 +287,6 @@
         }
         .avatar-wrapper { width: 40px; height: 40px; }
         .avatar-edit { width: 16px; height: 16px; font-size: 9px; }
-        .user-details .email { font-size: 12px; }
         .user-details .role { display: none; }
         .nav-menu {
             display: flex;
@@ -294,13 +301,16 @@
             border-left: none;
             border-bottom: 3px solid transparent;
         }
-        .nav-item.active { border-left: none; border-bottom-color: rgba(100, 180, 255, 0.85); }
+        .nav-item.active { border-left: none; border-bottom-color: var(--theme-accent); }
         .main-content { padding: 16px; }
-        .card { padding: 16px; border-radius: 12px; }
-        .card-head h2 { font-size: 15px; }
+        .card { padding: 16px; }
         .welcome-card { padding: 40px 20px; }
         .welcome-avatar { width: 90px; height: 90px; }
-        .welcome-title { font-size: 18px; }
+
+        .theme-switcher { padding: 14px 16px; gap: 10px; }
+        .theme-dot { width: 30px; height: 30px; }
+        .setting-options { gap: 8px; }
+        .setting-btn { padding: 10px 12px; font-size: 0.93em; }
     }
     </style>
 </head>
@@ -325,13 +335,13 @@
         <nav class="nav-menu">
             <div class="nav-item active" data-tab="home" onclick="switchTab('home')">🏠 我的主页</div>
             <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">👤 我的资料</div>
+            <div class="nav-item" data-tab="theme" onclick="switchTab('theme')">🎨 外观设置</div>
         </nav>
     </aside>
 
     <div class="main-wrapper">
         <main class="main-content">
 
-            <!-- 我的主页（欢迎） -->
             <div class="card active" id="cardHome">
                 <div class="welcome-card">
                     <img id="welcomeAvatar" class="welcome-avatar"
@@ -345,7 +355,6 @@
                 </div>
             </div>
 
-            <!-- 我的资料 -->
             <div class="card" id="cardProfile">
                 <div class="card-head">
                     <h2>👤 我的资料</h2>
@@ -368,6 +377,72 @@
                         <span class="label">注册时间</span>
                         <span class="value" id="infoCreated">—</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- ⭐ 外观设置 -->
+            <div class="card" id="cardTheme">
+                <div class="card-head">
+                    <h2>🎨 外观设置</h2>
+                    <span class="badge">跟账号同步</span>
+                </div>
+
+                <div class="theme-section-hint">
+                    所有设置都会保存到你的账号，换设备登录时自动同步。
+                </div>
+
+                <!-- 主题配色 -->
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span class="setting-title">主题配色</span>
+                        <span class="setting-desc">选择你喜欢的界面主色调</span>
+                    </div>
+                    <div id="themeSwitcherContainer"></div>
+                </div>
+
+                <!-- 字号大小 -->
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span class="setting-title">字号大小</span>
+                        <span class="setting-desc">调整界面文字和间距的大小</span>
+                    </div>
+                    <div class="setting-options" data-setting="fontSize">
+                        <button class="setting-btn" data-value="small">小</button>
+                        <button class="setting-btn" data-value="medium">标准</button>
+                        <button class="setting-btn" data-value="large">大</button>
+                    </div>
+                </div>
+
+                <!-- 圆角风格 -->
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span class="setting-title">圆角风格</span>
+                        <span class="setting-desc">调整卡片、输入框和按钮的圆润程度</span>
+                    </div>
+                    <div class="setting-options" data-setting="radius">
+                        <button class="setting-btn" data-value="small">直角</button>
+                        <button class="setting-btn" data-value="medium">标准</button>
+                        <button class="setting-btn" data-value="large">圆润</button>
+                    </div>
+                </div>
+
+                <!-- 过渡动效 -->
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span class="setting-title">过渡动效</span>
+                        <span class="setting-desc">关闭后切换页面和主题时不再有动画</span>
+                    </div>
+                    <div class="setting-options" data-setting="animations">
+                        <button class="setting-btn" data-value="on">开启</button>
+                        <button class="setting-btn" data-value="off">关闭</button>
+                    </div>
+                </div>
+
+                <!-- 重置按钮 -->
+                <div class="setting-reset-row">
+                    <button class="setting-reset-btn" id="resetAppearanceBtn">
+                        ↺ 恢复默认设置
+                    </button>
                 </div>
             </div>
 
@@ -401,6 +476,7 @@ function switchTab(tab) {
     });
     document.getElementById('cardHome').classList.toggle('active', tab === 'home');
     document.getElementById('cardProfile').classList.toggle('active', tab === 'profile');
+    document.getElementById('cardTheme').classList.toggle('active', tab === 'theme');
 }
 
 /* ============================================================
@@ -498,13 +574,10 @@ logoutBtn.addEventListener('click', function () {
 
 /* ============================================================
  * 权限守卫
- * 只在「明确没有 session」或「明确是管理员」时才跳转。
- * 其他任何情况都留在本页，避免被莫名踢出。
  * ============================================================ */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
 
-    // 情况 1：没有 session → 跳回登录页
     if (!session) {
         location.href = 'index.html';
         return;
@@ -513,13 +586,11 @@ supabaseClient.auth.getSession().then(function (res) {
     currentUser = session.user;
     var role = currentUser.app_metadata && currentUser.app_metadata.role;
 
-    // 情况 2：管理员 → 跳回管理后台
     if (role === 'admin') {
         location.href = 'admin-dashboard.html';
         return;
     }
 
-    // 情况 3：普通用户 → 留在本页
     userEmailEl.textContent = currentUser.email || '未知邮箱';
     welcomeEmail.textContent = currentUser.email || '未知邮箱';
 
@@ -530,7 +601,6 @@ supabaseClient.auth.getSession().then(function (res) {
     avatarImg.src = avatarUrl;
     welcomeAvatar.src = avatarUrl;
 
-    /* 加载 profiles 表里的昵称、手机号 */
     supabaseClient
         .from('profiles')
         .select('*')
@@ -552,6 +622,8 @@ supabaseClient.auth.getSession().then(function (res) {
         });
 });
 </script>
+
+<script src="other/theme.js"></script>
 
 </body>
 </html>
