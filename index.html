@@ -39,7 +39,8 @@
         </div>
     </div>
 
-    <div class="box">
+    <!-- 👇 唯一改动 ①：加 data-draggable -->
+    <div class="box" data-draggable data-drag-id="loginBox">
         <h2 id="title">Nan Gua</h2>
 
         <div id="loginView" class="view">
@@ -878,6 +879,8 @@
 
 </script>
 
+<!-- 👇 唯一改动 ②：引入拖拽模块 -->
+<script type="text/javascript" src="other/draggable.js"></script>
 <script type="text/javascript" src="other/protect.js"></script>
 </body>
 </html>

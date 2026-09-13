@@ -1134,3 +1134,34 @@ body {
         margin: 0 auto;
     }
 }
+/* ============================================================
+   可拖动元素样式
+   ============================================================ */
+[data-draggable] {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    will-change: transform;
+}
+
+[data-draggable].is-dragging {
+    cursor: grabbing;
+    /* 拖动时禁掉 box 的背景/边框过渡，跟手更利索 */
+    transition: box-shadow var(--dur-base) var(--ease) !important;
+}
+
+/* 拖动期间整个页面不选中文字 */
+body.dragging-active * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+/* 内部输入框、按钮的鼠标样式保持原样 */
+[data-draggable] input,
+[data-draggable] textarea {
+    cursor: text;
+}
+[data-draggable] button,
+[data-draggable] a {
+    cursor: pointer;
+}

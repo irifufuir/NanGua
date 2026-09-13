@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1c1a17">
-    <title>齿轮盛宴 · 用户中心</title>
+    <title>齿轮盛宴 · 个人账户</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 
     <link rel="stylesheet" href="other/theme.css">
@@ -15,7 +15,6 @@
        基础
        ============================================================ */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     html, body { height: 100%; }
 
     body {
@@ -88,10 +87,7 @@
         transition: all var(--transition-base);
         box-shadow: var(--shadow-sm);
     }
-    .avatar-edit:hover {
-        transform: scale(1.08);
-        box-shadow: var(--shadow-md);
-    }
+    .avatar-edit:hover { transform: scale(1.08); box-shadow: var(--shadow-md); }
 
     .user-details {
         display: flex;
@@ -107,7 +103,6 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        letter-spacing: 0.01em;
     }
     .user-bottom-row {
         display: flex;
@@ -122,7 +117,6 @@
         border: 1px solid var(--theme-accent-border);
         padding: 2px 10px;
         border-radius: var(--radius-full);
-        letter-spacing: 0.02em;
     }
     .logout-btn-mini {
         background: transparent;
@@ -154,6 +148,9 @@
         border-radius: 3px;
     }
 
+    /* ============================================================
+       导航项（含折叠箭头）
+       ============================================================ */
     .nav-item {
         display: flex;
         align-items: center;
@@ -163,46 +160,81 @@
         cursor: pointer;
         font-size: 0.95em;
         font-weight: 400;
-        letter-spacing: 0.01em;
-        border-radius: 0;
-        transition: all var(--transition-base);
         position: relative;
+        transition:
+            color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+            background 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+            padding-left 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
     }
     .nav-item::before {
         content: '';
         position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%) scaleY(0);
-        width: 3px;
-        height: 60%;
+        left: 0; top: 50%;
+        width: 3px; height: 60%;
         background: var(--theme-accent);
-        border-radius: 0 2px 2px 0;
-        transition: transform var(--transition-base);
+        border-radius: 0 3px 3px 0;
+        transform: translateY(-50%) scaleY(0);
+        transition: transform 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
     }
     .nav-item:hover {
         color: var(--theme-text);
         background: var(--theme-hover);
+        padding-left: calc(var(--space-6) + 2px);
     }
     .nav-item.active {
         color: var(--theme-accent);
         background: var(--theme-accent-soft);
         font-weight: 500;
+        padding-left: calc(var(--space-6) + 4px);
     }
-    .nav-item.active::before {
-        transform: translateY(-50%) scaleY(1);
+    .nav-item.active::before { transform: translateY(-50%) scaleY(1); }
+
+    .nav-item .nav-text {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ============================================================
+       ⭐ 右侧的折叠箭头（已经放大）
+       ============================================================ */
+    .nav-arrow {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        line-height: 1;
+        color: var(--theme-text-dim);
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        user-select: none;
+        transition:
+            transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1),
+            background var(--transition-base),
+            color var(--transition-base);
+    }
+    .nav-arrow:hover {
+        background: var(--theme-accent-soft);
+        color: var(--theme-accent);
+        transform: scale(1.10);
+    }
+    .nav-arrow.open {
+        transform: rotate(180deg);
+        color: var(--theme-accent);
+    }
+    .nav-arrow.open:hover {
+        transform: rotate(180deg) scale(1.10);
     }
 
     /* ============================================================
        主区域
        ============================================================ */
-    .main-wrapper {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        min-width: 0;
-    }
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
     .main-content {
         flex: 1;
         padding: var(--space-9) var(--space-8);
@@ -210,13 +242,8 @@
         scrollbar-width: thin;
     }
     .main-content::-webkit-scrollbar { width: 8px; }
-    .main-content::-webkit-scrollbar-thumb {
-        background: var(--theme-border);
-        border-radius: 4px;
-    }
-    .main-content::-webkit-scrollbar-thumb:hover {
-        background: var(--theme-text-faint);
-    }
+    .main-content::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 4px; }
+    .main-content::-webkit-scrollbar-thumb:hover { background: var(--theme-text-faint); }
 
     /* ============================================================
        卡片
@@ -225,18 +252,21 @@
         background: var(--theme-card);
         border: 1px solid var(--theme-border-soft);
         border-radius: var(--radius-lg);
-        padding: var(--space-8) var(--space-8);
+        padding: var(--space-8);
         box-shadow: var(--shadow-md);
         display: none;
         max-width: 880px;
         margin: 0 auto;
-        animation: cardIn var(--transition-slow) both;
+        will-change: opacity, transform;
     }
-    .card.active { display: block; }
-
-    @keyframes cardIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to   { opacity: 1; transform: translateY(0); }
+    .card.active {
+        display: block;
+        animation: cardEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes cardEnter {
+        0%   { opacity: 0; transform: translateY(14px) scale(0.985); filter: blur(2px); }
+        60%  { filter: blur(0); }
+        100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
     }
 
     .card-head {
@@ -253,7 +283,6 @@
         font-size: 1.1em;
         font-weight: 600;
         color: var(--theme-text);
-        letter-spacing: 0.02em;
         display: flex;
         align-items: center;
         gap: var(--space-3);
@@ -266,11 +295,10 @@
         font-weight: 500;
         padding: 4px 12px;
         border-radius: var(--radius-full);
-        letter-spacing: 0.02em;
     }
 
     /* ============================================================
-       欢迎卡片
+       欢迎区
        ============================================================ */
     .welcome-card {
         display: flex;
@@ -278,7 +306,7 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: var(--space-9) var(--space-6);
+        padding: var(--space-8) var(--space-6);
         gap: var(--space-5);
     }
     .welcome-avatar {
@@ -305,46 +333,75 @@
         font-size: 0.86em;
         color: var(--theme-text-faint);
         line-height: 1.9;
-        margin-top: var(--space-4);
+        margin-top: var(--space-2);
         max-width: 380px;
     }
 
     /* ============================================================
-       信息卡片
+       「我的资料」面板
        ============================================================ */
+    .profile-panel {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        margin-top: 0;
+        transition:
+            max-height 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 0.4s ease,
+            margin-top 0.4s ease;
+    }
+    .profile-panel.open {
+        max-height: 1000px;
+        opacity: 1;
+        margin-top: var(--space-6);
+    }
+
+    .profile-panel-inner {
+        padding-top: var(--space-5);
+        border-top: 1px solid var(--theme-border-soft);
+    }
+
+    .profile-panel-title {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: 0.92em;
+        font-weight: 600;
+        color: var(--theme-text);
+        margin-bottom: var(--space-4);
+        letter-spacing: 0.02em;
+    }
+
     .info-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: var(--space-4);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-3);
     }
     .info-box {
         background: var(--theme-info-box);
         border: 1px solid var(--theme-border-soft);
-        border-radius: var(--radius-md);
-        padding: var(--space-5) var(--space-5);
+        border-radius: var(--radius-sm);
+        padding: var(--space-4);
         display: flex;
         flex-direction: column;
         gap: var(--space-2);
         transition: all var(--transition-base);
-        box-shadow: var(--shadow-xs);
     }
     .info-box:hover {
         border-color: var(--theme-border);
-        box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow-xs);
     }
     .info-box .label {
-        font-size: 0.76em;
+        font-size: 0.78em;
         font-weight: 500;
         color: var(--theme-text-faint);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
     .info-box .value {
-        font-size: 1.05em;
+        font-size: 0.98em;
         font-weight: 500;
         color: var(--theme-text);
         word-break: break-all;
-        letter-spacing: 0.01em;
     }
 
     /* ============================================================
@@ -403,17 +460,21 @@
             white-space: nowrap;
             font-size: 0.88em;
         }
+        .nav-item:hover { padding-left: var(--space-5); }
+        .nav-item.active { padding-left: var(--space-5); }
         .nav-item::before {
-            top: auto;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%) scaleX(0);
-            width: 60%;
-            height: 2px;
+            top: auto; bottom: 0; left: 50%;
+            width: 60%; height: 2px;
             border-radius: 2px 2px 0 0;
+            transform: translateX(-50%) scaleX(0);
         }
-        .nav-item.active::before {
-            transform: translateX(-50%) scaleX(1);
+        .nav-item.active::before { transform: translateX(-50%) scaleX(1); }
+
+        /* 手机端箭头稍微收一点 */
+        .nav-arrow {
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
         }
 
         .main-content { padding: var(--space-5) var(--space-4); }
@@ -424,13 +485,15 @@
         }
         .card-head { margin-bottom: var(--space-5); padding-bottom: var(--space-4); }
 
-        .welcome-card { padding: var(--space-7) var(--space-4); }
+        .welcome-card { padding: var(--space-6) var(--space-4); }
         .welcome-avatar { width: 88px; height: 88px; }
+        .welcome-title { font-size: 1.3em; }
 
-        .theme-switcher { padding: var(--space-4) var(--space-4); gap: var(--space-3); }
-        .theme-dot { width: 30px; height: 30px; }
-        .setting-options { gap: var(--space-2); }
-        .setting-btn { padding: var(--space-3) var(--space-3); font-size: 0.88em; }
+        .info-grid { grid-template-columns: 1fr; gap: var(--space-2); }
+
+        .theme-switcher { padding: var(--space-4); gap: var(--space-3); }
+        .theme-dot { width: 28px; height: 28px; }
+        .setting-btn { padding: var(--space-3); font-size: 0.88em; }
         .setting-group { margin-bottom: var(--space-6); }
     }
     </style>
@@ -454,9 +517,13 @@
         </div>
 
         <nav class="nav-menu">
-            <div class="nav-item active" data-tab="home" onclick="switchTab('home')">🏠 我的主页</div>
-            <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">👤 我的资料</div>
-            <div class="nav-item" data-tab="theme" onclick="switchTab('theme')">🎨 外观设置</div>
+            <div class="nav-item active" data-tab="home" onclick="switchTab('home')">
+                <span class="nav-text">🏠 我的主页</span>
+                <span class="nav-arrow" id="profileArrow" title="展开 / 收起资料">▾</span>
+            </div>
+            <div class="nav-item" data-tab="theme" onclick="switchTab('theme')">
+                <span class="nav-text">🎨 外观设置</span>
+            </div>
         </nav>
     </aside>
 
@@ -464,41 +531,42 @@
         <main class="main-content">
 
             <div class="card active" id="cardHome">
+
                 <div class="welcome-card">
                     <img id="welcomeAvatar" class="welcome-avatar"
                          src="image/default-avatar.png" alt="头像">
                     <div class="welcome-title" id="welcomeTitle">欢迎回来</div>
                     <div class="welcome-email" id="welcomeEmail">—</div>
                     <div class="welcome-hint">
-                        这里是你的个人主页<br>
-                        当前登录端并不接入主服务器所以为空
+                        这里是你的个人主页
                     </div>
                 </div>
-            </div>
 
-            <div class="card" id="cardProfile">
-                <div class="card-head">
-                    <h2>👤 我的资料</h2>
-                    <span class="badge">仅自己可见</span>
+                <div class="profile-panel" id="profilePanel">
+                    <div class="profile-panel-inner">
+                        <div class="profile-panel-title">👤 我的资料</div>
+                        <div class="info-grid">
+                            <div class="info-box">
+                                <span class="label">邮箱</span>
+                                <span class="value" id="infoEmail">—</span>
+                            </div>
+                            <div class="info-box">
+                                <span class="label">昵称</span>
+                                <span class="value" id="infoName">—</span>
+                            </div>
+                            <div class="info-box">
+                                <span class="label">手机号</span>
+                                <span class="value" id="infoPhone">—</span>
+                            </div>
+                            <div class="info-box">
+                                <span class="label">注册时间</span>
+                                <span class="value" id="infoCreated">—</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-      <div class="info-grid">
-    <div class="info-box">
-        <span class="label">邮箱</span>
-        <span class="value" id="infoEmail">—</span>
-    </div>
-    <div class="info-box">
-        <span class="label">昵称</span>
-        <span class="value" id="infoName">—</span>
-    </div>
-    <div class="info-box">
-        <span class="label">手机号</span>
-        <span class="value" id="infoPhone">—</span>
-    </div>
-    <div class="info-box">
-        <span class="label">注册时间</span>
-        <span class="value" id="infoCreated">—</span>
-    </div>
-</div>
+
+            </div>
 
             <div class="card" id="cardTheme">
                 <div class="card-head">
@@ -510,7 +578,6 @@
                     所有设置都会保存到你的账号，换设备登录时自动同步。
                 </div>
 
-                <!-- 主题配色 -->
                 <div class="setting-group">
                     <div class="setting-label">
                         <span class="setting-title">主题配色</span>
@@ -519,7 +586,6 @@
                     <div id="themeSwitcherContainer"></div>
                 </div>
 
-                <!-- 字号大小 -->
                 <div class="setting-group">
                     <div class="setting-label">
                         <span class="setting-title">字号大小</span>
@@ -529,10 +595,10 @@
                         <button class="setting-btn" data-value="small">小</button>
                         <button class="setting-btn" data-value="medium">标准</button>
                         <button class="setting-btn" data-value="large">大</button>
+                        <button class="setting-btn" data-value="xl">特大</button>
                     </div>
                 </div>
 
-                <!-- 圆角风格 -->
                 <div class="setting-group">
                     <div class="setting-label">
                         <span class="setting-title">圆角风格</span>
@@ -545,7 +611,6 @@
                     </div>
                 </div>
 
-                <!-- 过渡动效 -->
                 <div class="setting-group">
                     <div class="setting-label">
                         <span class="setting-title">过渡动效</span>
@@ -588,18 +653,39 @@ var infoCreated    = document.getElementById('infoCreated');
 var DEFAULT_AVATAR = 'image/default-avatar.png';
 var currentUser = null;
 
-function switchTab(tab) {
+/* 折叠面板 */
+var profilePanel = document.getElementById('profilePanel');
+var profileArrow = document.getElementById('profileArrow');
+
+profileArrow.addEventListener('click', function (e) {
+    e.stopPropagation();
+    profilePanel.classList.toggle('open');
+    profileArrow.classList.toggle('open', profilePanel.classList.contains('open'));
+});
+
+/* 视图切换 */
+window.switchTab = function (tab) {
     document.querySelectorAll('.nav-item').forEach(function (el) {
         el.classList.toggle('active', el.getAttribute('data-tab') === tab);
     });
-    document.getElementById('cardHome').classList.toggle('active', tab === 'home');
-    document.getElementById('cardProfile').classList.toggle('active', tab === 'profile');
-    document.getElementById('cardTheme').classList.toggle('active', tab === 'theme');
-}
 
-/* ============================================================
- * 头像上传
- * ============================================================ */
+    var homeCard  = document.getElementById('cardHome');
+    var themeCard = document.getElementById('cardTheme');
+
+    if (tab === 'home') {
+        homeCard.classList.remove('active');
+        void homeCard.offsetWidth;
+        homeCard.classList.add('active');
+        themeCard.classList.remove('active');
+    } else if (tab === 'theme') {
+        themeCard.classList.remove('active');
+        void themeCard.offsetWidth;
+        themeCard.classList.add('active');
+        homeCard.classList.remove('active');
+    }
+};
+
+/* 头像上传 */
 avatarInput.addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
@@ -690,12 +776,9 @@ logoutBtn.addEventListener('click', function () {
     });
 });
 
-/* ============================================================
- * 权限守卫
- * ============================================================ */
+/* 权限守卫 */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
-
     if (!session) {
         location.href = 'index.html';
         return;
@@ -705,8 +788,19 @@ supabaseClient.auth.getSession().then(function (res) {
     var role = currentUser.app_metadata && currentUser.app_metadata.role;
 
     if (role === 'admin') {
-        location.href = 'admin-dashboard.html';
-        return;
+        var navMenu = document.querySelector('.nav-menu');
+        if (navMenu && !document.getElementById('adminEntry')) {
+            var entry = document.createElement('div');
+            entry.id = 'adminEntry';
+            entry.className = 'nav-item';
+            entry.innerHTML = '<span class="nav-text">🔧 进入管理后台</span>';
+            entry.addEventListener('click', function () {
+                location.href = 'admin-dashboard.html';
+            });
+            navMenu.appendChild(entry);
+        }
+        var roleBadge = document.querySelector('.user-details .role');
+        if (roleBadge) roleBadge.textContent = '管理员';
     }
 
     userEmailEl.textContent = currentUser.email || '未知邮箱';

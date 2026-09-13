@@ -13,26 +13,35 @@
     };
 
     var THEMES = [
-        { code: 'default', label: '金' },
-        { code: 'blue',    label: '蓝' },
-        { code: 'purple',  label: '紫' },
-        { code: 'green',   label: '绿' },
-        { code: 'orange',  label: '橙' },
-        { code: 'pink',    label: '粉' },
-        { code: 'ruby',    label: '红宝石' },
-        { code: 'cyan',    label: '青' },
-        { code: 'mint',    label: '薄荷' },
-        { code: 'coffee',  label: '咖啡' },
-        { code: 'ice',     label: '冰川' },
-        { code: 'rose',    label: '玫瑰金' },
-        { code: 'sakura',  label: '樱花' },
-        { code: 'space',   label: '深空' },
-        { code: 'forest',  label: '森林' },
-        { code: 'ocean',   label: '深海' },
-        { code: 'light',   label: '浅色' }
+        { code: 'default',   label: '金' },
+        { code: 'blue',      label: '蓝' },
+        { code: 'purple',    label: '紫' },
+        { code: 'green',     label: '绿' },
+        { code: 'orange',    label: '橙' },
+        { code: 'pink',      label: '粉' },
+        { code: 'ruby',      label: '红宝石' },
+        { code: 'cyan',      label: '青' },
+        { code: 'mint',      label: '薄荷' },
+        { code: 'coffee',    label: '咖啡' },
+        { code: 'ice',       label: '冰川' },
+        { code: 'rose',      label: '玫瑰金' },
+        { code: 'sakura',    label: '樱花' },
+        { code: 'space',     label: '深空' },
+        { code: 'forest',    label: '森林' },
+        { code: 'ocean',     label: '深海' },
+        { code: 'amber',     label: '琥珀' },
+        { code: 'coral',     label: '珊瑚' },
+        { code: 'peach',     label: '桃色' },
+        { code: 'olive',     label: '橄榄' },
+        { code: 'indigo',    label: '靛蓝' },
+        { code: 'turquoise', label: '松石' },
+        { code: 'violet',    label: '紫罗兰' },
+        { code: 'navy',      label: '藏青' },
+        { code: 'lotus',     label: '藕荷' },
+        { code: 'bamboo',    label: '竹青' },
+        { code: 'light',     label: '浅色' }
     ];
 
-    /* ---------- 本地存储 ---------- */
     function getLocal(key) {
         return localStorage.getItem(PREFIX + key) || DEFAULTS[key];
     }
@@ -76,7 +85,6 @@
         });
     }
 
-    /* ---------- 写回 Supabase ---------- */
     function saveToSupabase(key, value) {
         var sb = window.supabaseClient;
         if (!sb || !sb.auth) return;
@@ -107,7 +115,6 @@
         });
     }
 
-    /* ---------- 从 Supabase 读一次 ---------- */
     function loadFromSupabase() {
         var sb = window.supabaseClient;
         if (!sb || !sb.auth) return;
@@ -142,7 +149,6 @@
         });
     }
 
-    /* ---------- 注入主题圆点 ---------- */
     function injectThemeSwitcher() {
         var container = document.getElementById('themeSwitcherContainer');
         if (!container) return;
