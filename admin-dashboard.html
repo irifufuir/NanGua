@@ -23,9 +23,6 @@
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* ============================================================
-       侧边栏
-       ============================================================ */
     .sidebar {
         width: 260px;
         background: rgba(25, 25, 25, 0.95);
@@ -136,9 +133,6 @@
         border-left-color: rgba(255, 200, 100, 0.85);
     }
 
-    /* ============================================================
-       主区域
-       ============================================================ */
     .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
     .main-content { flex: 1; padding: 28px; overflow-y: auto; }
 
@@ -180,7 +174,6 @@
         border-radius: 20px;
     }
 
-    /* ⭐ 卡片头部右侧操作区（刷新按钮 + 计数） */
     .card-head .head-actions {
         display: flex;
         align-items: center;
@@ -220,9 +213,6 @@
         to   { transform: rotate(360deg); }
     }
 
-    /* ============================================================
-       表格
-       ============================================================ */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
     th, td {
@@ -318,9 +308,6 @@
         font-weight: 500;
     }
 
-    /* ============================================================
-       用户管理（两栏布局）
-       ============================================================ */
     .manage-layout {
         display: grid;
         grid-template-columns: 280px 1fr;
@@ -496,9 +483,6 @@
         color: #fff;
     }
 
-    /* ============================================================
-       📊 服务端信息
-       ============================================================ */
     .info-toolbar {
         display: flex;
         justify-content: space-between;
@@ -653,9 +637,6 @@
         text-align: right;
     }
 
-    /* ============================================================
-       ⭐ 封禁时长弹窗
-       ============================================================ */
     .ban-duration-mask {
         position: fixed;
         top: 0; left: 0;
@@ -797,9 +778,6 @@
         cursor: not-allowed;
     }
 
-    /* ============================================================
-       响应式
-       ============================================================ */
     @media (max-width: 900px) {
         .manage-layout { grid-template-columns: 1fr; }
         .manage-preview {
@@ -897,7 +875,6 @@
     <div class="main-wrapper">
         <main class="main-content">
 
-            <!-- 忘记密码申请 -->
             <div class="card active" id="cardForgot">
                 <div class="card-head">
                     <h2>📝 忘记密码申请</h2>
@@ -924,7 +901,6 @@
                 </div>
             </div>
 
-            <!-- 注册用户列表 -->
             <div class="card" id="cardUsers">
                 <div class="card-head">
                     <h2>👥 注册用户列表</h2>
@@ -952,7 +928,6 @@
                 </div>
             </div>
 
-            <!-- 用户管理 -->
             <div class="card" id="cardManage">
                 <div class="card-head">
                     <h2>⚙️ 用户管理</h2>
@@ -1012,7 +987,6 @@
                 </div>
             </div>
 
-            <!-- 📊 服务端信息 -->
             <div class="card" id="cardServer">
                 <div class="card-head">
                     <h2>📊 服务端信息</h2>
@@ -1094,7 +1068,6 @@
         </main>
     </div>
 
-    <!-- ⭐ 封禁时长弹窗 -->
     <div class="ban-duration-mask" id="banDurationModal" style="display:none;">
         <div class="ban-duration-box">
             <h3>设置封禁时长</h3>
@@ -1140,7 +1113,6 @@ var profilesBody   = document.getElementById('profilesBody');
 var badgeForgotEl  = document.getElementById('badgeForgot');
 var badgeProfilesEl= document.getElementById('badgeProfiles');
 
-/* ⭐ 新增：两个刷新按钮 */
 var refreshForgotBtn   = document.getElementById('refreshForgotBtn');
 var refreshProfilesBtn = document.getElementById('refreshProfilesBtn');
 
@@ -1173,7 +1145,6 @@ var infoMemory       = document.getElementById('infoMemory');
 var infoDeno         = document.getElementById('infoDeno');
 var infoTimestamp    = document.getElementById('infoTimestamp');
 
-/* 封禁弹窗 */
 var banDurationModal = document.getElementById('banDurationModal');
 var banDaysInput     = document.getElementById('banDays');
 var banHoursInput    = document.getElementById('banHours');
@@ -1197,7 +1168,6 @@ function formatTime(iso) {
     try { return new Date(iso).toLocaleString('zh-CN', { hour12: false }); }
     catch (e) { return iso; }
 }
-function getAvatarUrl(email) { return DEFAULT_AVATAR; }
 function getRemainingTime(bannedUntil) {
     if (!bannedUntil) return null;
     var diff = new Date(bannedUntil).getTime() - Date.now();
@@ -1226,7 +1196,34 @@ function switchTab(tab) {
 }
 
 /* ============================================================
- * ⭐ 刷新按钮事件绑定
+ * ⭐ 核心：SQL RPC 调用（替代 Edge Function 的简单操作）
+ * ============================================================ */
+function callRPC(funcName, params) {
+    return supabaseClient.rpc(funcName, params).then(function (res) {
+        if (res.error) {
+            return { error: res.error, data: null };
+        }
+        return { error: null, data: res.data };
+    });
+}
+
+/* ============================================================
+ * 仍然使用 Edge Function 的复杂操作（改邮箱/改密码/删用户）
+ * ============================================================ */
+function callEdgeFunction(action, userId, banDuration, newValue, metadata) {
+    return supabaseClient.functions.invoke('dynamic-handler', {
+        body: {
+            action: action,
+            userId: userId,
+            banDuration: banDuration,
+            newValue: newValue,
+            metadata: metadata
+        }
+    });
+}
+
+/* ============================================================
+ * 刷新按钮
  * ============================================================ */
 if (refreshForgotBtn) {
     refreshForgotBtn.addEventListener('click', function () {
@@ -1339,32 +1336,24 @@ avatarInput.addEventListener('change', function (e) {
     });
 });
 
-/* 退出登录 */
+/* ============================================================
+ * 退出登录 → 跳 index.html
+ * ============================================================ */
 logoutBtn.addEventListener('click', function () {
     supabaseClient.auth.signOut().then(function () {
-        location.href = 'admin.html';
+        location.href = 'index.html';
     });
 });
 
 /* ============================================================
- * 权限守卫
+ * 权限守卫（防死循环版）
  * ============================================================ */
-supabaseClient.auth.getSession().then(function (res) {
-    var session = res.data && res.data.session;
-
-    if (!session) {
-        sessionStorage.setItem('admin_redirect_guard', '1');
-        location.href = 'admin.html';
-        return;
-    }
-
-    var user = session.user;
+function bootAdminDashboard(user) {
     var role = user.app_metadata && user.app_metadata.role;
 
     if (role !== 'admin') {
-        sessionStorage.setItem('admin_redirect_guard', '1');
         supabaseClient.auth.signOut().then(function () {
-            location.href = 'admin.html';
+            location.href = 'index.html';
         });
         return;
     }
@@ -1374,6 +1363,26 @@ supabaseClient.auth.getSession().then(function (res) {
         avatarImg.src = user.user_metadata.avatar_url;
     }
     loadAll();
+}
+
+supabaseClient.auth.getSession().then(function (res) {
+    var session = res.data && res.data.session;
+
+    if (session && session.user) {
+        bootAdminDashboard(session.user);
+        return;
+    }
+
+    setTimeout(function () {
+        supabaseClient.auth.getSession().then(function (res2) {
+            var s2 = res2.data && res2.data.session;
+            if (!s2 || !s2.user) {
+                location.href = 'index.html';
+                return;
+            }
+            bootAdminDashboard(s2.user);
+        });
+    }, 400);
 });
 
 function loadAll() {
@@ -1382,7 +1391,7 @@ function loadAll() {
 }
 
 /* ============================================================
- * 忘记密码申请（支持刷新回调）
+ * 忘记密码申请
  * ============================================================ */
 function loadForgotRequests(callback) {
     forgotBody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
@@ -1421,7 +1430,7 @@ function loadForgotRequests(callback) {
 }
 
 /* ============================================================
- * 注册用户列表（支持刷新回调）
+ * 注册用户列表
  * ============================================================ */
 function loadProfiles(callback) {
     profilesBody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
@@ -1506,19 +1515,8 @@ function bindDelete() {
     });
 }
 
-function callEdgeFunction(action, userId, banDuration, newValue, metadata) {
-    return supabaseClient.functions.invoke('dynamic-handler', {
-        body: {
-            action: action,
-            userId: userId,
-            banDuration: banDuration,
-            newValue: newValue,
-            metadata: metadata
-        }
-    });
-}
-
 function bindProfileActions() {
+    /* 删除用户：走 Edge Function */
     document.querySelectorAll('.action-btn.del[data-table="profiles"]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
@@ -1535,6 +1533,7 @@ function bindProfileActions() {
         });
     });
 
+    /* 拉黑：走 SQL RPC */
     document.querySelectorAll('.action-btn.block').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
@@ -1542,12 +1541,13 @@ function bindProfileActions() {
         });
     });
 
+    /* 解封：走 SQL RPC */
     document.querySelectorAll('.action-btn.unblock').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
             if (!confirm('确定要解除拉黑吗？')) return;
 
-            callEdgeFunction('unban', id)
+            callRPC('admin_unban_user', { target_user_id: id })
                 .then(function (res) {
                     if (res.error) { alert('操作失败：' + res.error.message); return; }
                     if (res.data && res.data.error) { alert('操作失败：' + res.data.error); return; }
@@ -1560,7 +1560,7 @@ function bindProfileActions() {
 }
 
 /* ============================================================
- * ⭐ 封禁时长弹窗逻辑
+ * 封禁时长弹窗
  * ============================================================ */
 function openBanDurationModal(userId) {
     currentBanUserId = userId;
@@ -1608,6 +1608,7 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
+/* 确定封禁：走 SQL RPC */
 banConfirmBtn.addEventListener('click', function () {
     if (!currentBanUserId) return;
 
@@ -1617,7 +1618,7 @@ banConfirmBtn.addEventListener('click', function () {
 
     var totalHours;
     if (d === 0 && h === 0 && m === 0) {
-        totalHours = 876000;
+        totalHours = 876000;  // 永久
     } else {
         totalHours = d * 24 + h + m / 60;
         totalHours = Math.max(1, Math.ceil(totalHours));
@@ -1628,7 +1629,10 @@ banConfirmBtn.addEventListener('click', function () {
 
     var userId = currentBanUserId;
 
-    callEdgeFunction('ban', userId, String(totalHours))
+    callRPC('admin_ban_user', {
+        target_user_id: userId,
+        ban_hours: totalHours
+    })
         .then(function (res) {
             banConfirmBtn.disabled = false;
             banConfirmBtn.textContent = '确定封禁';
@@ -1659,7 +1663,7 @@ banConfirmBtn.addEventListener('click', function () {
 });
 
 /* ============================================================
- * 用户管理逻辑
+ * 用户管理
  * ============================================================ */
 function updateManageSelect() {
     var currentVal = manageUserSelect.value;
@@ -1729,6 +1733,7 @@ resetManageBtn.addEventListener('click', function () {
     updatePreview(null);
 });
 
+/* 保存修改：昵称/手机号走 SQL RPC，邮箱/密码走 Edge Function */
 saveManageBtn.addEventListener('click', function () {
     var userId = manageUserSelect.value;
     if (!userId) { alert('请先选择用户'); return; }
@@ -1747,27 +1752,28 @@ saveManageBtn.addEventListener('click', function () {
     var nameChanged  = newName  !== (user.full_name || '');
     var phoneChanged = newPhone !== (user.phone || '');
 
+    /* 昵称 / 手机号：SQL RPC */
     if (nameChanged || phoneChanged) {
-        var metadata = {};
-        if (nameChanged)  metadata.full_name = newName;
-        if (phoneChanged) metadata.phone = newPhone;
-
         var changedFields = [];
         if (nameChanged)  changedFields.push('昵称');
         if (phoneChanged) changedFields.push('手机号');
 
         tasks.push(
-            callEdgeFunction('update_metadata', userId, null, null, metadata)
-                .then(function (r) {
-                    if (r.error || (r.data && r.data.error)) {
-                        return { ok: false, field: changedFields.join('+'), err: r.error || new Error(r.data.error) };
-                    }
-                    return { ok: true, field: changedFields.join('+') };
-                })
+            callRPC('admin_update_profile', {
+                target_user_id: userId,
+                new_full_name: newName || null,
+                new_phone: newPhone || null
+            }).then(function (r) {
+                if (r.error || (r.data && r.data.error)) {
+                    return { ok: false, field: changedFields.join('+'), err: r.error || new Error(r.data.error) };
+                }
+                return { ok: true, field: changedFields.join('+') };
+            })
         );
         messages.push(changedFields.join('、'));
     }
 
+    /* 邮箱：Edge Function */
     if (newEmail && newEmail !== (user.email || '')) {
         tasks.push(
             callEdgeFunction('update_email', userId, null, newEmail)
@@ -1781,6 +1787,7 @@ saveManageBtn.addEventListener('click', function () {
         messages.push('邮箱');
     }
 
+    /* 密码：Edge Function */
     if (newPwd) {
         if (newPwd.length < 6) { alert('密码至少 6 位'); return; }
         tasks.push(
@@ -1822,7 +1829,7 @@ saveManageBtn.addEventListener('click', function () {
 });
 
 /* ============================================================
- * 📊 服务端信息
+ * 服务端信息
  * ============================================================ */
 function renderHealthCard(name, ok) {
     var dotClass = ok ? 'ok' : 'error';
