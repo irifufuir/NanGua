@@ -180,6 +180,46 @@
         border-radius: 20px;
     }
 
+    /* ⭐ 卡片头部右侧操作区（刷新按钮 + 计数） */
+    .card-head .head-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .card-head .refresh-btn-mini {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 200, 100, 0.12);
+        border: 1px solid rgba(255, 200, 100, 0.4);
+        color: rgba(255, 220, 140, 0.95);
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+        transition: 0.25s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        outline: none;
+    }
+    .card-head .refresh-btn-mini:hover:not(:disabled) {
+        background: rgba(255, 200, 100, 0.28);
+        border-color: rgba(255, 200, 100, 0.8);
+        color: #fff;
+    }
+    .card-head .refresh-btn-mini:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .card-head .refresh-btn-mini.spinning {
+        animation: protectSpin 0.8s linear infinite;
+    }
+    @keyframes protectSpin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+
     /* ============================================================
        表格
        ============================================================ */
@@ -861,7 +901,10 @@
             <div class="card active" id="cardForgot">
                 <div class="card-head">
                     <h2>📝 忘记密码申请</h2>
-                    <span class="badge" id="badgeForgot">—</span>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeForgot">—</span>
+                        <button class="refresh-btn-mini" id="refreshForgotBtn" title="刷新列表">🔄</button>
+                    </div>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -885,7 +928,10 @@
             <div class="card" id="cardUsers">
                 <div class="card-head">
                     <h2>👥 注册用户列表</h2>
-                    <span class="badge" id="badgeProfiles">—</span>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeProfiles">—</span>
+                        <button class="refresh-btn-mini" id="refreshProfilesBtn" title="刷新列表">🔄</button>
+                    </div>
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -1094,6 +1140,10 @@ var profilesBody   = document.getElementById('profilesBody');
 var badgeForgotEl  = document.getElementById('badgeForgot');
 var badgeProfilesEl= document.getElementById('badgeProfiles');
 
+/* ⭐ 新增：两个刷新按钮 */
+var refreshForgotBtn   = document.getElementById('refreshForgotBtn');
+var refreshProfilesBtn = document.getElementById('refreshProfilesBtn');
+
 var manageUserSelect = document.getElementById('manageUserSelect');
 var manageName       = document.getElementById('manageName');
 var managePhone      = document.getElementById('managePhone');
@@ -1173,6 +1223,35 @@ function switchTab(tab) {
     document.getElementById('cardServer').classList.toggle('active', tab === 'server');
 
     if (tab === 'server') loadServerInfo();
+}
+
+/* ============================================================
+ * ⭐ 刷新按钮事件绑定
+ * ============================================================ */
+if (refreshForgotBtn) {
+    refreshForgotBtn.addEventListener('click', function () {
+        if (this.disabled) return;
+        var btn = this;
+        btn.disabled = true;
+        btn.classList.add('spinning');
+        loadForgotRequests(function () {
+            btn.disabled = false;
+            btn.classList.remove('spinning');
+        });
+    });
+}
+
+if (refreshProfilesBtn) {
+    refreshProfilesBtn.addEventListener('click', function () {
+        if (this.disabled) return;
+        var btn = this;
+        btn.disabled = true;
+        btn.classList.add('spinning');
+        loadProfiles(function () {
+            btn.disabled = false;
+            btn.classList.remove('spinning');
+        });
+    });
 }
 
 /* ============================================================
@@ -1269,13 +1348,10 @@ logoutBtn.addEventListener('click', function () {
 
 /* ============================================================
  * 权限守卫
- * 只在“明确没有 session”或“明确不是 admin”时才跳登录页。
- * 其他任何情况（网络抖动、刷新失败等）一律留在本页。
  * ============================================================ */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
 
-    // 情况 1：没有 session → 唯一会跳回登录页的场景
     if (!session) {
         sessionStorage.setItem('admin_redirect_guard', '1');
         location.href = 'admin.html';
@@ -1285,7 +1361,6 @@ supabaseClient.auth.getSession().then(function (res) {
     var user = session.user;
     var role = user.app_metadata && user.app_metadata.role;
 
-    // 情况 2：不是管理员 → 登出并跳回登录页
     if (role !== 'admin') {
         sessionStorage.setItem('admin_redirect_guard', '1');
         supabaseClient.auth.signOut().then(function () {
@@ -1294,7 +1369,6 @@ supabaseClient.auth.getSession().then(function (res) {
         return;
     }
 
-    // 情况 3：正常管理员 → 留在本页，加载数据
     adminEmailEl.textContent = user.email;
     if (user.user_metadata && user.user_metadata.avatar_url) {
         avatarImg.src = user.user_metadata.avatar_url;
@@ -1302,22 +1376,29 @@ supabaseClient.auth.getSession().then(function (res) {
     loadAll();
 });
 
+function loadAll() {
+    loadForgotRequests();
+    loadProfiles();
+}
+
 /* ============================================================
- * 忘记密码申请
+ * 忘记密码申请（支持刷新回调）
  * ============================================================ */
-function loadForgotRequests() {
+function loadForgotRequests(callback) {
     forgotBody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
     supabaseClient.from('forgot_requests').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
                 forgotBody.innerHTML = '<tr><td colspan="5" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                if (typeof callback === 'function') callback();
                 return;
             }
             var data = res.data || [];
             badgeForgotEl.textContent = data.length + ' 条';
             if (data.length === 0) {
                 forgotBody.innerHTML = '<tr><td colspan="5" class="empty">暂无申请</td></tr>';
+                if (typeof callback === 'function') callback();
                 return;
             }
             var html = '';
@@ -1332,19 +1413,24 @@ function loadForgotRequests() {
             });
             forgotBody.innerHTML = html;
             bindDelete();
+            if (typeof callback === 'function') callback();
+        })
+        .catch(function () {
+            if (typeof callback === 'function') callback();
         });
 }
 
 /* ============================================================
- * 注册用户列表
+ * 注册用户列表（支持刷新回调）
  * ============================================================ */
-function loadProfiles() {
+function loadProfiles(callback) {
     profilesBody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
     supabaseClient.from('profiles').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
                 profilesBody.innerHTML = '<tr><td colspan="6" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                if (typeof callback === 'function') callback();
                 return;
             }
             var data = res.data || [];
@@ -1354,6 +1440,7 @@ function loadProfiles() {
 
             if (data.length === 0) {
                 profilesBody.innerHTML = '<tr><td colspan="6" class="empty">暂无用户</td></tr>';
+                if (typeof callback === 'function') callback();
                 return;
             }
             var html = '';
@@ -1397,6 +1484,10 @@ function loadProfiles() {
             });
             profilesBody.innerHTML = html;
             bindProfileActions();
+            if (typeof callback === 'function') callback();
+        })
+        .catch(function () {
+            if (typeof callback === 'function') callback();
         });
 }
 
@@ -1444,7 +1535,6 @@ function bindProfileActions() {
         });
     });
 
-    /* ⭐ 拉黑：打开封禁弹窗 */
     document.querySelectorAll('.action-btn.block').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
@@ -1487,7 +1577,6 @@ function closeBanDurationModal() {
     currentBanUserId = null;
 }
 
-/* 实时更新预览文字 */
 function updateBanPreview() {
     var d = parseInt(banDaysInput.value) || 0;
     var h = parseInt(banHoursInput.value) || 0;
@@ -1519,7 +1608,6 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
-/* 点确定封禁 */
 banConfirmBtn.addEventListener('click', function () {
     if (!currentBanUserId) return;
 
@@ -1527,13 +1615,11 @@ banConfirmBtn.addEventListener('click', function () {
     var h = parseInt(banHoursInput.value) || 0;
     var m = parseInt(banMinutesInput.value) || 0;
 
-    /* 计算总小时数（支持小数，Edge Function 那边会 parse） */
     var totalHours;
     if (d === 0 && h === 0 && m === 0) {
-        totalHours = 876000;   /* 永久（100 年） */
+        totalHours = 876000;
     } else {
         totalHours = d * 24 + h + m / 60;
-        /* 向上取整到最近的小时，最小 1 小时 */
         totalHours = Math.max(1, Math.ceil(totalHours));
     }
 

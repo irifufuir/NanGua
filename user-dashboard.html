@@ -497,56 +497,59 @@ logoutBtn.addEventListener('click', function () {
 });
 
 /* ============================================================
- * 权限守卫（普通用户 + 管理员都能进，但界面显示普通用户）
+ * 权限守卫
+ * 只在「明确没有 session」或「明确是管理员」时才跳转。
+ * 其他任何情况都留在本页，避免被莫名踢出。
  * ============================================================ */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
-    if (!session) { location.href = 'index.html'; return; }
 
-    supabaseClient.auth.refreshSession().then(function (rr) {
-        if (rr.error || !rr.data.session) { location.href = 'index.html'; return; }
+    // 情况 1：没有 session → 跳回登录页
+    if (!session) {
+        location.href = 'index.html';
+        return;
+    }
 
-        currentUser = rr.data.session.user;
+    currentUser = session.user;
+    var role = currentUser.app_metadata && currentUser.app_metadata.role;
 
-        /* ⭐ 如果当前是管理员，跳回管理后台 */
-        var role = currentUser.app_metadata && currentUser.app_metadata.role;
-        if (role === 'admin') {
-            location.href = 'admin-dashboard.html';
-            return;
-        }
+    // 情况 2：管理员 → 跳回管理后台
+    if (role === 'admin') {
+        location.href = 'admin-dashboard.html';
+        return;
+    }
 
-        /* 显示用户信息 */
-        userEmailEl.textContent = currentUser.email || '未知邮箱';
-        welcomeEmail.textContent = currentUser.email || '未知邮箱';
+    // 情况 3：普通用户 → 留在本页
+    userEmailEl.textContent = currentUser.email || '未知邮箱';
+    welcomeEmail.textContent = currentUser.email || '未知邮箱';
 
-        var avatarUrl = (currentUser.user_metadata && currentUser.user_metadata.avatar_url)
-            ? currentUser.user_metadata.avatar_url
-            : DEFAULT_AVATAR;
+    var avatarUrl = (currentUser.user_metadata && currentUser.user_metadata.avatar_url)
+        ? currentUser.user_metadata.avatar_url
+        : DEFAULT_AVATAR;
 
-        avatarImg.src = avatarUrl;
-        welcomeAvatar.src = avatarUrl;
+    avatarImg.src = avatarUrl;
+    welcomeAvatar.src = avatarUrl;
 
-        /* 加载 profiles 表里的昵称、手机号 */
-        supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', currentUser.id)
-            .maybeSingle()
-            .then(function (profileRes) {
-                var profile = profileRes.data || {};
+    /* 加载 profiles 表里的昵称、手机号 */
+    supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .maybeSingle()
+        .then(function (profileRes) {
+            var profile = profileRes.data || {};
 
-                welcomeTitle.textContent = profile.full_name
-                    ? '欢迎回来，' + profile.full_name
-                    : '欢迎回来';
+            welcomeTitle.textContent = profile.full_name
+                ? '欢迎回来，' + profile.full_name
+                : '欢迎回来';
 
-                infoEmail.textContent = currentUser.email || '—';
-                infoName.textContent  = profile.full_name || '未设置';
-                infoPhone.textContent = profile.phone || '未设置';
-                infoCreated.textContent = profile.created_at
-                    ? new Date(profile.created_at).toLocaleString('zh-CN', { hour12: false })
-                    : '—';
-            });
-    });
+            infoEmail.textContent = currentUser.email || '—';
+            infoName.textContent  = profile.full_name || '未设置';
+            infoPhone.textContent = profile.phone || '未设置';
+            infoCreated.textContent = profile.created_at
+                ? new Date(profile.created_at).toLocaleString('zh-CN', { hour12: false })
+                : '—';
+        });
 });
 </script>
 
