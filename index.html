@@ -117,6 +117,28 @@
         </div>
     </div>
 
+    <!-- ⭐ 账号封禁弹窗 -->
+    <div class="modal-mask" id="banModal" style="display:none;">
+        <div class="ban-modal-box">
+            <div class="ban-icon-wrap">
+                <div class="ban-icon">🔒</div>
+            </div>
+            <h3 class="ban-title">账号已被封禁</h3>
+            <p class="ban-desc">您的账号已被管理员封禁，暂时无法登录。</p>
+            <div class="ban-time-box">
+                <div class="ban-time-row">
+                    <span class="ban-time-label">解封时间</span>
+                    <span class="ban-time-value" id="banUntilDate">查询中...</span>
+                </div>
+                <div class="ban-time-row">
+                    <span class="ban-time-label">剩余时间</span>
+                    <span class="ban-time-value highlight" id="banRemaining">—</span>
+                </div>
+            </div>
+            <button type="button" class="ban-close-btn" id="banCloseBtn">我知道了</button>
+        </div>
+    </div>
+
 <script type="text/javascript" src="other/backgrounds.js"></script>
 
 <script type="text/javascript">
@@ -186,6 +208,12 @@
     var forgotSubmitBtn  = document.getElementById('forgotSubmitBtn');
     var forgotCancelBtn  = document.getElementById('forgotCancelBtn');
 
+    /* 封禁弹窗 */
+    var banModal      = document.getElementById('banModal');
+    var banUntilDate  = document.getElementById('banUntilDate');
+    var banRemaining  = document.getElementById('banRemaining');
+    var banCloseBtn   = document.getElementById('banCloseBtn');
+
     /* ========================================================
      *  三、多语言字典
      * ======================================================== */
@@ -216,6 +244,103 @@
         var name  = parts[parts.length - 1];
         return name.replace(/\.[^.]+$/, '');
     }
+
+    /* ⭐ 把 Supabase 的英文错误翻译成中文 */
+    function translateAuthError(msg) {
+        if (!msg) return '未知错误';
+        var m = String(msg).toLowerCase();
+
+        /* 登录相关 */
+        if (m.indexOf('invalid login credentials') !== -1)  return '邮箱或密码错误';
+        if (m.indexOf('email not confirmed') !== -1)        return '邮箱未验证，请先到邮箱点击确认链接';
+        if (m.indexOf('user is banned') !== -1)             return '该账号已被封禁';
+        if (m.indexOf('user_banned') !== -1)                return '该账号已被封禁';
+        if (m.indexOf('email rate limit exceeded') !== -1)  return '操作过于频繁，请稍后再试';
+        if (m.indexOf('for security purposes') !== -1)      return '出于安全考虑，请稍后再试';
+
+        /* 注册相关 */
+        if (m.indexOf('user already registered') !== -1)    return '该邮箱已被注册，请直接登录';
+        if (m.indexOf('password should be at least') !== -1) {
+            var match = msg.match(/at least (\d+)/);
+            return match ? '密码长度至少 ' + match[1] + ' 位' : '密码太短';
+        }
+        if (m.indexOf('unable to validate email address') !== -1) return '邮箱格式不正确';
+        if (m.indexOf('signups not allowed') !== -1)        return '当前不允许注册';
+        if (m.indexOf('signup is disabled') !== -1)         return '注册功能已关闭';
+        if (m.indexOf('email address not authorized') !== -1) return '该邮箱不被允许注册';
+        if (m.indexOf('user not found') !== -1)             return '该用户不存在';
+
+        /* 网络 */
+        if (m.indexOf('failed to fetch') !== -1)            return '网络错误，请检查网络连接';
+        if (m.indexOf('network') !== -1)                    return '网络错误，请稍后再试';
+        if (m.indexOf('timeout') !== -1)                    return '请求超时，请稍后再试';
+
+        /* 未知错误，返回原文 */
+        return msg;
+    }
+
+    /* ⭐ 显示封禁弹窗 */
+    function showBanModal(email, bannedUntil) {
+        banModal.style.display = 'flex';
+        banUntilDate.textContent = '查询中...';
+        banRemaining.textContent = '查询中...';
+
+        /* 如果已经有 bannedUntil，直接用 */
+        if (bannedUntil) {
+            renderBanTime(bannedUntil);
+            return;
+        }
+
+        /* 否则调 Edge Function 查 */
+        supabaseClient.functions.invoke('dynamic-handler', {
+            body: { action: 'get_ban_info', email: email }
+        }).then(function (res) {
+            if (res.error || !res.data || !res.data.success) {
+                banUntilDate.textContent = '请联系管理员';
+                banRemaining.textContent = '—';
+                return;
+            }
+            var data = res.data;
+            if (data.banned_until) {
+                renderBanTime(data.banned_until);
+            } else {
+                banUntilDate.textContent = '永久封禁';
+                banRemaining.textContent = '—';
+            }
+        }).catch(function () {
+            banUntilDate.textContent = '查询失败';
+            banRemaining.textContent = '请联系管理员';
+        });
+    }
+
+    function renderBanTime(bannedUntil) {
+        var until = new Date(bannedUntil);
+        banUntilDate.textContent = until.toLocaleString('zh-CN', { hour12: false });
+
+        var diff = until.getTime() - Date.now();
+        if (diff <= 0) {
+            banRemaining.textContent = '即将解封';
+            return;
+        }
+        var totalMin = Math.floor(diff / 60000);
+        var days  = Math.floor(totalMin / 1440);
+        var hours = Math.floor((totalMin % 1440) / 60);
+        var mins  = totalMin % 60;
+        var parts = [];
+        if (days > 0)  parts.push(days + ' 天');
+        if (hours > 0) parts.push(hours + ' 小时');
+        if (days === 0 && mins > 0) parts.push(mins + ' 分钟');
+        banRemaining.textContent = parts.join(' ') || '不到 1 分钟';
+    }
+
+    /* 关闭封禁弹窗 */
+    function closeBanModal() {
+        banModal.style.display = 'none';
+    }
+    banCloseBtn.addEventListener('click', closeBanModal);
+    banModal.addEventListener('click', function (e) {
+        if (e.target === banModal) closeBanModal();
+    });
 
     var tipTimer = null;
     function showTip(key, ok) {
@@ -342,7 +467,7 @@
     });
 
     /* ========================================================
-     *  七、登录逻辑（signInWithPassword + 拉黑拦截 + 角色跳转）
+     *  七、登录逻辑
      * ======================================================== */
     function doLogin() {
         var email = loginEmail.value.trim();
@@ -360,54 +485,74 @@
 
         var currentUser = null;
 
-        // 第一步：密码登录
         supabaseClient.auth.signInWithPassword({
             email: email,
             password: pwd
         }).then(function (res) {
-            if (res.error) throw res.error;
+            if (res.error) {
+                var errMsg = (res.error.message || '').toLowerCase();
+
+                /* ⭐ 如果是账号被封禁 */
+                if (errMsg.indexOf('banned') !== -1) {
+                    showBanModal(email);
+                    var be = new Error('__BANNED__');
+                    be.__isBanned = true;
+                    throw be;
+                }
+
+                /* 普通错误 */
+                var e = new Error(res.error.message);
+                e.__translated = false;
+                throw e;
+            }
+
             currentUser = res.data.user;
 
-            // 第二步：查询 profiles 表，看该用户是否被拉黑
             return supabaseClient
                 .from('profiles')
-                .select('is_blocked')
+                .select('is_blocked, banned_until')
                 .eq('id', currentUser.id)
                 .maybeSingle();
         }).then(function (profileRes) {
-            // 如果查询出错（比如用户不在 profiles 表里），不阻断登录，只打印警告
             if (profileRes.error) {
                 console.warn('查询拉黑状态失败：', profileRes.error.message);
             }
 
-            // 如果查到了记录，并且 is_blocked === true → 强制登出
+            /* ⭐ 二次检查 profiles 表的封禁状态 */
             if (profileRes.data && profileRes.data.is_blocked === true) {
+                showBanModal(email, profileRes.data.banned_until);
                 return supabaseClient.auth.signOut().then(function () {
-                    throw new Error('该账号已被管理员拉黑，请联系客服');
+                    var be = new Error('__BANNED__');
+                    be.__isBanned = true;
+                    throw be;
                 });
             }
 
-            // 正常登录
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
             showTip('tipLoginSuccess', true);
             console.log('[登录成功]', currentUser);
             clearRegisterForm();
 
-            /* ⭐ 判断角色，跳转到对应的仪表盘 */
             var role = currentUser.app_metadata && currentUser.app_metadata.role;
 
             setTimeout(function () {
                 if (role === 'admin') {
-                    location.href = 'admin-dashboard.html';   // 管理员 → 管理后台
+                    location.href = 'admin-dashboard.html';
                 } else {
-                    location.href = 'user-dashboard.html';    // 普通用户 → 用户中心
+                    location.href = 'user-dashboard.html';
                 }
             }, 800);
         }).catch(function (err) {
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
-            showTipMsg('登录失败：' + (err && err.message ? err.message : err), false);
+
+            /* 封禁弹窗已经显示，不显示普通错误 */
+            if (err && err.__isBanned) return;
+
+            var raw = (err && err.message) ? err.message : String(err);
+            var msg = (err && err.__translated) ? raw : translateAuthError(raw);
+            showTipMsg('登录失败：' + msg, false);
         });
     }
     loginBtn.addEventListener('click', doLogin);
@@ -419,7 +564,7 @@
     });
 
     /* ========================================================
-     *  八、注册逻辑（signUp + 写入 profiles）
+     *  八、注册逻辑
      * ======================================================== */
     function doRegister() {
         var email = regEmail.value.trim();
@@ -459,7 +604,11 @@
                 }
             }
         }).then(function (res) {
-            if (res.error) throw res.error;
+            if (res.error) {
+                var e = new Error(res.error.message);
+                e.__translated = false;
+                throw e;
+            }
             if (!res.data || !res.data.user) throw new Error('注册失败，请重试');
             newUserId = res.data.user.id;
             return res.data.session;
@@ -497,7 +646,10 @@
         }).catch(function (err) {
             registerBtn.disabled = false;
             registerBtn.textContent = i18n[currentLang].registerBtn;
-            showTipMsg('注册失败：' + (err && err.message ? err.message : err), false);
+
+            var raw = (err && err.message) ? err.message : String(err);
+            var msg = (err && err.__translated) ? raw : translateAuthError(raw);
+            showTipMsg('注册失败：' + msg, false);
         });
     }
     registerBtn.addEventListener('click', doRegister);
@@ -539,8 +691,9 @@
         if (e.target === forgotModal) closeForgotModal();
     });
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && forgotModal.style.display !== 'none') {
-            closeForgotModal();
+        if (e.key === 'Escape') {
+            if (forgotModal.style.display !== 'none') closeForgotModal();
+            if (banModal.style.display !== 'none') closeBanModal();
         }
     });
 
