@@ -491,7 +491,6 @@
         cursor: not-allowed;
     }
 
-    /* 健康状态卡片组 */
     .health-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -536,7 +535,6 @@
         color: rgba(255, 255, 255, 0.45);
     }
 
-    /* 数据统计 */
     .stat-section-title {
         font-size: 13px;
         color: rgba(255, 220, 140, 0.8);
@@ -584,7 +582,6 @@
         margin-left: 4px;
     }
 
-    /* 项目信息 */
     .project-info {
         background: rgba(30, 30, 30, 0.5);
         border: 1px solid rgba(255, 255, 255, 0.06);
@@ -614,6 +611,150 @@
         font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
         word-break: break-all;
         text-align: right;
+    }
+
+    /* ============================================================
+       ⭐ 封禁时长弹窗
+       ============================================================ */
+    .ban-duration-mask {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 3000;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .ban-duration-box {
+        width: 380px;
+        max-width: 100%;
+        padding: 28px 24px;
+        border-radius: 16px;
+        background: rgba(35, 35, 35, 0.95);
+        border: 1px solid rgba(255, 200, 100, 0.35);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        animation: boxIn 0.25s ease;
+        box-sizing: border-box;
+    }
+    @keyframes boxIn {
+        from { transform: translateY(12px) scale(0.98); opacity: 0; }
+        to   { transform: translateY(0)   scale(1);    opacity: 1; }
+    }
+
+    .ban-duration-box h3 {
+        font-size: 17px;
+        font-weight: 500;
+        color: rgba(255, 220, 140, 0.95);
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .ban-duration-hint {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.4);
+        text-align: center;
+        margin-top: -8px;
+    }
+
+    .ban-duration-inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+    }
+
+    .ban-duration-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .ban-duration-field label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.6);
+        text-align: center;
+    }
+    .ban-duration-field input {
+        width: 100%;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        padding: 0 10px;
+        font-size: 16px;
+        color: #fff;
+        text-align: center;
+        outline: none;
+        transition: 0.2s;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    .ban-duration-field input:focus {
+        border-color: rgba(255, 200, 100, 0.6);
+        background: rgba(255, 200, 100, 0.06);
+        box-shadow: 0 0 0 3px rgba(255, 200, 100, 0.08);
+    }
+
+    .ban-duration-preview {
+        padding: 10px 14px;
+        background: rgba(255, 200, 100, 0.08);
+        border: 1px solid rgba(255, 200, 100, 0.25);
+        border-radius: 8px;
+        font-size: 13px;
+        color: rgba(255, 220, 140, 0.9);
+        text-align: center;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ban-duration-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 4px;
+    }
+    .ban-duration-actions button {
+        flex: 1;
+        height: 42px;
+        font-size: 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        font-family: inherit;
+    }
+
+    .ban-duration-cancel {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .ban-duration-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+    .ban-duration-confirm {
+        background: rgba(220, 60, 60, 0.35);
+        border: 1px solid rgba(255, 100, 100, 0.55);
+        color: #ffaaaa;
+        font-weight: 500;
+    }
+    .ban-duration-confirm:hover:not(:disabled) {
+        background: rgba(255, 80, 80, 0.65);
+        color: #fff;
+    }
+    .ban-duration-confirm:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
     /* ============================================================
@@ -681,6 +822,9 @@
         .manage-preview { flex-direction: column; text-align: center; }
         .stat-grid, .health-grid { grid-template-columns: 1fr 1fr; }
         .stat-box .value { font-size: 22px; }
+        .ban-duration-box { padding: 22px 18px; }
+        .ban-duration-field input { height: 40px; font-size: 15px; }
+        .ban-duration-actions button { height: 40px; font-size: 13px; }
     }
     </style>
 </head>
@@ -834,7 +978,6 @@
                     <button class="refresh-btn" id="refreshServerBtn">🔄 刷新</button>
                 </div>
 
-                <!-- 健康状态 -->
                 <div class="stat-section-title">🟢 服务健康状态</div>
                 <div class="health-grid" id="healthGrid">
                     <div class="health-card">
@@ -845,7 +988,6 @@
                     </div>
                 </div>
 
-                <!-- 数据统计 -->
                 <div class="stat-section-title">📈 数据统计</div>
                 <div class="stat-grid">
                     <div class="stat-box">
@@ -874,7 +1016,6 @@
                     </div>
                 </div>
 
-                <!-- 项目信息 -->
                 <div class="stat-section-title">🌐 项目信息</div>
                 <div class="project-info">
                     <div class="info-row">
@@ -907,6 +1048,38 @@
         </main>
     </div>
 
+    <!-- ⭐ 封禁时长弹窗 -->
+    <div class="ban-duration-mask" id="banDurationModal" style="display:none;">
+        <div class="ban-duration-box">
+            <h3>设置封禁时长</h3>
+            <p class="ban-duration-hint">留空或全填 0 表示永久封禁</p>
+
+            <div class="ban-duration-inputs">
+                <div class="ban-duration-field">
+                    <label>天</label>
+                    <input type="number" id="banDays" min="0" max="36500" value="0"/>
+                </div>
+                <div class="ban-duration-field">
+                    <label>小时</label>
+                    <input type="number" id="banHours" min="0" max="23" value="0"/>
+                </div>
+                <div class="ban-duration-field">
+                    <label>分钟</label>
+                    <input type="number" id="banMinutes" min="0" max="59" value="0"/>
+                </div>
+            </div>
+
+            <div class="ban-duration-preview" id="banPreview">
+                永久封禁
+            </div>
+
+            <div class="ban-duration-actions">
+                <button type="button" class="ban-duration-cancel" id="banCancelBtn">取消</button>
+                <button type="button" class="ban-duration-confirm" id="banConfirmBtn">确定封禁</button>
+            </div>
+        </div>
+    </div>
+
 <script>
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
@@ -934,7 +1107,6 @@ var previewName      = document.getElementById('previewName');
 var previewEmail     = document.getElementById('previewEmail');
 var previewStatus    = document.getElementById('previewStatus');
 
-/* 服务端信息相关 */
 var lastUpdateEl     = document.getElementById('lastUpdate');
 var refreshServerBtn = document.getElementById('refreshServerBtn');
 var healthGrid       = document.getElementById('healthGrid');
@@ -950,6 +1122,16 @@ var infoQueryTime    = document.getElementById('infoQueryTime');
 var infoMemory       = document.getElementById('infoMemory');
 var infoDeno         = document.getElementById('infoDeno');
 var infoTimestamp    = document.getElementById('infoTimestamp');
+
+/* 封禁弹窗 */
+var banDurationModal = document.getElementById('banDurationModal');
+var banDaysInput     = document.getElementById('banDays');
+var banHoursInput    = document.getElementById('banHours');
+var banMinutesInput  = document.getElementById('banMinutes');
+var banPreviewEl     = document.getElementById('banPreview');
+var banCancelBtn     = document.getElementById('banCancelBtn');
+var banConfirmBtn    = document.getElementById('banConfirmBtn');
+var currentBanUserId = null;
 
 var allProfiles = [];
 var DEFAULT_AVATAR = 'image/default-avatar.png';
@@ -990,7 +1172,6 @@ function switchTab(tab) {
     document.getElementById('cardManage').classList.toggle('active', tab === 'manage');
     document.getElementById('cardServer').classList.toggle('active', tab === 'server');
 
-    /* 切换到服务端信息时自动加载 */
     if (tab === 'server') loadServerInfo();
 }
 
@@ -1088,28 +1269,38 @@ logoutBtn.addEventListener('click', function () {
 
 /* ============================================================
  * 权限守卫
+ * 只在“明确没有 session”或“明确不是 admin”时才跳登录页。
+ * 其他任何情况（网络抖动、刷新失败等）一律留在本页。
  * ============================================================ */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
-    if (!session) { location.href = 'admin.html'; return; }
 
-    supabaseClient.auth.refreshSession().then(function (rr) {
-        if (rr.error || !rr.data.session) { location.href = 'admin.html'; return; }
-        var user = rr.data.session.user;
-        var role = user.app_metadata && user.app_metadata.role;
-        if (role !== 'admin') {
-            supabaseClient.auth.signOut().then(function () { location.href = 'admin.html'; });
-            return;
-        }
-        adminEmailEl.textContent = user.email;
-        if (user.user_metadata && user.user_metadata.avatar_url) {
-            avatarImg.src = user.user_metadata.avatar_url;
-        }
-        loadAll();
-    });
+    // 情况 1：没有 session → 唯一会跳回登录页的场景
+    if (!session) {
+        sessionStorage.setItem('admin_redirect_guard', '1');
+        location.href = 'admin.html';
+        return;
+    }
+
+    var user = session.user;
+    var role = user.app_metadata && user.app_metadata.role;
+
+    // 情况 2：不是管理员 → 登出并跳回登录页
+    if (role !== 'admin') {
+        sessionStorage.setItem('admin_redirect_guard', '1');
+        supabaseClient.auth.signOut().then(function () {
+            location.href = 'admin.html';
+        });
+        return;
+    }
+
+    // 情况 3：正常管理员 → 留在本页，加载数据
+    adminEmailEl.textContent = user.email;
+    if (user.user_metadata && user.user_metadata.avatar_url) {
+        avatarImg.src = user.user_metadata.avatar_url;
+    }
+    loadAll();
 });
-
-function loadAll() { loadForgotRequests(); loadProfiles(); }
 
 /* ============================================================
  * 忘记密码申请
@@ -1253,21 +1444,11 @@ function bindProfileActions() {
         });
     });
 
+    /* ⭐ 拉黑：打开封禁弹窗 */
     document.querySelectorAll('.action-btn.block').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
-            var input = prompt('请输入封禁时长（小时）：\n\n• 24 = 1 天\n• 168 = 7 天\n• 720 = 30 天\n• 876000 = 永久\n\n直接点确定使用默认值（永久）', '876000');
-            if (input === null) return;
-            var hours = input.trim() === '' ? '876000' : input.trim();
-
-            callEdgeFunction('ban', id, hours)
-                .then(function (res) {
-                    if (res.error) { alert('拉黑失败：' + res.error.message); return; }
-                    if (res.data && res.data.error) { alert('拉黑失败：' + res.data.error); return; }
-                    alert('已拉黑用户（' + hours + ' 小时）');
-                    loadProfiles();
-                })
-                .catch(function (err) { alert('拉黑失败：' + (err.message || err)); });
+            openBanDurationModal(id);
         });
     });
 
@@ -1287,6 +1468,109 @@ function bindProfileActions() {
         });
     });
 }
+
+/* ============================================================
+ * ⭐ 封禁时长弹窗逻辑
+ * ============================================================ */
+function openBanDurationModal(userId) {
+    currentBanUserId = userId;
+    banDaysInput.value    = '0';
+    banHoursInput.value   = '0';
+    banMinutesInput.value = '0';
+    updateBanPreview();
+    banDurationModal.style.display = 'flex';
+    setTimeout(function () { banDaysInput.focus(); }, 50);
+}
+
+function closeBanDurationModal() {
+    banDurationModal.style.display = 'none';
+    currentBanUserId = null;
+}
+
+/* 实时更新预览文字 */
+function updateBanPreview() {
+    var d = parseInt(banDaysInput.value) || 0;
+    var h = parseInt(banHoursInput.value) || 0;
+    var m = parseInt(banMinutesInput.value) || 0;
+
+    if (d === 0 && h === 0 && m === 0) {
+        banPreviewEl.textContent = '永久封禁';
+        return;
+    }
+
+    var parts = [];
+    if (d > 0) parts.push(d + ' 天');
+    if (h > 0) parts.push(h + ' 小时');
+    if (m > 0) parts.push(m + ' 分钟');
+    banPreviewEl.textContent = '封禁时长：' + parts.join(' ');
+}
+
+banDaysInput.addEventListener('input', updateBanPreview);
+banHoursInput.addEventListener('input', updateBanPreview);
+banMinutesInput.addEventListener('input', updateBanPreview);
+
+banCancelBtn.addEventListener('click', closeBanDurationModal);
+banDurationModal.addEventListener('click', function (e) {
+    if (e.target === banDurationModal) closeBanDurationModal();
+});
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && banDurationModal.style.display !== 'none') {
+        closeBanDurationModal();
+    }
+});
+
+/* 点确定封禁 */
+banConfirmBtn.addEventListener('click', function () {
+    if (!currentBanUserId) return;
+
+    var d = parseInt(banDaysInput.value) || 0;
+    var h = parseInt(banHoursInput.value) || 0;
+    var m = parseInt(banMinutesInput.value) || 0;
+
+    /* 计算总小时数（支持小数，Edge Function 那边会 parse） */
+    var totalHours;
+    if (d === 0 && h === 0 && m === 0) {
+        totalHours = 876000;   /* 永久（100 年） */
+    } else {
+        totalHours = d * 24 + h + m / 60;
+        /* 向上取整到最近的小时，最小 1 小时 */
+        totalHours = Math.max(1, Math.ceil(totalHours));
+    }
+
+    banConfirmBtn.disabled = true;
+    banConfirmBtn.textContent = '处理中...';
+
+    var userId = currentBanUserId;
+
+    callEdgeFunction('ban', userId, String(totalHours))
+        .then(function (res) {
+            banConfirmBtn.disabled = false;
+            banConfirmBtn.textContent = '确定封禁';
+
+            if (res.error) { alert('拉黑失败：' + res.error.message); return; }
+            if (res.data && res.data.error) { alert('拉黑失败：' + res.data.error); return; }
+
+            closeBanDurationModal();
+
+            var msg;
+            if (d === 0 && h === 0 && m === 0) {
+                msg = '已永久封禁该用户';
+            } else {
+                var parts = [];
+                if (d > 0) parts.push(d + ' 天');
+                if (h > 0) parts.push(h + ' 小时');
+                if (m > 0) parts.push(m + ' 分钟');
+                msg = '已封禁 ' + parts.join(' ');
+            }
+            alert(msg);
+            loadProfiles();
+        })
+        .catch(function (err) {
+            banConfirmBtn.disabled = false;
+            banConfirmBtn.textContent = '确定封禁';
+            alert('拉黑失败：' + (err.message || err));
+        });
+});
 
 /* ============================================================
  * 用户管理逻辑
@@ -1470,7 +1754,6 @@ function loadServerInfo() {
     refreshServerBtn.disabled = true;
     refreshServerBtn.textContent = '加载中...';
 
-    /* 健康卡片显示加载中 */
     healthGrid.innerHTML = '<div class="health-card">' +
         '<div class="health-dot" style="background:#555;"></div>' +
         '<div class="health-info"><span class="name">加载中...</span></div>' +
@@ -1492,7 +1775,6 @@ function loadServerInfo() {
             return;
         }
 
-        /* 健康状态 */
         var health = data.health || {};
         var healthHtml = '';
         healthHtml += renderHealthCard('Database',     health.database === true);
@@ -1501,7 +1783,6 @@ function loadServerInfo() {
         healthHtml += renderHealthCard('Edge Functions', health.edgeFunctions === true);
         healthGrid.innerHTML = healthHtml;
 
-        /* 数据统计 */
         var stats = data.stats || {};
         statAuthUsers.textContent = stats.authUsers || 0;
         statProfiles.textContent  = stats.profiles || 0;
@@ -1510,7 +1791,6 @@ function loadServerInfo() {
         statAvatars.textContent   = stats.avatars || 0;
         statAvatarSize.innerHTML  = (stats.avatarSizeMB || 0) + '<span class="unit">MB</span>';
 
-        /* 项目信息 */
         var proj = data.project || {};
         infoUrl.textContent       = proj.url || '—';
         infoRegion.textContent    = proj.region || '—';
@@ -1521,7 +1801,6 @@ function loadServerInfo() {
         infoDeno.textContent      = rt.denoVersion || '—';
         infoTimestamp.textContent = data.timestamp ? new Date(data.timestamp).toLocaleString('zh-CN', { hour12: false }) : '—';
 
-        /* 最后更新时间 */
         lastUpdateEl.textContent = '最后更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
 
     }).catch(function (err) {
