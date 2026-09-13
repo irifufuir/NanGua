@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>齿轮盛宴</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 多语言字典 -->
+    <script src="other/i18n.js"></script>
+</head>
+<body>
+
+    <div class="bg-container">
+        <div class="bg-image" id="bgImage"></div>
+        <video class="bg-video" id="bgVideo" autoplay muted loop playsinline></video>
+    </div>
+
+    <div class="top-right-controls">
+        <div class="lang-switcher">
+            <button class="lang-btn" id="langBtn">🌐 简体中文</button>
+            <div class="lang-dropdown" id="langDropdown">
+                <a href="#" data-lang="zh">简体中文</a>
+                <a href="#" data-lang="en">English</a>
+                <a href="#" data-lang="ja">日本語</a>
+                <a href="#" data-lang="ko">한국어</a>
+                <a href="#" data-lang="fr">Français</a>
+                <a href="#" data-lang="es">Español</a>
+            </div>
+        </div>
+        <div class="bg-switcher">
+            <button class="bg-btn" id="bgBtn">🎨 背景</button>
+            <div class="bg-dropdown" id="bgDropdown"></div>
+        </div>
+    </div>
+
+    <!-- 👇 唯一改动 ①：加 data-draggable -->
+    <div class="box" data-draggable data-drag-id="loginBox">
+        <h2 id="title">Nan Gua</h2>
+
+        <div id="loginView" class="view">
+            <div class="input-box">
+                <label>邮箱</label>
+                <input type="email" id="loginEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
+            </div>
+            <div class="input-box">
+                <label>密码</label>
+                <input type="password" id="loginPwd" placeholder="请输入密码" autocomplete="current-password"/>
+            </div>
+            <div class="btn-box">
+                <a href="#" id="forgotLink">忘记密码?</a>
+                <div>
+                    <button type="button" id="loginBtn">登录</button>
+                    <button type="button" id="toRegisterBtn">注册</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="registerView" class="view" style="display:none;">
+            <div class="input-box">
+                <label>邮箱</label>
+                <input type="email" id="regEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
+            </div>
+            <div class="input-box">
+                <label>昵称</label>
+                <input type="text" id="regName" placeholder="请输入您的昵称" autocomplete="nickname"/>
+            </div>
+            <div class="input-box">
+                <label>手机号</label>
+                <input type="tel" id="regPhone" placeholder="请输入手机号" autocomplete="tel"/>
+            </div>
+            <div class="input-box">
+                <label>设置密码</label>
+                <input type="password" id="regPwd" placeholder="至少 8 位，含大小写字母和数字" autocomplete="new-password"/>
+            </div>
+            <div class="input-box">
+                <label>确认密码</label>
+                <input type="password" id="regPwd2" placeholder="再次输入密码" autocomplete="new-password"/>
+            </div>
+            <div class="btn-box">
+                <a href="#" id="backLoginLink">已有账号？返回登录</a>
+                <div>
+                    <button type="button" id="registerBtn" class="single-btn">注册</button>
+                </div>
+            </div>
+        </div>
+
+        <p class="tip" id="tip"></p>
+    </div>
+
+    <div class="modal-mask" id="forgotModal" style="display:none;">
+        <div class="modal-box">
+            <h3 id="forgotTitle">找回密码</h3>
+            <div class="input-box">
+                <label id="forgotEmailLabel">注册邮箱</label>
+                <input type="email" id="forgotEmail" placeholder="请输入注册时使用的邮箱" autocomplete="off"/>
+            </div>
+            <div class="input-box">
+                <label id="forgotContactLabel">联系方式</label>
+                <input type="text" id="forgotContact" placeholder="手机号 / 其他邮箱（便于管理员联系您）" autocomplete="off"/>
+            </div>
+            <div class="input-box">
+                <label id="forgotReasonLabel">问题描述</label>
+                <textarea id="forgotReason" rows="3" placeholder="简单描述您的情况（例如：忘记密码，账号是 xxx）"></textarea>
+            </div>
+            <p class="tip" id="forgotTip"></p>
+            <div class="btn-box">
+                <div>
+                    <button type="button" id="forgotSubmitBtn">提交申请</button>
+                    <button type="button" id="forgotCancelBtn">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⭐ 账号封禁弹窗 -->
+    <div class="modal-mask" id="banModal" style="display:none;">
+        <div class="ban-modal-box">
+            <div class="ban-icon-wrap">
+                <div class="ban-icon">🔒</div>
+            </div>
+            <h3 class="ban-title">账号已被封禁</h3>
+            <p class="ban-desc">您的账号已被管理员封禁，暂时无法登录。</p>
+            <div class="ban-time-box">
+                <div class="ban-time-row">
+                    <span class="ban-time-label">解封时间</span>
+                    <span class="ban-time-value" id="banUntilDate">查询中...</span>
+                </div>
+                <div class="ban-time-row">
+                    <span class="ban-time-label">剩余时间</span>
+                    <span class="ban-time-value highlight" id="banRemaining">—</span>
+                </div>
+            </div>
+            <button type="button" class="ban-close-btn" id="banCloseBtn">我知道了</button>
+        </div>
+    </div>
+
+<script type="text/javascript" src="other/backgrounds.js"></script>
+
+<script type="text/javascript">
+
+    /* ========================================================
+     *  0. Supabase 初始化
+     * ======================================================== */
+    var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
+    var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    /* ========================================================
+     *  一、背景分类多语言标题
+     * ======================================================== */
+    var CATEGORY_LABELS_I18N = {
+        zh: { video: '📹 视频', image: '🖼️ 图片' },
+        en: { video: '📹 Video', image: '🖼️ Image' },
+        ja: { video: '📹 動画',  image: '🖼️ 画像' },
+        ko: { video: '📹 비디오', image: '🖼️ 이미지' },
+        fr: { video: '📹 Vidéo', image: '🖼️ Image' },
+        es: { video: '📹 Vídeo', image: '🖼️ Imagen' }
+    };
+    var CATEGORY_ORDER = ['video', 'image'];
+    var BG_BTN_LABELS = {
+        zh: '🎨 背景', en: '🎨 Background', ja: '🎨 背景',
+        ko: '🎨 배경', fr: '🎨 Fond', es: '🎨 Fondo'
+    };
+
+    /* ========================================================
+     *  二、元素引用
+     * ======================================================== */
+    var bgImage        = document.getElementById('bgImage');
+    var bgVideo        = document.getElementById('bgVideo');
+    var bgDropdown     = document.getElementById('bgDropdown');
+    var bgBtn          = document.getElementById('bgBtn');
+    var langDropdown   = document.getElementById('langDropdown');
+    var langBtn        = document.getElementById('langBtn');
+
+    var titleEl        = document.getElementById('title');
+    var loginView      = document.getElementById('loginView');
+    var registerView   = document.getElementById('registerView');
+    var tipEl          = document.getElementById('tip');
+
+    var loginEmail     = document.getElementById('loginEmail');
+    var loginPwd       = document.getElementById('loginPwd');
+    var loginBtn       = document.getElementById('loginBtn');
+    var toRegisterBtn  = document.getElementById('toRegisterBtn');
+    var forgotLink     = document.getElementById('forgotLink');
+
+    var regEmail       = document.getElementById('regEmail');
+    var regName        = document.getElementById('regName');
+    var regPhone       = document.getElementById('regPhone');
+    var regPwd         = document.getElementById('regPwd');
+    var regPwd2        = document.getElementById('regPwd2');
+    var registerBtn    = document.getElementById('registerBtn');
+    var backLoginLink  = document.getElementById('backLoginLink');
+
+    var forgotModal      = document.getElementById('forgotModal');
+    var forgotTitle      = document.getElementById('forgotTitle');
+    var forgotEmailLabel = document.getElementById('forgotEmailLabel');
+    var forgotContactLbl = document.getElementById('forgotContactLabel');
+    var forgotReasonLbl  = document.getElementById('forgotReasonLabel');
+    var forgotEmail      = document.getElementById('forgotEmail');
+    var forgotContact    = document.getElementById('forgotContact');
+    var forgotReason     = document.getElementById('forgotReason');
+    var forgotTip        = document.getElementById('forgotTip');
+    var forgotSubmitBtn  = document.getElementById('forgotSubmitBtn');
+    var forgotCancelBtn  = document.getElementById('forgotCancelBtn');
+
+    /* 封禁弹窗 */
+    var banModal      = document.getElementById('banModal');
+    var banUntilDate  = document.getElementById('banUntilDate');
+    var banRemaining  = document.getElementById('banRemaining');
+    var banCloseBtn   = document.getElementById('banCloseBtn');
+
+    /* ========================================================
+     *  三、多语言字典
+     * ======================================================== */
+    var i18n = window.I18N;
+    var currentLang = 'zh';
+
+    /* ========================================================
+     *  四、工具函数
+     * ======================================================== */
+    var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
+    var PHONE_RE = /^[\d\s\-+()]{6,20}$/;
+    var ALLOWED_DOMAINS = [
+        '@163.com', '@qq.com', '@sina.com', '@hotmail.com',
+        '@sina.cn', '@live.cn', '@gmail.com', '@sohu.com'
+    ];
+    var PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+    function isValidEmail(email) {
+        if (!EMAIL_RE.test(email)) return false;
+        var lowerEmail = email.toLowerCase();
+        return ALLOWED_DOMAINS.some(function (d) {
+            return lowerEmail.endsWith(d);
+        });
+    }
+
+    function fileNameFromPath(path) {
+        var parts = String(path).split('/');
+        var name  = parts[parts.length - 1];
+        return name.replace(/\.[^.]+$/, '');
+    }
+
+    /* ⭐ 把 Supabase 的英文错误翻译成中文 */
+    function translateAuthError(msg) {
+        if (!msg) return '未知错误';
+        var m = String(msg).toLowerCase();
+
+        /* 登录相关 */
+        if (m.indexOf('invalid login credentials') !== -1)  return '邮箱或密码错误';
+        if (m.indexOf('email not confirmed') !== -1)        return '邮箱未验证，请先到邮箱点击确认链接';
+        if (m.indexOf('user is banned') !== -1)             return '该账号已被封禁';
+        if (m.indexOf('user_banned') !== -1)                return '该账号已被封禁';
+        if (m.indexOf('email rate limit exceeded') !== -1)  return '操作过于频繁，请稍后再试';
+        if (m.indexOf('for security purposes') !== -1)      return '出于安全考虑，请稍后再试';
+
+        /* 注册相关 */
+        if (m.indexOf('user already registered') !== -1)    return '该邮箱已被注册，请直接登录';
+        if (m.indexOf('password should be at least') !== -1) {
+            var match = msg.match(/at least (\d+)/);
+            return match ? '密码长度至少 ' + match[1] + ' 位' : '密码太短';
+        }
+        if (m.indexOf('unable to validate email address') !== -1) return '邮箱格式不正确';
+        if (m.indexOf('signups not allowed') !== -1)        return '当前不允许注册';
+        if (m.indexOf('signup is disabled') !== -1)         return '注册功能已关闭';
+        if (m.indexOf('email address not authorized') !== -1) return '该邮箱不被允许注册';
+        if (m.indexOf('user not found') !== -1)             return '该用户不存在';
+
+        /* 网络 */
+        if (m.indexOf('failed to fetch') !== -1)            return '网络错误，请检查网络连接';
+        if (m.indexOf('network') !== -1)                    return '网络错误，请稍后再试';
+        if (m.indexOf('timeout') !== -1)                    return '请求超时，请稍后再试';
+
+        /* 未知错误，返回原文 */
+        return msg;
+    }
+
+    /* ⭐ 显示封禁弹窗 */
+    function showBanModal(email, bannedUntil) {
+        banModal.style.display = 'flex';
+        banUntilDate.textContent = '查询中...';
+        banRemaining.textContent = '查询中...';
+
+        /* 如果已经有 bannedUntil，直接用 */
+        if (bannedUntil) {
+            renderBanTime(bannedUntil);
+            return;
+        }
+
+        /* 否则调 Edge Function 查 */
+        supabaseClient.functions.invoke('dynamic-handler', {
+            body: { action: 'get_ban_info', email: email }
+        }).then(function (res) {
+            if (res.error || !res.data || !res.data.success) {
+                banUntilDate.textContent = '请联系管理员';
+                banRemaining.textContent = '—';
+                return;
+            }
+            var data = res.data;
+            if (data.banned_until) {
+                renderBanTime(data.banned_until);
+            } else {
+                banUntilDate.textContent = '永久封禁';
+                banRemaining.textContent = '—';
+            }
+        }).catch(function () {
+            banUntilDate.textContent = '查询失败';
+            banRemaining.textContent = '请联系管理员';
+        });
+    }
+
+    function renderBanTime(bannedUntil) {
+        var until = new Date(bannedUntil);
+        banUntilDate.textContent = until.toLocaleString('zh-CN', { hour12: false });
+
+        var diff = until.getTime() - Date.now();
+        if (diff <= 0) {
+            banRemaining.textContent = '即将解封';
+            return;
+        }
+        var totalMin = Math.floor(diff / 60000);
+        var days  = Math.floor(totalMin / 1440);
+        var hours = Math.floor((totalMin % 1440) / 60);
+        var mins  = totalMin % 60;
+        var parts = [];
+        if (days > 0)  parts.push(days + ' 天');
+        if (hours > 0) parts.push(hours + ' 小时');
+        if (days === 0 && mins > 0) parts.push(mins + ' 分钟');
+        banRemaining.textContent = parts.join(' ') || '不到 1 分钟';
+    }
+
+    /* 关闭封禁弹窗 */
+    function closeBanModal() {
+        banModal.style.display = 'none';
+    }
+    banCloseBtn.addEventListener('click', closeBanModal);
+    banModal.addEventListener('click', function (e) {
+        if (e.target === banModal) closeBanModal();
+    });
+
+    var tipTimer = null;
+    function showTip(key, ok) {
+        var dict = i18n[currentLang] || i18n.zh;
+        var msg = dict[key] || key;
+        tipEl.textContent = msg;
+        tipEl.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
+        tipEl.classList.add('show');
+        clearTimeout(tipTimer);
+        tipTimer = setTimeout(function () { tipEl.classList.remove('show'); }, 3000);
+    }
+
+    function showTipMsg(msg, ok) {
+        tipEl.textContent = msg;
+        tipEl.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
+        tipEl.classList.add('show');
+        clearTimeout(tipTimer);
+        tipTimer = setTimeout(function () { tipEl.classList.remove('show'); }, 3000);
+    }
+
+    var forgotTipTimer = null;
+    function showForgotTip(key, ok) {
+        var dict = i18n[currentLang] || i18n.zh;
+        var msg = dict[key] || key;
+        forgotTip.textContent = msg;
+        forgotTip.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
+        forgotTip.classList.add('show');
+        clearTimeout(forgotTipTimer);
+        forgotTipTimer = setTimeout(function () { forgotTip.classList.remove('show'); }, 2500);
+    }
+
+    function clearRegisterForm() {
+        regEmail.value  = '';
+        regName.value   = '';
+        regPhone.value  = '';
+        regPwd.value    = '';
+        regPwd2.value   = '';
+    }
+
+    /* ========================================================
+     *  五、视图切换 & 语言应用
+     * ======================================================== */
+    function applyLanguage(lang) {
+        var dict = i18n[lang];
+        if (!dict) return;
+        currentLang = lang;
+
+        langBtn.textContent = '🌐 ' + dict.langBtn;
+        bgBtn.textContent   = (BG_BTN_LABELS[lang] || BG_BTN_LABELS.zh);
+
+        if (loginView.style.display !== 'none') {
+            titleEl.textContent = dict.loginTitle;
+        } else {
+            titleEl.textContent = dict.registerTitle;
+        }
+
+        document.querySelector('#loginView .input-box:nth-child(1) label').textContent = dict.emailLabel;
+        loginEmail.placeholder = dict.emailPlaceholder;
+        document.querySelector('#loginView .input-box:nth-child(2) label').textContent = dict.pwdLabel;
+        loginPwd.placeholder = dict.pwdPlaceholder;
+        forgotLink.textContent = dict.forgotPwd;
+        loginBtn.textContent = dict.loginBtn;
+        toRegisterBtn.textContent = dict.registerBtn;
+
+        document.querySelector('#registerView .input-box:nth-child(1) label').textContent = dict.emailLabel;
+        regEmail.placeholder = dict.emailPlaceholder;
+        document.querySelector('#registerView .input-box:nth-child(2) label').textContent = dict.nameLabel;
+        regName.placeholder = dict.namePlaceholder;
+        document.querySelector('#registerView .input-box:nth-child(3) label').textContent = dict.phoneLabel;
+        regPhone.placeholder = dict.phonePlaceholder;
+        document.querySelector('#registerView .input-box:nth-child(4) label').textContent = dict.pwdLabelReg;
+        regPwd.placeholder = dict.pwdPlaceholderReg;
+        document.querySelector('#registerView .input-box:nth-child(5) label').textContent = dict.confirmPwdLabel;
+        regPwd2.placeholder = dict.confirmPwdPlaceholder;
+        backLoginLink.textContent = dict.backLogin;
+        registerBtn.textContent = dict.registerBtn;
+
+        forgotTitle.textContent      = dict.forgotTitle;
+        forgotEmailLabel.textContent = dict.forgotEmailLabel;
+        forgotEmail.placeholder      = dict.forgotEmailPlaceholder;
+        forgotContactLbl.textContent = dict.forgotContactLabel;
+        forgotContact.placeholder    = dict.forgotContactPlaceholder;
+        forgotReasonLbl.textContent  = dict.forgotReasonLabel;
+        forgotReason.placeholder     = dict.forgotReasonPlaceholder;
+        forgotSubmitBtn.textContent  = dict.forgotSubmit;
+        forgotCancelBtn.textContent  = dict.forgotCancel;
+
+        refreshBgCategoryLabels();
+    }
+
+    function showLoginView() {
+        titleEl.textContent = i18n[currentLang].loginTitle;
+        loginView.style.display = '';
+        registerView.style.display = 'none';
+        tipEl.classList.remove('show');
+        clearRegisterForm();
+        loginEmail.focus();
+    }
+
+    function showRegisterView() {
+        titleEl.textContent = i18n[currentLang].registerTitle;
+        loginView.style.display = 'none';
+        registerView.style.display = '';
+        tipEl.classList.remove('show');
+        regEmail.focus();
+    }
+
+    toRegisterBtn.addEventListener('click', showRegisterView);
+    backLoginLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        showLoginView();
+    });
+
+    /* ========================================================
+     *  六、邮箱失焦检测
+     * ======================================================== */
+    loginEmail.addEventListener('blur', function () {
+        var email = this.value.trim();
+        if (email && !isValidEmail(email)) showTip('tipEmailFormat', false);
+    });
+    regEmail.addEventListener('blur', function () {
+        var email = this.value.trim();
+        if (email && !isValidEmail(email)) showTip('tipEmailFormat', false);
+    });
+
+    /* ========================================================
+     *  七、登录逻辑
+     * ======================================================== */
+    function doLogin() {
+        var email = loginEmail.value.trim();
+        var pwd   = loginPwd.value;
+
+        if (!isValidEmail(email)) {
+            showTip('tipEmailFormat', false); loginEmail.focus(); return;
+        }
+        if (!pwd) {
+            showTipMsg('请输入密码', false); loginPwd.focus(); return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = '登录中...';
+
+        var currentUser = null;
+
+        supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: pwd
+        }).then(function (res) {
+            if (res.error) {
+                var errMsg = (res.error.message || '').toLowerCase();
+
+                /* ⭐ 如果是账号被封禁 */
+                if (errMsg.indexOf('banned') !== -1) {
+                    showBanModal(email);
+                    var be = new Error('__BANNED__');
+                    be.__isBanned = true;
+                    throw be;
+                }
+
+                /* 普通错误 */
+                var e = new Error(res.error.message);
+                e.__translated = false;
+                throw e;
+            }
+
+            currentUser = res.data.user;
+
+            return supabaseClient
+                .from('profiles')
+                .select('is_blocked, banned_until')
+                .eq('id', currentUser.id)
+                .maybeSingle();
+        }).then(function (profileRes) {
+            if (profileRes.error) {
+                console.warn('查询拉黑状态失败：', profileRes.error.message);
+            }
+
+            /* ⭐ 二次检查 profiles 表的封禁状态 */
+            if (profileRes.data && profileRes.data.is_blocked === true) {
+                showBanModal(email, profileRes.data.banned_until);
+                return supabaseClient.auth.signOut().then(function () {
+                    var be = new Error('__BANNED__');
+                    be.__isBanned = true;
+                    throw be;
+                });
+            }
+
+            loginBtn.disabled = false;
+            loginBtn.textContent = i18n[currentLang].loginBtn;
+            showTip('tipLoginSuccess', true);
+            console.log('[登录成功]', currentUser);
+            clearRegisterForm();
+
+            var role = currentUser.app_metadata && currentUser.app_metadata.role;
+
+            setTimeout(function () {
+                if (role === 'admin') {
+                    location.href = 'admin-dashboard.html';
+                } else {
+                    location.href = 'user-dashboard.html';
+                }
+            }, 800);
+        }).catch(function (err) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = i18n[currentLang].loginBtn;
+
+            /* 封禁弹窗已经显示，不显示普通错误 */
+            if (err && err.__isBanned) return;
+
+            var raw = (err && err.message) ? err.message : String(err);
+            var msg = (err && err.__translated) ? raw : translateAuthError(raw);
+            showTipMsg('登录失败：' + msg, false);
+        });
+    }
+    loginBtn.addEventListener('click', doLogin);
+    loginEmail.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') loginPwd.focus();
+    });
+    loginPwd.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') doLogin();
+    });
+
+    /* ========================================================
+     *  八、注册逻辑
+     * ======================================================== */
+    function doRegister() {
+        var email = regEmail.value.trim();
+        var name  = regName.value.trim();
+        var phone = regPhone.value.trim();
+        var pwd   = regPwd.value;
+        var pwd2  = regPwd2.value;
+
+        if (!isValidEmail(email)) {
+            showTip('tipEmailFormat', false); regEmail.focus(); return;
+        }
+        if (name.length < 2) {
+            showTip('tipNameLength', false); regName.focus(); return;
+        }
+        if (!PHONE_RE.test(phone)) {
+            showTip('tipPhoneFormat', false); regPhone.focus(); return;
+        }
+        if (!PWD_RE.test(pwd)) {
+            showTip('tipPwdLength', false); regPwd.focus(); return;
+        }
+        if (pwd !== pwd2) {
+            showTip('tipPwdMatch', false); regPwd2.focus(); return;
+        }
+
+        registerBtn.disabled = true;
+        registerBtn.textContent = '注册中...';
+
+        var newUserId = null;
+
+        supabaseClient.auth.signUp({
+            email: email,
+            password: pwd,
+            options: {
+                data: {
+                    full_name: name,
+                    phone: phone
+                }
+            }
+        }).then(function (res) {
+            if (res.error) {
+                var e = new Error(res.error.message);
+                e.__translated = false;
+                throw e;
+            }
+            if (!res.data || !res.data.user) throw new Error('注册失败，请重试');
+            newUserId = res.data.user.id;
+            return res.data.session;
+        }).then(function (session) {
+            return supabaseClient
+                .from('profiles')
+                .insert([{
+                    id: newUserId,
+                    email: email,
+                    full_name: name,
+                    phone: phone
+                }])
+                .then(function (res2) {
+                    return { session: session, profileRes: res2 };
+                });
+        }).then(function (result) {
+            registerBtn.disabled = false;
+            registerBtn.textContent = i18n[currentLang].registerBtn;
+
+            if (result.profileRes && result.profileRes.error) {
+                console.warn('profiles 写入失败：', result.profileRes.error.message);
+            }
+
+            if (result.session) {
+                showTip('tipLoginSuccess', true);
+            } else {
+                showTip('tipRegConfirm', true);
+            }
+
+            loginEmail.value = email;
+            loginPwd.value   = '';
+
+            clearRegisterForm();
+            setTimeout(showLoginView, 1800);
+        }).catch(function (err) {
+            registerBtn.disabled = false;
+            registerBtn.textContent = i18n[currentLang].registerBtn;
+
+            var raw = (err && err.message) ? err.message : String(err);
+            var msg = (err && err.__translated) ? raw : translateAuthError(raw);
+            showTipMsg('注册失败：' + msg, false);
+        });
+    }
+    registerBtn.addEventListener('click', doRegister);
+    regEmail.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') regName.focus();
+    });
+    regName.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') regPhone.focus();
+    });
+    regPhone.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') regPwd.focus();
+    });
+    regPwd.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') regPwd2.focus();
+    });
+    regPwd2.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') doRegister();
+    });
+
+    /* ========================================================
+     *  九、忘记密码弹窗
+     * ======================================================== */
+    function openForgotModal() {
+        forgotModal.style.display = 'flex';
+        forgotEmail.value   = '';
+        forgotContact.value = '';
+        forgotReason.value  = '';
+        forgotTip.classList.remove('show');
+        setTimeout(function () { forgotEmail.focus(); }, 50);
+    }
+    function closeForgotModal() {
+        forgotModal.style.display = 'none';
+    }
+    forgotLink.addEventListener('click', function (e) {
+        e.preventDefault(); openForgotModal();
+    });
+    forgotCancelBtn.addEventListener('click', closeForgotModal);
+    forgotModal.addEventListener('click', function (e) {
+        if (e.target === forgotModal) closeForgotModal();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            if (forgotModal.style.display !== 'none') closeForgotModal();
+            if (banModal.style.display !== 'none') closeBanModal();
+        }
+    });
+
+    function submitForgotForm() {
+        var email   = forgotEmail.value.trim();
+        var contact = forgotContact.value.trim();
+        var reason  = forgotReason.value.trim();
+
+        if (!isValidEmail(email)) {
+            showForgotTip('tipForgotEmail', false); forgotEmail.focus(); return;
+        }
+        if (!contact) {
+            showForgotTip('tipForgotContact', false); forgotContact.focus(); return;
+        }
+
+        forgotSubmitBtn.disabled = true;
+        forgotSubmitBtn.textContent = '提交中...';
+
+        supabaseClient
+            .from('forgot_requests')
+            .insert([{ email: email, contact: contact, reason: reason }])
+            .then(function (res) {
+                forgotSubmitBtn.disabled = false;
+                forgotSubmitBtn.textContent = i18n[currentLang].forgotSubmit;
+
+                if (res.error) {
+                    showForgotTip('提交失败：' + res.error.message, false);
+                    return;
+                }
+                showForgotTip('tipForgotSent', true);
+                setTimeout(closeForgotModal, 1500);
+            }).catch(function (err) {
+                forgotSubmitBtn.disabled = false;
+                forgotSubmitBtn.textContent = i18n[currentLang].forgotSubmit;
+                showForgotTip('提交失败：' + (err && err.message ? err.message : err), false);
+            });
+    }
+    forgotSubmitBtn.addEventListener('click', submitForgotForm);
+    forgotEmail.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') forgotContact.focus();
+    });
+    forgotContact.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') forgotReason.focus();
+    });
+
+    /* ========================================================
+     *  十、语言切换
+     * ======================================================== */
+    langBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var willShow = !langDropdown.classList.contains('show');
+        bgDropdown.classList.remove('show');
+        langDropdown.classList.toggle('show', willShow);
+    });
+    langDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+    document.querySelectorAll('#langDropdown a').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            applyLanguage(this.getAttribute('data-lang'));
+            langDropdown.classList.remove('show');
+        });
+    });
+
+    /* ========================================================
+     *  十一、背景切换
+     * ======================================================== */
+    var BACKGROUND_CONFIG = window.BACKGROUND_CONFIG || {};
+
+    function buildBgMenu() {
+        bgDropdown.innerHTML = '';
+
+        CATEGORY_ORDER.forEach(function (catKey) {
+            var items = BACKGROUND_CONFIG[catKey] || [];
+            if (items.length === 0) return;
+
+            var catEl = document.createElement('div');
+            catEl.className = 'bg-category';
+            catEl.dataset.cat = catKey;
+
+            var titleA = document.createElement('a');
+            titleA.href = '#';
+            titleA.className = 'bg-cat-title';
+            titleA.textContent = (CATEGORY_LABELS_I18N[currentLang] || CATEGORY_LABELS_I18N.zh)[catKey];
+
+            titleA.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var wasActive = catEl.classList.contains('active');
+                bgDropdown.querySelectorAll('.bg-category').forEach(function (el) {
+                    el.classList.remove('active');
+                });
+                if (!wasActive) catEl.classList.add('active');
+            });
+
+            var itemsEl = document.createElement('div');
+            itemsEl.className = 'bg-items';
+
+            items.forEach(function (path) {
+                var itemA = document.createElement('a');
+                itemA.href = '#';
+                itemA.textContent = fileNameFromPath(path);
+
+                itemA.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setBackground(catKey, path);
+                    bgDropdown.classList.remove('show');
+                    bgDropdown.querySelectorAll('.bg-category').forEach(function (el) {
+                        el.classList.remove('active');
+                    });
+                });
+                itemsEl.appendChild(itemA);
+            });
+
+            catEl.appendChild(titleA);
+            catEl.appendChild(itemsEl);
+            bgDropdown.appendChild(catEl);
+        });
+    }
+
+    function refreshBgCategoryLabels() {
+        var labels = CATEGORY_LABELS_I18N[currentLang] || CATEGORY_LABELS_I18N.zh;
+        bgDropdown.querySelectorAll('.bg-category').forEach(function (catEl) {
+            var t = catEl.querySelector('.bg-cat-title');
+            if (t) t.textContent = labels[catEl.dataset.cat];
+        });
+    }
+
+    function setBackground(type, src) {
+        if (type === 'image') {
+            bgImage.style.backgroundImage = 'url("' + src + '")';
+            bgImage.style.opacity = '1';
+            bgVideo.style.opacity = '0';
+            setTimeout(function () {
+                if (bgImage.style.opacity === '1') {
+                    try { bgVideo.pause(); } catch (err) {}
+                }
+            }, 1200);
+        } else {
+            try {
+                bgVideo.src = src;
+                bgVideo.load();
+                bgVideo.play().catch(function () {});
+            } catch (err) { console.warn('视频加载失败：', err); }
+            bgVideo.style.opacity = '1';
+            bgImage.style.opacity = '0';
+        }
+        console.log('[背景] 切换到：', type, '→', src);
+    }
+
+    var defaultBg = (BACKGROUND_CONFIG.image && BACKGROUND_CONFIG.image[0]) || 'image/bg.jpg';
+    bgImage.style.backgroundImage = 'url("' + defaultBg + '")';
+    bgImage.style.opacity = '1';
+
+    bgBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var willShow = !bgDropdown.classList.contains('show');
+        langDropdown.classList.remove('show');
+        if (willShow) {
+            bgDropdown.querySelectorAll('.bg-category').forEach(function (el) {
+                el.classList.remove('active');
+            });
+        }
+        bgDropdown.classList.toggle('show', willShow);
+    });
+    bgDropdown.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+    document.addEventListener('click', function () {
+        langDropdown.classList.remove('show');
+        bgDropdown.classList.remove('show');
+    });
+
+    /* ========================================================
+     *  十二、初始化
+     * ======================================================== */
+    buildBgMenu();
+    applyLanguage('zh');
+    showLoginView();
+
+</script>
+
+<!-- 👇 唯一改动 ②：引入拖拽模块 -->
+<script type="text/javascript" src="other/draggable.js"></script>
+<script type="text/javascript" src="other/protect.js"></script>
+</body>
+</html>
