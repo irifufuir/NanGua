@@ -35,8 +35,8 @@ window.BACKGROUND_CONFIG = {
     /* ============ 图片 ============ */
     image: [
         // 'image/ASD.jpg',
-        'image/bg.jpg',
-        //'image/conan.jpg',
+        'image/宵宫.jpg',
+        'image/女孩.jpg',
         //'image/hutao.jpg',
         //'image/xiaogong.jpg'
     ]

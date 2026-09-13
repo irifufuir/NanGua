@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a1a">
-    <title>管理后台 · Nan Gua</title>
+ <title>齿轮盛宴 · 管理后台</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -18,236 +18,382 @@
         color: rgba(255,255,255,0.9);
         min-height: 100vh;
         min-height: 100dvh;
-        padding: 20px;
+        display: flex;
         -webkit-tap-highlight-color: transparent;
     }
 
-    header {
+    .sidebar {
+        width: 260px;
+        background: rgba(25, 25, 25, 0.95);
+        border-right: 1px solid rgba(255,255,255,0.08);
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        padding: 24px 0;
+        flex-shrink: 0;
+    }
+
+    .user-profile {
+        display: flex;
         align-items: center;
-        flex-wrap: wrap;
+        padding: 0 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        margin-bottom: 15px;
         gap: 12px;
-        margin-bottom: 30px;
-        padding-bottom: 16px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
     }
-    header h1 {
-        font-size: 22px;
-        font-weight: 600;
-        color: rgba(255, 220, 140, 0.95);
-        letter-spacing: 1px;
+    .avatar-wrapper {
+        position: relative;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
     }
-    .user-info {
+    .avatar-wrapper img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 200, 100, 0.6);
+        background: rgba(255, 200, 100, 0.1);
+    }
+    .avatar-edit {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 18px;
+        height: 18px;
+        background: rgba(255, 200, 100, 0.9);
+        color: #1a1a1a;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 14px;
-        font-size: 13px;
+        justify-content: center;
+        font-size: 10px;
+        cursor: pointer;
+        transition: 0.2s;
     }
-    .user-info .email {
-        color: rgba(255,255,255,0.7);
-        max-width: 220px;
+    .avatar-edit:hover { transform: scale(1.1); }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+        gap: 6px;
+    }
+    .user-details .email {
+        font-size: 14px;
+        color: rgba(255,255,255,0.9);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-    .logout-btn {
-        padding: 8px 16px;
-        background: rgba(220, 60, 60, 0.55);
-        border: 1px solid rgba(255, 100, 100, 0.8);
-        color: #fff;
-        border-radius: 8px;
+    .user-bottom-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .user-details .role {
+        font-size: 11px;
+        color: rgba(255, 220, 140, 0.95);
+        background: rgba(255, 200, 100, 0.15);
+        border: 1px solid rgba(255, 200, 100, 0.3);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    .logout-btn-mini {
+        background: rgba(220, 60, 60, 0.4);
+        border: 1px solid rgba(255, 100, 100, 0.6);
+        color: #ffaaaa;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 6px;
         cursor: pointer;
         transition: 0.2s;
-        font-size: 13px;
+        white-space: nowrap;
     }
-    .logout-btn:hover { background: rgba(255, 80, 80, 0.8); }
-
-    main {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        max-width: 1200px;
-        margin: 0 auto;
+    .logout-btn-mini:hover {
+        background: rgba(255, 80, 80, 0.7);
+        color: #fff;
     }
 
-    .stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 16px;
-    }
-    .stat-card {
-        background: rgba(50, 50, 50, 0.35);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 14px;
-        padding: 18px 20px;
+    .nav-menu { flex: 1; overflow-y: auto; }
+    .nav-item {
+        padding: 14px 22px;
+        color: rgba(255,255,255,0.65);
+        cursor: pointer;
+        transition: 0.2s;
+        border-left: 3px solid transparent;
+        font-size: 14px;
         display: flex;
-        flex-direction: column;
-        gap: 6px;
+        align-items: center;
+        gap: 10px;
     }
-    .stat-card .stat-label {
-        font-size: 12px;
-        color: rgba(255,255,255,0.55);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    .stat-card .stat-value {
-        font-size: 28px;
-        font-weight: 600;
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item.active {
+        background: rgba(255, 200, 100, 0.1);
         color: rgba(255, 220, 140, 0.95);
+        border-left-color: rgba(255, 200, 100, 0.85);
     }
+
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .main-content { flex: 1; padding: 28px; overflow-y: auto; }
 
     .card {
-        background: rgba(50, 50, 50, 0.3);
+        background: rgba(45, 45, 45, 0.4);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        display: none;
     }
-    .card h2 {
+    .card.active { display: block; }
+
+    .card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .card-head h2 {
         font-size: 16px;
         font-weight: 500;
-        margin-bottom: 16px;
         color: rgba(255, 220, 140, 0.9);
         letter-spacing: 1px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
+    .card-head .badge {
+        background: rgba(255, 200, 100, 0.15);
+        border: 1px solid rgba(255, 200, 100, 0.35);
+        color: rgba(255, 220, 140, 0.95);
+        font-size: 12px;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
 
-    .table-wrap {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        border-radius: 8px;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-        min-width: 520px;
-    }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
     th, td {
         padding: 12px 10px;
         text-align: left;
         border-bottom: 1px solid rgba(255,255,255,0.06);
-        vertical-align: top;
+        vertical-align: middle;
     }
     th {
-        color: rgba(255,255,255,0.55);
+        color: rgba(255,255,255,0.5);
         font-weight: 500;
         font-size: 12px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         white-space: nowrap;
     }
-    td { color: rgba(255,255,255,0.9); word-break: break-all; }
+    td { color: rgba(255,255,255,0.88); word-break: break-all; }
     tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 200, 100, 0.35);
+        background: rgba(255, 255, 255, 0.05);
+        flex-shrink: 0;
+        object-fit: cover;
+    }
 
     .empty, .loading {
         text-align: center;
         color: rgba(255,255,255,0.4);
-        padding: 30px 0;
+        padding: 40px 0;
         font-size: 14px;
     }
 
-    .del-btn {
-        background: rgba(220, 60, 60, 0.35);
-        border: 1px solid rgba(255, 100, 100, 0.55);
-        color: #ffaaaa;
-        padding: 5px 12px;
+    .action-btn {
+        padding: 5px 10px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 12px;
         transition: 0.2s;
         white-space: nowrap;
+        margin-right: 5px;
+        border: 1px solid transparent;
     }
-    .del-btn:hover {
-        background: rgba(255, 80, 80, 0.65);
-        color: #fff;
+    .action-btn.del {
+        background: rgba(220, 60, 60, 0.35);
+        border-color: rgba(255, 100, 100, 0.55);
+        color: #ffaaaa;
+    }
+    .action-btn.del:hover { background: rgba(255, 80, 80, 0.65); color: #fff; }
+    .action-btn.block {
+        background: rgba(255, 160, 0, 0.2);
+        border-color: rgba(255, 180, 0, 0.5);
+        color: #ffcc66;
+    }
+    .action-btn.block:hover { background: rgba(255, 180, 0, 0.5); color: #fff; }
+    .action-btn.unblock {
+        background: rgba(80, 200, 120, 0.2);
+        border-color: rgba(80, 200, 120, 0.5);
+        color: #80e0a0;
+    }
+    .action-btn.unblock:hover { background: rgba(80, 200, 120, 0.5); color: #fff; }
+
+    .status-tag {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+    }
+    .status-tag.active {
+        background: rgba(80, 200, 120, 0.15);
+        color: #80e0a0;
+        border: 1px solid rgba(80, 200, 120, 0.3);
+    }
+    .status-tag.blocked {
+        background: rgba(220, 60, 60, 0.15);
+        color: #ff9999;
+        border: 1px solid rgba(255, 100, 100, 0.3);
     }
 
-    @media (max-width: 480px) {
-        body { padding: 14px; }
-        header { margin-bottom: 22px; padding-bottom: 14px; }
-        header h1 { font-size: 18px; }
-        .user-info .email { max-width: 130px; font-size: 12px; }
-        .logout-btn { padding: 7px 12px; font-size: 12px; }
+    .remaining-tag {
+        display: inline-block;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background: rgba(255, 60, 60, 0.15);
+        color: #ff6666;
+        border: 1px solid rgba(255, 80, 80, 0.5);
+        white-space: nowrap;
+        margin-left: 4px;
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        body { flex-direction: column; }
+        .sidebar {
+            width: 100%;
+            padding: 15px 0;
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .user-profile {
+            flex-direction: row;
+            padding: 0 15px;
+            border-bottom: none;
+            margin-bottom: 0;
+            gap: 10px;
+            flex: 1;
+        }
+        .avatar-wrapper { width: 40px; height: 40px; }
+        .avatar-edit { width: 16px; height: 16px; font-size: 9px; }
+        .user-details .email { font-size: 12px; }
+        .user-details .role { display: none; }
+        .nav-menu {
+            display: flex;
+            order: 3;
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .nav-item {
+            padding: 10px 15px;
+            white-space: nowrap;
+            border-left: none;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-item.active { border-left: none; border-bottom-color: rgba(255, 200, 100, 0.85); }
+        .main-content { padding: 16px; }
         .card { padding: 16px; border-radius: 12px; }
-        .card h2 { font-size: 15px; }
-        .stat-card { padding: 14px 16px; border-radius: 12px; }
-        .stat-card .stat-value { font-size: 22px; }
-        table { font-size: 13px; min-width: 460px; }
+        .card-head h2 { font-size: 15px; }
+        table { font-size: 13px; min-width: 700px; }
         th, td { padding: 10px 8px; }
+        .user-avatar { width: 30px; height: 30px; }
     }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>🔧 管理后台</h1>
-    <div class="user-info">
-        <span class="email" id="adminEmail">加载中...</span>
-        <button class="logout-btn" id="logoutBtn">退出登录</button>
-    </div>
-</header>
+    <aside class="sidebar">
+        <div class="user-profile">
+            <div class="avatar-wrapper">
+                <img id="avatarImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="头像">
+                <label for="avatarInput" class="avatar-edit" title="更换头像">📷</label>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+            </div>
+            <div class="user-details">
+                <span class="email" id="adminEmail">加载中...</span>
+                <div class="user-bottom-row">
+                    <span class="role">管理员</span>
+                    <button class="logout-btn-mini" id="logoutBtn">退出</button>
+                </div>
+            </div>
+        </div>
 
-<main>
-    <div class="stats">
-        <div class="stat-card">
-            <span class="stat-label">忘记密码申请</span>
-            <span class="stat-value" id="statForgot">—</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-label">注册用户</span>
-            <span class="stat-value" id="statProfiles">—</span>
-        </div>
-    </div>
+        <nav class="nav-menu">
+            <div class="nav-item active" data-tab="forgot" onclick="switchTab('forgot')">📝 忘记密码申请</div>
+            <div class="nav-item" data-tab="users" onclick="switchTab('users')">👥 注册用户列表</div>
+        </nav>
+    </aside>
 
-    <div class="card">
-        <h2>📝 忘记密码申请</h2>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>邮箱</th>
-                        <th>联系方式</th>
-                        <th>问题描述</th>
-                        <th>提交时间</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="forgotBody">
-                    <tr><td colspan="5" class="loading">加载中...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <div class="main-wrapper">
+        <main class="main-content">
 
-    <div class="card">
-        <h2>👥 注册用户</h2>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>邮箱</th>
-                        <th>注册时间</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="profilesBody">
-                    <tr><td colspan="3" class="loading">加载中...</td></tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="card active" id="cardForgot">
+                <div class="card-head">
+                    <h2>📝 忘记密码申请</h2>
+                    <span class="badge" id="badgeForgot">—</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>邮箱</th>
+                                <th>联系方式</th>
+                                <th>问题描述</th>
+                                <th>提交时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="forgotBody">
+                            <tr><td colspan="5" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" id="cardUsers">
+                <div class="card-head">
+                    <h2>👥 注册用户列表</h2>
+                    <span class="badge" id="badgeProfiles">—</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>用户</th>
+                                <th>昵称</th>
+                                <th>手机号</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profilesBody">
+                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
     </div>
-</main>
 
 <script>
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
@@ -256,76 +402,185 @@ var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 var adminEmailEl   = document.getElementById('adminEmail');
 var logoutBtn      = document.getElementById('logoutBtn');
+var avatarInput    = document.getElementById('avatarInput');
+var avatarImg      = document.getElementById('avatarImg');
 var forgotBody     = document.getElementById('forgotBody');
 var profilesBody   = document.getElementById('profilesBody');
-var statForgotEl   = document.getElementById('statForgot');
-var statProfilesEl = document.getElementById('statProfiles');
+var badgeForgotEl  = document.getElementById('badgeForgot');
+var badgeProfilesEl= document.getElementById('badgeProfiles');
 
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 function formatTime(iso) {
     if (!iso) return '—';
     try { return new Date(iso).toLocaleString('zh-CN', { hour12: false }); }
     catch (e) { return iso; }
 }
+function getAvatarUrl(email) {
+    var seed = encodeURIComponent((email || 'user').toLowerCase().trim());
+    return 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + seed;
+}
+function getRemainingTime(bannedUntil) {
+    if (!bannedUntil) return null;
+    var diff = new Date(bannedUntil).getTime() - Date.now();
+    if (diff <= 0) return '即将解封';
 
-/* 权限守卫：refreshSession + 校验 role */
-supabaseClient.auth.getSession().then(function (res) {
-    var session = res.data && res.data.session;
-    if (!session) { location.href = 'admin.html'; return; }
+    var totalMinutes = Math.floor(diff / 60000);
+    var days    = Math.floor(totalMinutes / 1440);
+    var hours   = Math.floor((totalMinutes % 1440) / 60);
+    var minutes = totalMinutes % 60;
 
-    supabaseClient.auth.refreshSession().then(function (rr) {
-        if (rr.error || !rr.data.session) { location.href = 'admin.html'; return; }
+    var parts = [];
+    if (days > 0) parts.push(days + '天');
+    if (hours > 0) parts.push(hours + '小时');
+    if (days === 0 && minutes > 0) parts.push(minutes + '分钟');
 
-        var user = rr.data.session.user;
-        var role = user.app_metadata && user.app_metadata.role;
+    return parts.join(' ') || '不到 1 分钟';
+}
 
-        if (role !== 'admin') {
-            supabaseClient.auth.signOut().then(function () {
-                location.href = 'admin.html';
-            });
+function switchTab(tab) {
+    document.querySelectorAll('.nav-item').forEach(function (el) {
+        el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+    });
+    document.getElementById('cardForgot').classList.toggle('active', tab === 'forgot');
+    document.getElementById('cardUsers').classList.toggle('active', tab === 'users');
+}
+
+/* ============================================================
+ * 头像上传：每小时一次 + Private bucket 用 signed URL + 同步到 profiles
+ * ============================================================ */
+avatarInput.addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    // 每小时限制
+    var lastUpload = localStorage.getItem('last_avatar_upload');
+    if (lastUpload) {
+        var elapsed = Date.now() - parseInt(lastUpload, 10);
+        var oneHour = 60 * 60 * 1000;
+        if (elapsed < oneHour) {
+            var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
+            var msg = remainingMin >= 60
+                ? Math.floor(remainingMin / 60) + ' 小时 ' + (remainingMin % 60) + ' 分钟'
+                : remainingMin + ' 分钟';
+            alert('头像修改过于频繁\n请 ' + msg + ' 后再试');
+            this.value = '';
             return;
         }
+    }
 
-        adminEmailEl.textContent = user.email;
-        loadAll();
+    // 5MB + 类型检查
+    if (file.size > 5 * 1024 * 1024) {
+        alert('头像文件大小不能超过 5 MB！');
+        this.value = '';
+        return;
+    }
+    if (!file.type.startsWith('image/')) {
+        alert('请上传图片文件！');
+        this.value = '';
+        return;
+    }
+
+    supabaseClient.auth.getUser().then(function (userRes) {
+        if (userRes.error || !userRes.data.user) {
+            alert('获取用户信息失败，请重新登录');
+            return;
+        }
+        var user = userRes.data.user;
+        var userId = user.id;
+        var fileExt = file.name.split('.').pop();
+        var filePath = userId + '/' + Date.now() + '.' + fileExt;
+
+        supabaseClient.storage
+            .from('avatars')
+            .upload(filePath, file, { upsert: true })
+            .then(function (uploadRes) {
+                if (uploadRes.error) {
+                    alert('头像上传失败：' + uploadRes.error.message);
+                    return;
+                }
+                // Private bucket 必须用 createSignedUrl
+                return supabaseClient.storage
+                    .from('avatars')
+                    .createSignedUrl(filePath, 60 * 60 * 24 * 365);
+            })
+            .then(function (signRes) {
+                if (!signRes || signRes.error) {
+                    if (signRes) alert('生成头像链接失败：' + signRes.error.message);
+                    return;
+                }
+                var signedUrl = signRes.data.signedUrl;
+
+                // 更新 auth 用户 metadata
+                return supabaseClient.auth.updateUser({
+                    data: { avatar_url: signedUrl }
+                }).then(function (updateRes) {
+                    if (updateRes.error) {
+                        alert('头像保存失败：' + updateRes.error.message);
+                        return;
+                    }
+                    // 同步到 profiles 表（这样管理后台能看到）
+                    return supabaseClient
+                        .from('profiles')
+                        .update({ avatar_url: signedUrl })
+                        .eq('id', userId);
+                }).then(function (profileRes) {
+                    if (profileRes && profileRes.error) {
+                        console.warn('profiles 头像同步失败：', profileRes.error.message);
+                    }
+                    localStorage.setItem('last_avatar_upload', Date.now().toString());
+                    avatarImg.src = signedUrl;
+                    alert('头像更新成功！\n下次修改需等待 1 小时');
+                });
+            });
     });
 });
 
+/* 退出登录 */
 logoutBtn.addEventListener('click', function () {
     supabaseClient.auth.signOut().then(function () {
         location.href = 'admin.html';
     });
 });
 
-function loadAll() {
-    loadForgotRequests();
-    loadProfiles();
-}
+/* 权限守卫 */
+supabaseClient.auth.getSession().then(function (res) {
+    var session = res.data && res.data.session;
+    if (!session) { location.href = 'admin.html'; return; }
+
+    supabaseClient.auth.refreshSession().then(function (rr) {
+        if (rr.error || !rr.data.session) { location.href = 'admin.html'; return; }
+        var user = rr.data.session.user;
+        var role = user.app_metadata && user.app_metadata.role;
+        if (role !== 'admin') {
+            supabaseClient.auth.signOut().then(function () { location.href = 'admin.html'; });
+            return;
+        }
+        adminEmailEl.textContent = user.email;
+        if (user.user_metadata && user.user_metadata.avatar_url) {
+            avatarImg.src = user.user_metadata.avatar_url;
+        }
+        loadAll();
+    });
+});
+
+function loadAll() { loadForgotRequests(); loadProfiles(); }
 
 function loadForgotRequests() {
     forgotBody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
-
-    supabaseClient
-        .from('forgot_requests')
-        .select('*')
+    supabaseClient.from('forgot_requests').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                forgotBody.innerHTML = '<tr><td colspan="5" class="empty">加载失败：' +
-                    escapeHtml(res.error.message) + '</td></tr>';
+                forgotBody.innerHTML = '<tr><td colspan="5" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
                 return;
             }
             var data = res.data || [];
-            statForgotEl.textContent = data.length;
-
+            badgeForgotEl.textContent = data.length + ' 条';
             if (data.length === 0) {
                 forgotBody.innerHTML = '<tr><td colspan="5" class="empty">暂无申请</td></tr>';
                 return;
@@ -337,7 +592,7 @@ function loadForgotRequests() {
                     '<td>' + escapeHtml(item.contact) + '</td>' +
                     '<td>' + escapeHtml(item.reason || '—') + '</td>' +
                     '<td>' + escapeHtml(formatTime(item.created_at)) + '</td>' +
-                    '<td><button class="del-btn" data-id="' + item.id + '" data-table="forgot_requests">删除</button></td>' +
+                    '<td><button class="action-btn del" data-id="' + item.id + '" data-table="forgot_requests">删除</button></td>' +
                     '</tr>';
             });
             forgotBody.innerHTML = html;
@@ -346,57 +601,135 @@ function loadForgotRequests() {
 }
 
 function loadProfiles() {
-    profilesBody.innerHTML = '<tr><td colspan="3" class="loading">加载中...</td></tr>';
-
-    supabaseClient
-        .from('profiles')
-        .select('*')
+    profilesBody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+    supabaseClient.from('profiles').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                profilesBody.innerHTML = '<tr><td colspan="3" class="empty">加载失败：' +
-                    escapeHtml(res.error.message) + '</td></tr>';
+                profilesBody.innerHTML = '<tr><td colspan="6" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
                 return;
             }
             var data = res.data || [];
-            statProfilesEl.textContent = data.length;
-
+            badgeProfilesEl.textContent = data.length + ' 人';
             if (data.length === 0) {
-                profilesBody.innerHTML = '<tr><td colspan="3" class="empty">暂无用户</td></tr>';
+                profilesBody.innerHTML = '<tr><td colspan="6" class="empty">暂无用户</td></tr>';
                 return;
             }
             var html = '';
             data.forEach(function (item) {
+                var isBlocked = item.is_blocked === true;
+
+                // 优先用真实上传的头像，否则用 DiceBear 生成
+                var avatarUrl = item.avatar_url || getAvatarUrl(item.email);
+
+                var statusHtml = isBlocked
+                    ? '<span class="status-tag blocked">已拉黑</span>'
+                    : '<span class="status-tag active">正常</span>';
+
+                var blockBtnHtml = isBlocked
+                    ? '<button class="action-btn unblock" data-id="' + item.id + '">解除拉黑</button>'
+                    : '<button class="action-btn block" data-id="' + item.id + '">拉黑</button>';
+
+                var remainingHtml = '';
+                if (isBlocked) {
+                    var remaining = getRemainingTime(item.banned_until);
+                    if (remaining) {
+                        remainingHtml = '<span class="remaining-tag">剩余：' + escapeHtml(remaining) + '</span>';
+                    }
+                }
+
                 html += '<tr>' +
-                    '<td>' + escapeHtml(item.email) + '</td>' +
+                    '<td>' +
+                        '<div class="user-cell">' +
+                            '<img class="user-avatar" src="' + escapeHtml(avatarUrl) + '" alt="" onerror="this.src=\'' + getAvatarUrl(item.email) + '\'">' +
+                            '<span>' + escapeHtml(item.email) + '</span>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td>' + escapeHtml(item.full_name || '—') + '</td>' +
+                    '<td>' + escapeHtml(item.phone || '—') + '</td>' +
+                    '<td>' + statusHtml + '</td>' +
                     '<td>' + escapeHtml(formatTime(item.created_at)) + '</td>' +
-                    '<td><button class="del-btn" data-id="' + item.id + '" data-table="profiles">删除</button></td>' +
+                    '<td>' +
+                        '<button class="action-btn del" data-id="' + item.id + '" data-table="profiles">删除</button>' +
+                        blockBtnHtml +
+                        remainingHtml +
+                    '</td>' +
                     '</tr>';
             });
             profilesBody.innerHTML = html;
-            bindDelete();
+            bindProfileActions();
         });
 }
 
 function bindDelete() {
-    document.querySelectorAll('.del-btn').forEach(function (btn) {
+    document.querySelectorAll('.action-btn.del[data-table="forgot_requests"]').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            var id    = this.getAttribute('data-id');
-            var table = this.getAttribute('data-table');
+            var id = this.getAttribute('data-id');
             if (!confirm('确定要删除这条记录吗？')) return;
-
-            supabaseClient
-                .from(table)
-                .delete()
-                .eq('id', id)
+            supabaseClient.from('forgot_requests').delete().eq('id', id).select()
                 .then(function (res) {
-                    if (res.error) {
-                        alert('删除失败：' + res.error.message);
-                    } else {
-                        if (table === 'forgot_requests') loadForgotRequests();
-                        else                              loadProfiles();
-                    }
+                    if (res.error) { alert('删除失败：' + res.error.message); return; }
+                    if (!res.data || res.data.length === 0) { alert('删除失败：没有权限删除该记录'); return; }
+                    loadForgotRequests();
                 });
+        });
+    });
+}
+
+function callEdgeFunction(action, userId, banDuration) {
+    return supabaseClient.functions.invoke('dynamic-handler', {
+        body: { action: action, userId: userId, banDuration: banDuration }
+    });
+}
+
+function bindProfileActions() {
+    document.querySelectorAll('.action-btn.del[data-table="profiles"]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = this.getAttribute('data-id');
+            if (!confirm('⚠️ 确定要彻底删除该用户吗？\n\n• 会同时删除登录账号和资料\n• 此操作不可恢复！')) return;
+
+            callEdgeFunction('delete', id)
+                .then(function (res) {
+                    if (res.error) { alert('删除失败：' + res.error.message); return; }
+                    if (res.data && res.data.error) { alert('删除失败：' + res.data.error); return; }
+                    alert('用户已彻底删除');
+                    loadProfiles();
+                })
+                .catch(function (err) { alert('删除失败：' + (err.message || err)); });
+        });
+    });
+
+    document.querySelectorAll('.action-btn.block').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = this.getAttribute('data-id');
+            var input = prompt('请输入封禁时长（小时）：\n\n• 24 = 1 天\n• 168 = 7 天\n• 720 = 30 天\n• 876000 = 永久\n\n直接点确定使用默认值（永久）', '876000');
+            if (input === null) return;
+            var hours = input.trim() === '' ? '876000' : input.trim();
+
+            callEdgeFunction('ban', id, hours)
+                .then(function (res) {
+                    if (res.error) { alert('拉黑失败：' + res.error.message); return; }
+                    if (res.data && res.data.error) { alert('拉黑失败：' + res.data.error); return; }
+                    alert('已拉黑用户（' + hours + ' 小时）');
+                    loadProfiles();
+                })
+                .catch(function (err) { alert('拉黑失败：' + (err.message || err)); });
+        });
+    });
+
+    document.querySelectorAll('.action-btn.unblock').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = this.getAttribute('data-id');
+            if (!confirm('确定要解除拉黑吗？')) return;
+
+            callEdgeFunction('unban', id)
+                .then(function (res) {
+                    if (res.error) { alert('操作失败：' + res.error.message); return; }
+                    if (res.data && res.data.error) { alert('操作失败：' + res.data.error); return; }
+                    alert('已解除拉黑');
+                    loadProfiles();
+                })
+                .catch(function (err) { alert('操作失败：' + (err.message || err)); });
         });
     });
 }

@@ -5,21 +5,22 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a1a">
-    <title>Man Gua Login</title>
-    <link rel="stylesheet" href="style.css">
+<title>齿轮盛宴</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+<link rel="stylesheet" href="style.css">
 
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 多语言字典 -->
+    <script src="other/i18n.js"></script>
 </head>
 <body>
 
-    <!-- 背景层 -->
     <div class="bg-container">
         <div class="bg-image" id="bgImage"></div>
         <video class="bg-video" id="bgVideo" autoplay muted loop playsinline></video>
     </div>
 
-    <!-- 右上角控制 -->
     <div class="top-right-controls">
         <div class="lang-switcher">
             <button class="lang-btn" id="langBtn">🌐 简体中文</button>
@@ -38,23 +39,17 @@
         </div>
     </div>
 
-    <!-- 主盒子 -->
     <div class="box">
         <h2 id="title">Nan Gua</h2>
 
-        <!-- 登录视图 -->
         <div id="loginView" class="view">
             <div class="input-box">
                 <label>邮箱</label>
                 <input type="email" id="loginEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
             </div>
             <div class="input-box">
-                <label>验证码</label>
-                <div class="code-box">
-                    <input type="text" id="loginCode" maxlength="6" placeholder="6位验证码"
-                           inputmode="numeric" autocomplete="one-time-code"/>
-                    <button type="button" id="loginSendBtn" class="code-btn">获取验证码</button>
-                </div>
+                <label>密码</label>
+                <input type="password" id="loginPwd" placeholder="请输入密码" autocomplete="current-password"/>
             </div>
             <div class="btn-box">
                 <a href="#" id="forgotLink">忘记密码?</a>
@@ -65,23 +60,22 @@
             </div>
         </div>
 
-        <!-- 注册视图 -->
         <div id="registerView" class="view" style="display:none;">
             <div class="input-box">
                 <label>邮箱</label>
                 <input type="email" id="regEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
             </div>
             <div class="input-box">
-                <label>验证码</label>
-                <div class="code-box">
-                    <input type="text" id="regCode" maxlength="6" placeholder="6位验证码......"
-                           inputmode="numeric" autocomplete="one-time-code"/>
-                    <button type="button" id="regSendBtn" class="code-btn">获取验证码</button>
-                </div>
+                <label>昵称</label>
+                <input type="text" id="regName" placeholder="请输入您的昵称" autocomplete="nickname"/>
+            </div>
+            <div class="input-box">
+                <label>手机号</label>
+                <input type="tel" id="regPhone" placeholder="请输入手机号" autocomplete="tel"/>
             </div>
             <div class="input-box">
                 <label>设置密码</label>
-                <input type="password" id="regPwd" placeholder="至少 6 位" autocomplete="new-password"/>
+                <input type="password" id="regPwd" placeholder="至少 8 位，含大小写字母和数字" autocomplete="new-password"/>
             </div>
             <div class="input-box">
                 <label>确认密码</label>
@@ -98,29 +92,22 @@
         <p class="tip" id="tip"></p>
     </div>
 
-    <!-- 忘记密码弹窗 -->
     <div class="modal-mask" id="forgotModal" style="display:none;">
         <div class="modal-box">
             <h3 id="forgotTitle">找回密码</h3>
-
             <div class="input-box">
                 <label id="forgotEmailLabel">注册邮箱</label>
-                <input type="email" id="forgotEmail"
-                       placeholder="请输入注册时使用的邮箱" autocomplete="off"/>
+                <input type="email" id="forgotEmail" placeholder="请输入注册时使用的邮箱" autocomplete="off"/>
             </div>
             <div class="input-box">
                 <label id="forgotContactLabel">联系方式</label>
-                <input type="text" id="forgotContact"
-                       placeholder="手机号 / 其他邮箱（便于管理员联系您）" autocomplete="off"/>
+                <input type="text" id="forgotContact" placeholder="手机号 / 其他邮箱（便于管理员联系您）" autocomplete="off"/>
             </div>
             <div class="input-box">
                 <label id="forgotReasonLabel">问题描述</label>
-                <textarea id="forgotReason" rows="3"
-                          placeholder="简单描述您的情况（例如：忘记密码，账号是 xxx）"></textarea>
+                <textarea id="forgotReason" rows="3" placeholder="简单描述您的情况（例如：忘记密码，账号是 xxx）"></textarea>
             </div>
-
             <p class="tip" id="forgotTip"></p>
-
             <div class="btn-box">
                 <div>
                     <button type="button" id="forgotSubmitBtn">提交申请</button>
@@ -130,14 +117,8 @@
         </div>
     </div>
 
-<!-- ============================================================
-     背景资源清单
-     ============================================================ -->
 <script type="text/javascript" src="other/backgrounds.js"></script>
 
-<!-- ============================================================
-     主逻辑脚本
-     ============================================================ -->
 <script type="text/javascript">
 
     /* ========================================================
@@ -148,7 +129,7 @@
     var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     /* ========================================================
-     *  一、背景分类的多语言标题
+     *  一、背景分类多语言标题
      * ======================================================== */
     var CATEGORY_LABELS_I18N = {
         zh: { video: '📹 视频', image: '🖼️ 图片' },
@@ -180,15 +161,14 @@
     var tipEl          = document.getElementById('tip');
 
     var loginEmail     = document.getElementById('loginEmail');
-    var loginCode      = document.getElementById('loginCode');
-    var loginSendBtn   = document.getElementById('loginSendBtn');
+    var loginPwd       = document.getElementById('loginPwd');
     var loginBtn       = document.getElementById('loginBtn');
     var toRegisterBtn  = document.getElementById('toRegisterBtn');
     var forgotLink     = document.getElementById('forgotLink');
 
     var regEmail       = document.getElementById('regEmail');
-    var regCode        = document.getElementById('regCode');
-    var regSendBtn     = document.getElementById('regSendBtn');
+    var regName        = document.getElementById('regName');
+    var regPhone       = document.getElementById('regPhone');
     var regPwd         = document.getElementById('regPwd');
     var regPwd2        = document.getElementById('regPwd2');
     var registerBtn    = document.getElementById('registerBtn');
@@ -209,181 +189,20 @@
     /* ========================================================
      *  三、多语言字典
      * ======================================================== */
-    var i18n = {
-        zh: {
-            loginTitle: 'Nan Gua', registerTitle: 'Yu Mi Li',
-            emailLabel: '邮箱', emailPlaceholder: '请输入邮箱地址......',
-            codeLabel: '验证码', codePlaceholder: '6位验证码',
-            sendCodeBtn: '获取验证码', resend: 's 后重发',
-            forgotPwd: '忘记密码?', loginBtn: '登录', registerBtn: '注册',
-            backLogin: '已有账号？返回登录',
-            pwdLabel: '设置密码', pwdPlaceholder: '至少 6 位',
-            confirmPwdLabel: '确认密码', confirmPwdPlaceholder: '再次输入密码',
-            tipEmailFormat: '请输入正确的邮箱地址（支持 @163.com、@qq.com 等常见后缀）',
-            tipCodeFormat: '请输入 6 位数字验证码',
-            tipPwdLength: '密码长度至少 6 位',
-            tipPwdMatch: '两次输入的密码不一致',
-            tipSent: '验证码已发送，请查收邮件',
-            tipLoginSuccess: '登录成功，欢迎回来！',
-            tipRegSuccess: '注册成功，请登录',
-            langBtn: '简体中文',
-            forgotTitle: '找回密码',
-            forgotEmailLabel: '注册邮箱',
-            forgotEmailPlaceholder: '请输入注册时使用的邮箱',
-            forgotContactLabel: '联系方式',
-            forgotContactPlaceholder: '手机号 / 其他邮箱（便于管理员联系您）',
-            forgotReasonLabel: '问题描述',
-            forgotReasonPlaceholder: '简单描述您的情况（例如：忘记密码，账号是 xxx）',
-            forgotSubmit: '提交申请', forgotCancel: '取消',
-            tipForgotEmail: '请填写注册邮箱',
-            tipForgotContact: '请填写联系方式，便于管理员联系您',
-            tipForgotSent: '申请已提交，管理员核实后会尽快处理'
-        },
-        en: {
-            loginTitle: 'Man Gua', registerTitle: 'Yu Mi Li',
-            emailLabel: 'Email', emailPlaceholder: 'Enter email address...',
-            codeLabel: 'Code', codePlaceholder: '6-digit code',
-            sendCodeBtn: 'Get Code', resend: 's left',
-            forgotPwd: 'Forgot password?', loginBtn: 'Login', registerBtn: 'Register',
-            backLogin: 'Already have an account? Back to Login',
-            pwdLabel: 'Set Password', pwdPlaceholder: 'At least 6 chars',
-            confirmPwdLabel: 'Confirm Password', confirmPwdPlaceholder: 'Re-enter password',
-            tipEmailFormat: 'Please enter a valid email',
-            tipCodeFormat: 'Please enter 6-digit code',
-            tipPwdLength: 'Password must be at least 6 characters',
-            tipPwdMatch: 'Passwords do not match',
-            tipSent: 'Code sent, please check your email',
-            tipLoginSuccess: 'Login successful, welcome back!',
-            tipRegSuccess: 'Registration successful, please login',
-            langBtn: 'English',
-            forgotTitle: 'Reset Password',
-            forgotEmailLabel: 'Registered Email',
-            forgotEmailPlaceholder: 'Enter your registered email',
-            forgotContactLabel: 'Contact',
-            forgotContactPlaceholder: 'Phone / other email',
-            forgotReasonLabel: 'Description',
-            forgotReasonPlaceholder: 'Briefly describe your situation',
-            forgotSubmit: 'Submit', forgotCancel: 'Cancel',
-            tipForgotEmail: 'Please enter your registered email',
-            tipForgotContact: 'Please provide contact info',
-            tipForgotSent: 'Submitted. Admin will process soon'
-        },
-        ja: {
-            loginTitle: 'Man Gua', registerTitle: 'Yu Mi Li',
-            emailLabel: 'メールアドレス', emailPlaceholder: 'メールアドレスを入力...',
-            codeLabel: '認証コード', codePlaceholder: '6桁のコード',
-            sendCodeBtn: 'コードを取得', resend: '秒後に再送',
-            forgotPwd: 'パスワードをお忘れですか？', loginBtn: 'ログイン', registerBtn: '登録',
-            backLogin: 'アカウントをお持ちですか？ログイン',
-            pwdLabel: 'パスワード設定', pwdPlaceholder: '6文字以上',
-            confirmPwdLabel: 'パスワード確認', confirmPwdPlaceholder: 'パスワードを再入力',
-            tipEmailFormat: '正しいメールアドレスを入力してください',
-            tipCodeFormat: '6桁の数字コードを入力してください',
-            tipPwdLength: 'パスワードは6文字以上必要です',
-            tipPwdMatch: 'パスワードが一致しません',
-            tipSent: 'コードを送信しました',
-            tipLoginSuccess: 'ログイン成功！',
-            tipRegSuccess: '登録成功、ログインしてください',
-            langBtn: '日本語',
-            forgotTitle: 'パスワード再設定',
-            forgotEmailLabel: '登録メール', forgotEmailPlaceholder: '登録したメールを入力',
-            forgotContactLabel: '連絡先', forgotContactPlaceholder: '電話番号 / 他のメール',
-            forgotReasonLabel: '状況説明', forgotReasonPlaceholder: '簡単に状況を説明してください',
-            forgotSubmit: '送信', forgotCancel: 'キャンセル',
-            tipForgotEmail: '登録メールを入力してください',
-            tipForgotContact: '連絡先を入力してください',
-            tipForgotSent: '送信しました'
-        },
-        ko: {
-            loginTitle: 'Man Gua', registerTitle: 'Yu Mi Li',
-            emailLabel: '이메일', emailPlaceholder: '이메일 주소 입력...',
-            codeLabel: '인증 코드', codePlaceholder: '6자리 코드',
-            sendCodeBtn: '코드 받기', resend: '초 후 재전송',
-            forgotPwd: '비밀번호를 잊으셨나요?', loginBtn: '로그인', registerBtn: '회원가입',
-            backLogin: '이미 계정이 있으신가요? 로그인',
-            pwdLabel: '비밀번호 설정', pwdPlaceholder: '6자 이상',
-            confirmPwdLabel: '비밀번호 확인', confirmPwdPlaceholder: '비밀번호 재입력',
-            tipEmailFormat: '올바른 이메일을 입력하세요',
-            tipCodeFormat: '6자리 숫자 코드를 입력하세요',
-            tipPwdLength: '비밀번호는 6자 이상이어야 합니다',
-            tipPwdMatch: '비밀번호가 일치하지 않습니다',
-            tipSent: '코드가 전송되었습니다',
-            tipLoginSuccess: '로그인 성공!',
-            tipRegSuccess: '가입 성공, 로그인하세요',
-            langBtn: '한국어',
-            forgotTitle: '비밀번호 재설정',
-            forgotEmailLabel: '등록 이메일', forgotEmailPlaceholder: '등록한 이메일 입력',
-            forgotContactLabel: '연락처', forgotContactPlaceholder: '전화번호 / 기타 이메일',
-            forgotReasonLabel: '상황 설명', forgotReasonPlaceholder: '상황을 간단히 설명해주세요',
-            forgotSubmit: '제출', forgotCancel: '취소',
-            tipForgotEmail: '등록 이메일을 입력하세요',
-            tipForgotContact: '연락처를 입력하세요',
-            tipForgotSent: '제출되었습니다'
-        },
-        fr: {
-            loginTitle: 'Man Gua', registerTitle: 'Yu Mi Li',
-            emailLabel: 'E-mail', emailPlaceholder: 'Entrez votre e-mail...',
-            codeLabel: 'Code', codePlaceholder: 'Code à 6 chiffres',
-            sendCodeBtn: 'Obtenir le code', resend: 's avant renvoi',
-            forgotPwd: 'Mot de passe oublié ?', loginBtn: 'Connexion', registerBtn: 'S\'inscrire',
-            backLogin: 'Déjà un compte ? Se connecter',
-            pwdLabel: 'Définir le mot de passe', pwdPlaceholder: 'Au moins 6 caractères',
-            confirmPwdLabel: 'Confirmer le mot de passe', confirmPwdPlaceholder: 'Ressaisir le mot de passe',
-            tipEmailFormat: 'Veuillez entrer un e-mail valide',
-            tipCodeFormat: 'Veuillez entrer un code à 6 chiffres',
-            tipPwdLength: 'Le mot de passe doit contenir au moins 6 caractères',
-            tipPwdMatch: 'Les mots de passe ne correspondent pas',
-            tipSent: 'Code envoyé',
-            tipLoginSuccess: 'Connexion réussie !',
-            tipRegSuccess: 'Inscription réussie, connectez-vous',
-            langBtn: 'Français',
-            forgotTitle: 'Réinitialiser le mot de passe',
-            forgotEmailLabel: 'E-mail enregistré', forgotEmailPlaceholder: 'Entrez votre e-mail enregistré',
-            forgotContactLabel: 'Contact', forgotContactPlaceholder: 'Téléphone / autre e-mail',
-            forgotReasonLabel: 'Description', forgotReasonPlaceholder: 'Décrivez brièvement votre situation',
-            forgotSubmit: 'Envoyer', forgotCancel: 'Annuler',
-            tipForgotEmail: 'Veuillez entrer votre e-mail enregistré',
-            tipForgotContact: 'Veuillez fournir vos coordonnées',
-            tipForgotSent: 'Envoyé'
-        },
-        es: {
-            loginTitle: 'Man Gua', registerTitle: 'Yu Mi Li',
-            emailLabel: 'Correo electrónico', emailPlaceholder: 'Ingrese su correo electrónico...',
-            codeLabel: 'Código', codePlaceholder: 'Código de 6 dígitos',
-            sendCodeBtn: 'Obtener código', resend: 's para reenviar',
-            forgotPwd: '¿Olvidó su contraseña?', loginBtn: 'Iniciar sesión', registerBtn: 'Registrarse',
-            backLogin: '¿Ya tiene una cuenta? Iniciar sesión',
-            pwdLabel: 'Establecer contraseña', pwdPlaceholder: 'Al menos 6 caracteres',
-            confirmPwdLabel: 'Confirmar contraseña', confirmPwdPlaceholder: 'Vuelva a ingresar la contraseña',
-            tipEmailFormat: 'Por favor ingrese un correo electrónico válido',
-            tipCodeFormat: 'Por favor ingrese un código de 6 dígitos',
-            tipPwdLength: 'La contraseña debe tener al menos 6 caracteres',
-            tipPwdMatch: 'Las contraseñas no coinciden',
-            tipSent: 'Código enviado',
-            tipLoginSuccess: '¡Inicio de sesión exitoso!',
-            tipRegSuccess: 'Registro exitoso, por favor inicie sesión',
-            langBtn: 'Español',
-            forgotTitle: 'Restablecer contraseña',
-            forgotEmailLabel: 'Correo registrado', forgotEmailPlaceholder: 'Ingrese su correo registrado',
-            forgotContactLabel: 'Contacto', forgotContactPlaceholder: 'Teléfono / otro correo',
-            forgotReasonLabel: 'Descripción', forgotReasonPlaceholder: 'Describa brevemente su situación',
-            forgotSubmit: 'Enviar', forgotCancel: 'Cancelar',
-            tipForgotEmail: 'Ingrese su correo registrado',
-            tipForgotContact: 'Proporcione su información de contacto',
-            tipForgotSent: 'Enviado'
-        }
-    };
-
+    var i18n = window.I18N;
     var currentLang = 'zh';
 
     /* ========================================================
      *  四、工具函数
      * ======================================================== */
     var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
+    var PHONE_RE = /^[\d\s\-+()]{6,20}$/;
     var ALLOWED_DOMAINS = [
         '@163.com', '@qq.com', '@sina.com', '@hotmail.com',
         '@sina.cn', '@live.cn', '@gmail.com', '@sohu.com'
     ];
+    /* 密码规则：至少 8 位，必须包含小写、大写字母和数字 */
+    var PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
     function isValidEmail(email) {
         if (!EMAIL_RE.test(email)) return false;
@@ -407,7 +226,15 @@
         tipEl.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
         tipEl.classList.add('show');
         clearTimeout(tipTimer);
-        tipTimer = setTimeout(function () { tipEl.classList.remove('show'); }, 2500);
+        tipTimer = setTimeout(function () { tipEl.classList.remove('show'); }, 3000);
+    }
+
+    function showTipMsg(msg, ok) {
+        tipEl.textContent = msg;
+        tipEl.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
+        tipEl.classList.add('show');
+        clearTimeout(tipTimer);
+        tipTimer = setTimeout(function () { tipEl.classList.remove('show'); }, 3000);
     }
 
     var forgotTipTimer = null;
@@ -421,39 +248,13 @@
         forgotTipTimer = setTimeout(function () { forgotTip.classList.remove('show'); }, 2500);
     }
 
-    function onlySixDigits(inputEl) {
-        inputEl.addEventListener('input', function () {
-            inputEl.value = inputEl.value.replace(/\D/g, '').slice(0, 6);
-        });
+    function clearRegisterForm() {
+        regEmail.value  = '';
+        regName.value   = '';
+        regPhone.value  = '';
+        regPwd.value    = '';
+        regPwd2.value   = '';
     }
-
-    function createCountdown(btn) {
-        var timer = null;
-        var countdown = 0;
-        return function start() {
-            if (timer) return;
-            countdown = 60;
-            btn.disabled = true;
-            btn.textContent = countdown + i18n[currentLang].resend;
-            timer = setInterval(function () {
-                countdown--;
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    timer = null;
-                    btn.disabled = false;
-                    btn.textContent = i18n[currentLang].sendCodeBtn;
-                } else {
-                    btn.textContent = countdown + i18n[currentLang].resend;
-                }
-            }, 1000);
-        };
-    }
-
-    var startLoginCountdown = createCountdown(loginSendBtn);
-    var startRegCountdown   = createCountdown(regSendBtn);
-
-    onlySixDigits(loginCode);
-    onlySixDigits(regCode);
 
     /* ========================================================
      *  五、视图切换 & 语言应用
@@ -474,21 +275,21 @@
 
         document.querySelector('#loginView .input-box:nth-child(1) label').textContent = dict.emailLabel;
         loginEmail.placeholder = dict.emailPlaceholder;
-        document.querySelector('#loginView .input-box:nth-child(2) label').textContent = dict.codeLabel;
-        loginCode.placeholder = dict.codePlaceholder;
-        if (!loginSendBtn.disabled) loginSendBtn.textContent = dict.sendCodeBtn;
+        document.querySelector('#loginView .input-box:nth-child(2) label').textContent = dict.pwdLabel;
+        loginPwd.placeholder = dict.pwdPlaceholder;
         forgotLink.textContent = dict.forgotPwd;
         loginBtn.textContent = dict.loginBtn;
         toRegisterBtn.textContent = dict.registerBtn;
 
         document.querySelector('#registerView .input-box:nth-child(1) label').textContent = dict.emailLabel;
         regEmail.placeholder = dict.emailPlaceholder;
-        document.querySelector('#registerView .input-box:nth-child(2) label').textContent = dict.codeLabel;
-        regCode.placeholder = dict.codePlaceholder;
-        if (!regSendBtn.disabled) regSendBtn.textContent = dict.sendCodeBtn;
-        document.querySelector('#registerView .input-box:nth-child(3) label').textContent = dict.pwdLabel;
-        regPwd.placeholder = dict.pwdPlaceholder;
-        document.querySelector('#registerView .input-box:nth-child(4) label').textContent = dict.confirmPwdLabel;
+        document.querySelector('#registerView .input-box:nth-child(2) label').textContent = dict.nameLabel;
+        regName.placeholder = dict.namePlaceholder;
+        document.querySelector('#registerView .input-box:nth-child(3) label').textContent = dict.phoneLabel;
+        regPhone.placeholder = dict.phonePlaceholder;
+        document.querySelector('#registerView .input-box:nth-child(4) label').textContent = dict.pwdLabelReg;
+        regPwd.placeholder = dict.pwdPlaceholderReg;
+        document.querySelector('#registerView .input-box:nth-child(5) label').textContent = dict.confirmPwdLabel;
         regPwd2.placeholder = dict.confirmPwdPlaceholder;
         backLoginLink.textContent = dict.backLogin;
         registerBtn.textContent = dict.registerBtn;
@@ -511,6 +312,7 @@
         loginView.style.display = '';
         registerView.style.display = 'none';
         tipEl.classList.remove('show');
+        clearRegisterForm();
         loginEmail.focus();
     }
 
@@ -541,129 +343,93 @@
     });
 
     /* ========================================================
-     *  七、发送验证码
-     * ======================================================== */
-    loginSendBtn.addEventListener('click', function () {
-        var email = loginEmail.value.trim();
-        if (!isValidEmail(email)) {
-            showTip('tipEmailFormat', false);
-            loginEmail.focus();
-            return;
-        }
-        loginSendBtn.disabled = true;
-        loginSendBtn.textContent = '发送中...';
-
-        supabaseClient.auth.signInWithOtp({
-            email: email,
-            options: { shouldCreateUser: false }
-        }).then(function (res) {
-            if (res.error) {
-                showTip('发送失败：' + res.error.message, false);
-                loginSendBtn.disabled = false;
-                loginSendBtn.textContent = i18n[currentLang].sendCodeBtn;
-                return;
-            }
-            showTip('tipSent', true);
-            startLoginCountdown();
-            loginCode.focus();
-        }).catch(function (err) {
-            showTip('发送失败：' + (err && err.message ? err.message : err), false);
-            loginSendBtn.disabled = false;
-            loginSendBtn.textContent = i18n[currentLang].sendCodeBtn;
-        });
-    });
-
-    regSendBtn.addEventListener('click', function () {
-        var email = regEmail.value.trim();
-        if (!isValidEmail(email)) {
-            showTip('tipEmailFormat', false);
-            regEmail.focus();
-            return;
-        }
-        regSendBtn.disabled = true;
-        regSendBtn.textContent = '发送中...';
-
-        supabaseClient.auth.signInWithOtp({
-            email: email,
-            options: { shouldCreateUser: true }
-        }).then(function (res) {
-            if (res.error) {
-                showTip('发送失败：' + res.error.message, false);
-                regSendBtn.disabled = false;
-                regSendBtn.textContent = i18n[currentLang].sendCodeBtn;
-                return;
-            }
-            showTip('tipSent', true);
-            startRegCountdown();
-            regCode.focus();
-        }).catch(function (err) {
-            showTip('发送失败：' + (err && err.message ? err.message : err), false);
-            regSendBtn.disabled = false;
-            regSendBtn.textContent = i18n[currentLang].sendCodeBtn;
-        });
-    });
-
-    /* ========================================================
-     *  八、登录逻辑
+     *  七、登录逻辑（signInWithPassword + 拉黑拦截） ⭐ 已修改
      * ======================================================== */
     function doLogin() {
         var email = loginEmail.value.trim();
-        var code  = loginCode.value.trim();
+        var pwd   = loginPwd.value;
 
         if (!isValidEmail(email)) {
             showTip('tipEmailFormat', false); loginEmail.focus(); return;
         }
-        if (!/^\d{6}$/.test(code)) {
-            showTip('tipCodeFormat', false); loginCode.focus(); return;
+        if (!pwd) {
+            showTipMsg('请输入密码', false); loginPwd.focus(); return;
         }
 
         loginBtn.disabled = true;
         loginBtn.textContent = '登录中...';
 
-        supabaseClient.auth.verifyOtp({
+        var currentUser = null;
+
+        // 第一步：密码登录
+        supabaseClient.auth.signInWithPassword({
             email: email,
-            token: code,
-            type: 'email'
+            password: pwd
         }).then(function (res) {
+            if (res.error) throw res.error;
+            currentUser = res.data.user;
+
+            // 第二步：查询 profiles 表，看该用户是否被拉黑
+            return supabaseClient
+                .from('profiles')
+                .select('is_blocked')
+                .eq('id', currentUser.id)
+                .maybeSingle();
+        }).then(function (profileRes) {
+            // 如果查询出错（比如用户不在 profiles 表里），不阻断登录，只打印警告
+            if (profileRes.error) {
+                console.warn('查询拉黑状态失败：', profileRes.error.message);
+            }
+
+            // 如果查到了记录，并且 is_blocked === true → 强制登出
+            if (profileRes.data && profileRes.data.is_blocked === true) {
+                return supabaseClient.auth.signOut().then(function () {
+                    throw new Error('该账号已被管理员拉黑，请联系客服');
+                });
+            }
+
+            // 正常登录
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
-
-            if (res.error) {
-                showTip('登录失败：' + res.error.message, false);
-                return;
-            }
             showTip('tipLoginSuccess', true);
-            console.log('[登录成功]', res.data);
+            console.log('[登录成功]', currentUser);
+            clearRegisterForm();
+
+            // TODO: 跳转到首页 location.href = 'home.html';
         }).catch(function (err) {
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
-            showTip('登录失败：' + (err && err.message ? err.message : err), false);
+            showTipMsg('登录失败：' + (err && err.message ? err.message : err), false);
         });
     }
     loginBtn.addEventListener('click', doLogin);
     loginEmail.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') loginCode.focus();
+        if (e.key === 'Enter') loginPwd.focus();
     });
-    loginCode.addEventListener('keydown', function (e) {
+    loginPwd.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') doLogin();
     });
 
     /* ========================================================
-     *  九、注册逻辑
+     *  八、注册逻辑（signUp + 写入 profiles）
      * ======================================================== */
     function doRegister() {
         var email = regEmail.value.trim();
-        var code  = regCode.value.trim();
+        var name  = regName.value.trim();
+        var phone = regPhone.value.trim();
         var pwd   = regPwd.value;
         var pwd2  = regPwd2.value;
 
         if (!isValidEmail(email)) {
             showTip('tipEmailFormat', false); regEmail.focus(); return;
         }
-        if (!/^\d{6}$/.test(code)) {
-            showTip('tipCodeFormat', false); regCode.focus(); return;
+        if (name.length < 2) {
+            showTip('tipNameLength', false); regName.focus(); return;
         }
-        if (pwd.length < 6) {
+        if (!PHONE_RE.test(phone)) {
+            showTip('tipPhoneFormat', false); regPhone.focus(); return;
+        }
+        if (!PWD_RE.test(pwd)) {
             showTip('tipPwdLength', false); regPwd.focus(); return;
         }
         if (pwd !== pwd2) {
@@ -673,35 +439,67 @@
         registerBtn.disabled = true;
         registerBtn.textContent = '注册中...';
 
-        supabaseClient.auth.verifyOtp({
+        var newUserId = null;
+
+        supabaseClient.auth.signUp({
             email: email,
-            token: code,
-            type: 'email'
+            password: pwd,
+            options: {
+                data: {
+                    full_name: name,
+                    phone: phone
+                }
+            }
         }).then(function (res) {
             if (res.error) throw res.error;
-            return supabaseClient.auth.updateUser({ password: pwd });
-        }).then(function (res2) {
+            if (!res.data || !res.data.user) throw new Error('注册失败，请重试');
+            newUserId = res.data.user.id;
+            return res.data.session;
+        }).then(function (session) {
+            return supabaseClient
+                .from('profiles')
+                .insert([{
+                    id: newUserId,
+                    email: email,
+                    full_name: name,
+                    phone: phone
+                }])
+                .then(function (res2) {
+                    return { session: session, profileRes: res2 };
+                });
+        }).then(function (result) {
             registerBtn.disabled = false;
             registerBtn.textContent = i18n[currentLang].registerBtn;
 
-            if (res2 && res2.error) {
-                showTip('注册失败：' + res2.error.message, false);
-                return;
+            if (result.profileRes && result.profileRes.error) {
+                console.warn('profiles 写入失败：', result.profileRes.error.message);
             }
-            showTip('tipRegSuccess', true);
-            console.log('[注册成功]');
-            setTimeout(showLoginView, 1500);
+
+            if (result.session) {
+                showTip('tipLoginSuccess', true);
+            } else {
+                showTip('tipRegConfirm', true);
+            }
+
+            loginEmail.value = email;
+            loginPwd.value   = '';
+
+            clearRegisterForm();
+            setTimeout(showLoginView, 1800);
         }).catch(function (err) {
             registerBtn.disabled = false;
             registerBtn.textContent = i18n[currentLang].registerBtn;
-            showTip('注册失败：' + (err && err.message ? err.message : err), false);
+            showTipMsg('注册失败：' + (err && err.message ? err.message : err), false);
         });
     }
     registerBtn.addEventListener('click', doRegister);
     regEmail.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') regCode.focus();
+        if (e.key === 'Enter') regName.focus();
     });
-    regCode.addEventListener('keydown', function (e) {
+    regName.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') regPhone.focus();
+    });
+    regPhone.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') regPwd.focus();
     });
     regPwd.addEventListener('keydown', function (e) {
@@ -712,7 +510,7 @@
     });
 
     /* ========================================================
-     *  十、忘记密码弹窗（写入 Supabase）
+     *  九、忘记密码弹窗
      * ======================================================== */
     function openForgotModal() {
         forgotModal.style.display = 'flex';
@@ -781,7 +579,7 @@
     });
 
     /* ========================================================
-     *  十一、语言切换
+     *  十、语言切换
      * ======================================================== */
     langBtn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -801,7 +599,7 @@
     });
 
     /* ========================================================
-     *  十二、背景切换
+     *  十一、背景切换
      * ======================================================== */
     var BACKGROUND_CONFIG = window.BACKGROUND_CONFIG || {};
 
@@ -911,7 +709,7 @@
     });
 
     /* ========================================================
-     *  十三、初始化
+     *  十二、初始化
      * ======================================================== */
     buildBgMenu();
     applyLanguage('zh');
