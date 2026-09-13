@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a1a">
-<title>齿轮盛宴</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
-<link rel="stylesheet" href="style.css">
+    <title>齿轮盛宴</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <link rel="stylesheet" href="style.css">
 
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -201,7 +201,6 @@
         '@163.com', '@qq.com', '@sina.com', '@hotmail.com',
         '@sina.cn', '@live.cn', '@gmail.com', '@sohu.com'
     ];
-    /* 密码规则：至少 8 位，必须包含小写、大写字母和数字 */
     var PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
     function isValidEmail(email) {
@@ -343,7 +342,7 @@
     });
 
     /* ========================================================
-     *  七、登录逻辑（signInWithPassword + 拉黑拦截） ⭐ 已修改
+     *  七、登录逻辑（signInWithPassword + 拉黑拦截 + 角色跳转）
      * ======================================================== */
     function doLogin() {
         var email = loginEmail.value.trim();
@@ -395,7 +394,16 @@
             console.log('[登录成功]', currentUser);
             clearRegisterForm();
 
-            // TODO: 跳转到首页 location.href = 'home.html';
+            /* ⭐ 判断角色，跳转到对应的仪表盘 */
+            var role = currentUser.app_metadata && currentUser.app_metadata.role;
+
+            setTimeout(function () {
+                if (role === 'admin') {
+                    location.href = 'admin-dashboard.html';   // 管理员 → 管理后台
+                } else {
+                    location.href = 'user-dashboard.html';    // 普通用户 → 用户中心
+                }
+            }, 800);
         }).catch(function (err) {
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;

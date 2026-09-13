@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a1a">
- <title>齿轮盛宴 · 管理后台</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+    <title>齿轮盛宴 · 管理后台</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -22,6 +23,9 @@
         -webkit-tap-highlight-color: transparent;
     }
 
+    /* ============================================================
+       侧边栏
+       ============================================================ */
     .sidebar {
         width: 260px;
         background: rgba(25, 25, 25, 0.95);
@@ -56,10 +60,8 @@
     }
     .avatar-edit {
         position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 18px;
-        height: 18px;
+        bottom: 0; right: 0;
+        width: 18px; height: 18px;
         background: rgba(255, 200, 100, 0.9);
         color: #1a1a1a;
         border-radius: 50%;
@@ -134,6 +136,9 @@
         border-left-color: rgba(255, 200, 100, 0.85);
     }
 
+    /* ============================================================
+       主区域
+       ============================================================ */
     .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
     .main-content { flex: 1; padding: 28px; overflow-y: auto; }
 
@@ -175,6 +180,9 @@
         border-radius: 20px;
     }
 
+    /* ============================================================
+       表格
+       ============================================================ */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 760px; }
     th, td {
@@ -196,8 +204,7 @@
 
     .user-cell { display: flex; align-items: center; gap: 10px; }
     .user-avatar {
-        width: 36px;
-        height: 36px;
+        width: 36px; height: 36px;
         border-radius: 50%;
         border: 1px solid rgba(255, 200, 100, 0.35);
         background: rgba(255, 255, 255, 0.05);
@@ -271,6 +278,360 @@
         font-weight: 500;
     }
 
+    /* ============================================================
+       用户管理（两栏布局）
+       ============================================================ */
+    .manage-layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+    .manage-preview {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        position: sticky;
+        top: 0;
+    }
+    .preview-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 200, 100, 0.55);
+        background: rgba(255, 255, 255, 0.05);
+        object-fit: cover;
+        box-shadow: 0 4px 20px rgba(255, 200, 100, 0.15);
+    }
+    .preview-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: rgba(255, 220, 140, 0.95);
+        text-align: center;
+        word-break: break-all;
+    }
+    .preview-email {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        text-align: center;
+        word-break: break-all;
+        line-height: 1.5;
+    }
+    .preview-status {
+        font-size: 11px;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+    .preview-status.active {
+        background: rgba(80, 200, 120, 0.15);
+        color: #80e0a0;
+        border: 1px solid rgba(80, 200, 120, 0.35);
+    }
+    .preview-status.blocked {
+        background: rgba(220, 60, 60, 0.15);
+        color: #ff9999;
+        border: 1px solid rgba(255, 100, 100, 0.35);
+    }
+    .preview-divider {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin: 4px 0;
+    }
+    .preview-hint {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.35);
+        text-align: center;
+        line-height: 1.6;
+    }
+
+    .manage-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 600px;
+    }
+    .form-section-title {
+        font-size: 12px;
+        color: rgba(255, 220, 140, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 200, 100, 0.15);
+        margin-bottom: 4px;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-group label {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .form-group label .hint {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.35);
+        font-weight: 400;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        height: 42px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 0 14px;
+        font-size: 14px;
+        color: #fff;
+        outline: none;
+        transition: 0.2s;
+        font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: rgba(255, 200, 100, 0.55);
+        background: rgba(255, 200, 100, 0.04);
+        box-shadow: 0 0 0 3px rgba(255, 200, 100, 0.08);
+    }
+    .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.28);
+    }
+    .form-group select option {
+        background: #2a2a2a;
+        color: #fff;
+    }
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .btn-save {
+        flex: 1;
+        height: 44px;
+        background: rgba(255, 200, 100, 0.18);
+        border: 1px solid rgba(255, 200, 100, 0.5);
+        color: rgba(255, 220, 140, 0.95);
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 1px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-save:hover:not(:disabled) {
+        background: rgba(255, 200, 100, 0.3);
+        border-color: rgba(255, 200, 100, 0.75);
+        color: #fff;
+        box-shadow: 0 0 20px rgba(255, 200, 100, 0.15);
+    }
+    .btn-save:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .btn-reset {
+        width: 100px;
+        height: 44px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .btn-reset:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+    }
+
+    /* ============================================================
+       📊 服务端信息
+       ============================================================ */
+    .info-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .info-toolbar .last-update {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.45);
+    }
+    .refresh-btn {
+        padding: 8px 18px;
+        background: rgba(255, 200, 100, 0.15);
+        border: 1px solid rgba(255, 200, 100, 0.45);
+        color: rgba(255, 220, 140, 0.95);
+        font-size: 13px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .refresh-btn:hover:not(:disabled) {
+        background: rgba(255, 200, 100, 0.28);
+        border-color: rgba(255, 200, 100, 0.7);
+        color: #fff;
+    }
+    .refresh-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* 健康状态卡片组 */
+    .health-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    .health-card {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 16px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: 0.2s;
+    }
+    .health-card:hover {
+        border-color: rgba(255, 200, 100, 0.25);
+    }
+    .health-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        box-shadow: 0 0 10px currentColor;
+    }
+    .health-dot.ok { background: #4ade80; color: #4ade80; }
+    .health-dot.warn { background: #fbbf24; color: #fbbf24; }
+    .health-dot.error { background: #ef4444; color: #ef4444; }
+    .health-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .health-info .name {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+    .health-info .status {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.45);
+    }
+
+    /* 数据统计 */
+    .stat-section-title {
+        font-size: 13px;
+        color: rgba(255, 220, 140, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 200, 100, 0.15);
+    }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    .stat-box {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        transition: 0.2s;
+    }
+    .stat-box:hover {
+        border-color: rgba(255, 200, 100, 0.25);
+        transform: translateY(-2px);
+    }
+    .stat-box .label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        letter-spacing: 0.5px;
+    }
+    .stat-box .value {
+        font-size: 26px;
+        font-weight: 600;
+        color: rgba(255, 220, 140, 0.95);
+        line-height: 1.2;
+    }
+    .stat-box .unit {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: 400;
+        margin-left: 4px;
+    }
+
+    /* 项目信息 */
+    .project-info {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .key {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.5);
+        flex-shrink: 0;
+    }
+    .info-row .val {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.9);
+        font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+        word-break: break-all;
+        text-align: right;
+    }
+
+    /* ============================================================
+       响应式
+       ============================================================ */
+    @media (max-width: 900px) {
+        .manage-layout { grid-template-columns: 1fr; }
+        .manage-preview {
+            position: static;
+            flex-direction: row;
+            text-align: left;
+            align-items: center;
+        }
+        .preview-avatar { width: 64px; height: 64px; border-width: 2px; }
+        .preview-divider { display: none; }
+        .preview-hint { display: none; }
+    }
+
     @media (max-width: 768px) {
         body { flex-direction: column; }
         .sidebar {
@@ -315,6 +676,11 @@
         table { font-size: 13px; min-width: 700px; }
         th, td { padding: 10px 8px; }
         .user-avatar { width: 30px; height: 30px; }
+        .form-actions { flex-direction: column; }
+        .btn-reset { width: 100%; }
+        .manage-preview { flex-direction: column; text-align: center; }
+        .stat-grid, .health-grid { grid-template-columns: 1fr 1fr; }
+        .stat-box .value { font-size: 22px; }
     }
     </style>
 </head>
@@ -323,7 +689,7 @@
     <aside class="sidebar">
         <div class="user-profile">
             <div class="avatar-wrapper">
-                <img id="avatarImg" src="https://api.dicebear.com/7.x/avataaars/svg?seed=admin" alt="头像">
+                <img id="avatarImg" src="image/default-avatar.png" alt="头像">
                 <label for="avatarInput" class="avatar-edit" title="更换头像">📷</label>
                 <input type="file" id="avatarInput" accept="image/*" style="display:none;">
             </div>
@@ -339,12 +705,15 @@
         <nav class="nav-menu">
             <div class="nav-item active" data-tab="forgot" onclick="switchTab('forgot')">📝 忘记密码申请</div>
             <div class="nav-item" data-tab="users" onclick="switchTab('users')">👥 注册用户列表</div>
+            <div class="nav-item" data-tab="manage" onclick="switchTab('manage')">⚙️ 用户管理</div>
+            <div class="nav-item" data-tab="server" onclick="switchTab('server')">📊 服务端信息</div>
         </nav>
     </aside>
 
     <div class="main-wrapper">
         <main class="main-content">
 
+            <!-- 忘记密码申请 -->
             <div class="card active" id="cardForgot">
                 <div class="card-head">
                     <h2>📝 忘记密码申请</h2>
@@ -368,6 +737,7 @@
                 </div>
             </div>
 
+            <!-- 注册用户列表 -->
             <div class="card" id="cardUsers">
                 <div class="card-head">
                     <h2>👥 注册用户列表</h2>
@@ -392,6 +762,148 @@
                 </div>
             </div>
 
+            <!-- 用户管理 -->
+            <div class="card" id="cardManage">
+                <div class="card-head">
+                    <h2>⚙️ 用户管理</h2>
+                    <span class="badge">修改实时同步 Supabase</span>
+                </div>
+
+                <div class="manage-layout">
+                    <div class="manage-preview">
+                        <img id="previewAvatar" class="preview-avatar"
+                             src="image/default-avatar.png" alt="头像">
+                        <div class="preview-name" id="previewName">未选择用户</div>
+                        <div class="preview-email" id="previewEmail">请从右侧下拉框选择</div>
+                        <span class="preview-status" id="previewStatus" style="display:none;">正常</span>
+                        <div class="preview-divider"></div>
+                        <div class="preview-hint">
+                            修改后点击右侧「保存修改」<br>
+                            昵称、手机号、邮箱、密码将实时同步
+                        </div>
+                    </div>
+
+                    <div class="manage-form">
+                        <div class="form-section-title">① 选择目标用户</div>
+                        <div class="form-group">
+                            <label>用户</label>
+                            <select id="manageUserSelect">
+                                <option value="">-- 请选择用户 --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-section-title">② 修改用户资料</div>
+
+                        <div class="form-group">
+                            <label>昵称</label>
+                            <input type="text" id="manageName" placeholder="输入新的昵称"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label>手机号</label>
+                            <input type="tel" id="managePhone" placeholder="输入新的手机号"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label>邮箱 <span class="hint">（会同步修改登录邮箱）</span></label>
+                            <input type="email" id="manageEmail" placeholder="输入新的邮箱"/>
+                        </div>
+
+                        <div class="form-group">
+                            <label>新密码 <span class="hint">留空则不修改</span></label>
+                            <input type="password" id="managePassword" placeholder="至少 6 位"/>
+                        </div>
+
+                        <div class="form-actions">
+                            <button class="btn-save" id="saveManageBtn">💾 保存修改</button>
+                            <button class="btn-reset" id="resetManageBtn">清空</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 服务端信息 -->
+            <div class="card" id="cardServer">
+                <div class="card-head">
+                    <h2>📊 服务端信息</h2>
+                    <span class="badge">实时读取 Supabase</span>
+                </div>
+
+                <div class="info-toolbar">
+                    <span class="last-update" id="lastUpdate">尚未加载</span>
+                    <button class="refresh-btn" id="refreshServerBtn">🔄 刷新</button>
+                </div>
+
+                <!-- 健康状态 -->
+                <div class="stat-section-title">🟢 服务健康状态</div>
+                <div class="health-grid" id="healthGrid">
+                    <div class="health-card">
+                        <div class="health-dot" style="background:#555;"></div>
+                        <div class="health-info">
+                            <span class="name">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据统计 -->
+                <div class="stat-section-title">📈 数据统计</div>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <span class="label">Auth 注册用户</span>
+                        <span class="value" id="statAuthUsers">—</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">profiles 用户资料</span>
+                        <span class="value" id="statProfiles">—</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">忘记密码申请</span>
+                        <span class="value" id="statForgot">—</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">已拉黑用户</span>
+                        <span class="value" id="statBlocked">—</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">头像文件数</span>
+                        <span class="value" id="statAvatars">—</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">头像占用空间</span>
+                        <span class="value" id="statAvatarSize">—<span class="unit">MB</span></span>
+                    </div>
+                </div>
+
+                <!-- 项目信息 -->
+                <div class="stat-section-title">🌐 项目信息</div>
+                <div class="project-info">
+                    <div class="info-row">
+                        <span class="key">项目地址</span>
+                        <span class="val" id="infoUrl">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="key">区域</span>
+                        <span class="val" id="infoRegion">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="key">查询耗时</span>
+                        <span class="val" id="infoQueryTime">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="key">内存占用</span>
+                        <span class="val" id="infoMemory">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="key">Deno 版本</span>
+                        <span class="val" id="infoDeno">—</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="key">服务器时间</span>
+                        <span class="val" id="infoTimestamp">—</span>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -409,6 +921,39 @@ var profilesBody   = document.getElementById('profilesBody');
 var badgeForgotEl  = document.getElementById('badgeForgot');
 var badgeProfilesEl= document.getElementById('badgeProfiles');
 
+var manageUserSelect = document.getElementById('manageUserSelect');
+var manageName       = document.getElementById('manageName');
+var managePhone      = document.getElementById('managePhone');
+var manageEmail      = document.getElementById('manageEmail');
+var managePassword   = document.getElementById('managePassword');
+var saveManageBtn    = document.getElementById('saveManageBtn');
+var resetManageBtn   = document.getElementById('resetManageBtn');
+
+var previewAvatar    = document.getElementById('previewAvatar');
+var previewName      = document.getElementById('previewName');
+var previewEmail     = document.getElementById('previewEmail');
+var previewStatus    = document.getElementById('previewStatus');
+
+/* 服务端信息相关 */
+var lastUpdateEl     = document.getElementById('lastUpdate');
+var refreshServerBtn = document.getElementById('refreshServerBtn');
+var healthGrid       = document.getElementById('healthGrid');
+var statAuthUsers    = document.getElementById('statAuthUsers');
+var statProfiles     = document.getElementById('statProfiles');
+var statForgot       = document.getElementById('statForgot');
+var statBlocked      = document.getElementById('statBlocked');
+var statAvatars      = document.getElementById('statAvatars');
+var statAvatarSize   = document.getElementById('statAvatarSize');
+var infoUrl          = document.getElementById('infoUrl');
+var infoRegion       = document.getElementById('infoRegion');
+var infoQueryTime    = document.getElementById('infoQueryTime');
+var infoMemory       = document.getElementById('infoMemory');
+var infoDeno         = document.getElementById('infoDeno');
+var infoTimestamp    = document.getElementById('infoTimestamp');
+
+var allProfiles = [];
+var DEFAULT_AVATAR = 'image/default-avatar.png';
+
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -420,25 +965,19 @@ function formatTime(iso) {
     try { return new Date(iso).toLocaleString('zh-CN', { hour12: false }); }
     catch (e) { return iso; }
 }
-function getAvatarUrl(email) {
-    var seed = encodeURIComponent((email || 'user').toLowerCase().trim());
-    return 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + seed;
-}
+function getAvatarUrl(email) { return DEFAULT_AVATAR; }
 function getRemainingTime(bannedUntil) {
     if (!bannedUntil) return null;
     var diff = new Date(bannedUntil).getTime() - Date.now();
     if (diff <= 0) return '即将解封';
-
     var totalMinutes = Math.floor(diff / 60000);
     var days    = Math.floor(totalMinutes / 1440);
     var hours   = Math.floor((totalMinutes % 1440) / 60);
     var minutes = totalMinutes % 60;
-
     var parts = [];
     if (days > 0) parts.push(days + '天');
     if (hours > 0) parts.push(hours + '小时');
     if (days === 0 && minutes > 0) parts.push(minutes + '分钟');
-
     return parts.join(' ') || '不到 1 分钟';
 }
 
@@ -448,16 +987,20 @@ function switchTab(tab) {
     });
     document.getElementById('cardForgot').classList.toggle('active', tab === 'forgot');
     document.getElementById('cardUsers').classList.toggle('active', tab === 'users');
+    document.getElementById('cardManage').classList.toggle('active', tab === 'manage');
+    document.getElementById('cardServer').classList.toggle('active', tab === 'server');
+
+    /* 切换到服务端信息时自动加载 */
+    if (tab === 'server') loadServerInfo();
 }
 
 /* ============================================================
- * 头像上传：每小时一次 + Private bucket 用 signed URL + 同步到 profiles
+ * 头像上传
  * ============================================================ */
 avatarInput.addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
 
-    // 每小时限制
     var lastUpload = localStorage.getItem('last_avatar_upload');
     if (lastUpload) {
         var elapsed = Date.now() - parseInt(lastUpload, 10);
@@ -473,7 +1016,6 @@ avatarInput.addEventListener('change', function (e) {
         }
     }
 
-    // 5MB + 类型检查
     if (file.size > 5 * 1024 * 1024) {
         alert('头像文件大小不能超过 5 MB！');
         this.value = '';
@@ -503,7 +1045,6 @@ avatarInput.addEventListener('change', function (e) {
                     alert('头像上传失败：' + uploadRes.error.message);
                     return;
                 }
-                // Private bucket 必须用 createSignedUrl
                 return supabaseClient.storage
                     .from('avatars')
                     .createSignedUrl(filePath, 60 * 60 * 24 * 365);
@@ -515,7 +1056,6 @@ avatarInput.addEventListener('change', function (e) {
                 }
                 var signedUrl = signRes.data.signedUrl;
 
-                // 更新 auth 用户 metadata
                 return supabaseClient.auth.updateUser({
                     data: { avatar_url: signedUrl }
                 }).then(function (updateRes) {
@@ -523,7 +1063,6 @@ avatarInput.addEventListener('change', function (e) {
                         alert('头像保存失败：' + updateRes.error.message);
                         return;
                     }
-                    // 同步到 profiles 表（这样管理后台能看到）
                     return supabaseClient
                         .from('profiles')
                         .update({ avatar_url: signedUrl })
@@ -547,7 +1086,9 @@ logoutBtn.addEventListener('click', function () {
     });
 });
 
-/* 权限守卫 */
+/* ============================================================
+ * 权限守卫
+ * ============================================================ */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
     if (!session) { location.href = 'admin.html'; return; }
@@ -570,6 +1111,9 @@ supabaseClient.auth.getSession().then(function (res) {
 
 function loadAll() { loadForgotRequests(); loadProfiles(); }
 
+/* ============================================================
+ * 忘记密码申请
+ * ============================================================ */
 function loadForgotRequests() {
     forgotBody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
     supabaseClient.from('forgot_requests').select('*')
@@ -600,6 +1144,9 @@ function loadForgotRequests() {
         });
 }
 
+/* ============================================================
+ * 注册用户列表
+ * ============================================================ */
 function loadProfiles() {
     profilesBody.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
     supabaseClient.from('profiles').select('*')
@@ -610,7 +1157,10 @@ function loadProfiles() {
                 return;
             }
             var data = res.data || [];
+            allProfiles = data;
             badgeProfilesEl.textContent = data.length + ' 人';
+            updateManageSelect();
+
             if (data.length === 0) {
                 profilesBody.innerHTML = '<tr><td colspan="6" class="empty">暂无用户</td></tr>';
                 return;
@@ -618,9 +1168,7 @@ function loadProfiles() {
             var html = '';
             data.forEach(function (item) {
                 var isBlocked = item.is_blocked === true;
-
-                // 优先用真实上传的头像，否则用 DiceBear 生成
-                var avatarUrl = item.avatar_url || getAvatarUrl(item.email);
+                var avatarUrl = item.avatar_url || DEFAULT_AVATAR;
 
                 var statusHtml = isBlocked
                     ? '<span class="status-tag blocked">已拉黑</span>'
@@ -641,7 +1189,7 @@ function loadProfiles() {
                 html += '<tr>' +
                     '<td>' +
                         '<div class="user-cell">' +
-                            '<img class="user-avatar" src="' + escapeHtml(avatarUrl) + '" alt="" onerror="this.src=\'' + getAvatarUrl(item.email) + '\'">' +
+                            '<img class="user-avatar" src="' + escapeHtml(avatarUrl) + '" alt="" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
                             '<span>' + escapeHtml(item.email) + '</span>' +
                         '</div>' +
                     '</td>' +
@@ -676,9 +1224,15 @@ function bindDelete() {
     });
 }
 
-function callEdgeFunction(action, userId, banDuration) {
+function callEdgeFunction(action, userId, banDuration, newValue, metadata) {
     return supabaseClient.functions.invoke('dynamic-handler', {
-        body: { action: action, userId: userId, banDuration: banDuration }
+        body: {
+            action: action,
+            userId: userId,
+            banDuration: banDuration,
+            newValue: newValue,
+            metadata: metadata
+        }
     });
 }
 
@@ -733,6 +1287,251 @@ function bindProfileActions() {
         });
     });
 }
+
+/* ============================================================
+ * 用户管理逻辑
+ * ============================================================ */
+function updateManageSelect() {
+    var currentVal = manageUserSelect.value;
+    var html = '<option value="">-- 请选择用户 --</option>';
+    allProfiles.forEach(function (p) {
+        var label = (p.email || '未知邮箱') + ' （' + (p.full_name || '未设置昵称') + '）';
+        html += '<option value="' + p.id + '">' + escapeHtml(label) + '</option>';
+    });
+    manageUserSelect.innerHTML = html;
+    if (currentVal) manageUserSelect.value = currentVal;
+}
+
+manageUserSelect.addEventListener('change', function () {
+    var selectedId = this.value;
+    if (!selectedId) {
+        clearManageForm();
+        updatePreview(null);
+        return;
+    }
+    var user = allProfiles.find(function (p) { return p.id === selectedId; });
+    if (!user) { clearManageForm(); updatePreview(null); return; }
+
+    manageName.value     = user.full_name || '';
+    managePhone.value    = user.phone || '';
+    manageEmail.value    = user.email || '';
+    managePassword.value = '';
+
+    updatePreview(user);
+});
+
+function updatePreview(user) {
+    if (!user) {
+        previewAvatar.src = DEFAULT_AVATAR;
+        previewName.textContent = '未选择用户';
+        previewEmail.textContent = '请从右侧下拉框选择';
+        previewStatus.style.display = 'none';
+        return;
+    }
+
+    var avatarUrl = user.avatar_url || DEFAULT_AVATAR;
+    previewAvatar.src = avatarUrl;
+    previewAvatar.onerror = function () { this.src = DEFAULT_AVATAR; };
+
+    previewName.textContent = user.full_name || '未设置昵称';
+    previewEmail.textContent = user.email || '未知邮箱';
+
+    previewStatus.style.display = 'inline-block';
+    if (user.is_blocked === true) {
+        previewStatus.className = 'preview-status blocked';
+        previewStatus.textContent = '已拉黑';
+    } else {
+        previewStatus.className = 'preview-status active';
+        previewStatus.textContent = '正常';
+    }
+}
+
+function clearManageForm() {
+    manageName.value = '';
+    managePhone.value = '';
+    manageEmail.value = '';
+    managePassword.value = '';
+}
+
+resetManageBtn.addEventListener('click', function () {
+    manageUserSelect.value = '';
+    clearManageForm();
+    updatePreview(null);
+});
+
+saveManageBtn.addEventListener('click', function () {
+    var userId = manageUserSelect.value;
+    if (!userId) { alert('请先选择用户'); return; }
+
+    var user = allProfiles.find(function (p) { return p.id === userId; });
+    if (!user) { alert('找不到该用户信息'); return; }
+
+    var newName  = manageName.value.trim();
+    var newPhone = managePhone.value.trim();
+    var newEmail = manageEmail.value.trim();
+    var newPwd   = managePassword.value;
+
+    var tasks = [];
+    var messages = [];
+
+    var nameChanged  = newName  !== (user.full_name || '');
+    var phoneChanged = newPhone !== (user.phone || '');
+
+    if (nameChanged || phoneChanged) {
+        var metadata = {};
+        if (nameChanged)  metadata.full_name = newName;
+        if (phoneChanged) metadata.phone = newPhone;
+
+        var changedFields = [];
+        if (nameChanged)  changedFields.push('昵称');
+        if (phoneChanged) changedFields.push('手机号');
+
+        tasks.push(
+            callEdgeFunction('update_metadata', userId, null, null, metadata)
+                .then(function (r) {
+                    if (r.error || (r.data && r.data.error)) {
+                        return { ok: false, field: changedFields.join('+'), err: r.error || new Error(r.data.error) };
+                    }
+                    return { ok: true, field: changedFields.join('+') };
+                })
+        );
+        messages.push(changedFields.join('、'));
+    }
+
+    if (newEmail && newEmail !== (user.email || '')) {
+        tasks.push(
+            callEdgeFunction('update_email', userId, null, newEmail)
+                .then(function (r) {
+                    if (r.error || (r.data && r.data.error)) {
+                        return { ok: false, field: '邮箱', err: r.error || new Error(r.data.error) };
+                    }
+                    return { ok: true, field: '邮箱' };
+                })
+        );
+        messages.push('邮箱');
+    }
+
+    if (newPwd) {
+        if (newPwd.length < 6) { alert('密码至少 6 位'); return; }
+        tasks.push(
+            callEdgeFunction('update_password', userId, null, newPwd)
+                .then(function (r) {
+                    if (r.error || (r.data && r.data.error)) {
+                        return { ok: false, field: '密码', err: r.error || new Error(r.data.error) };
+                    }
+                    return { ok: true, field: '密码' };
+                })
+        );
+        messages.push('密码');
+    }
+
+    if (tasks.length === 0) { alert('没有任何修改'); return; }
+
+    saveManageBtn.disabled = true;
+    saveManageBtn.textContent = '保存中...';
+
+    Promise.all(tasks).then(function (results) {
+        saveManageBtn.disabled = false;
+        saveManageBtn.textContent = '💾 保存修改';
+
+        var failures = results.filter(function (r) { return !r.ok; });
+        if (failures.length > 0) {
+            var msgs = failures.map(function (f) {
+                return f.field + '：' + (f.err && f.err.message ? f.err.message : '失败');
+            }).join('\n');
+            alert('部分修改失败：\n\n' + msgs);
+        } else {
+            alert('修改成功：\n\n' + messages.join('、'));
+        }
+        loadProfiles();
+    }).catch(function (err) {
+        saveManageBtn.disabled = false;
+        saveManageBtn.textContent = '💾 保存修改';
+        alert('保存失败：' + (err && err.message ? err.message : err));
+    });
+});
+
+/* ============================================================
+ * 📊 服务端信息
+ * ============================================================ */
+function renderHealthCard(name, ok) {
+    var dotClass = ok ? 'ok' : 'error';
+    var statusText = ok ? '运行正常' : '异常';
+    return '<div class="health-card">' +
+        '<div class="health-dot ' + dotClass + '"></div>' +
+        '<div class="health-info">' +
+            '<span class="name">' + name + '</span>' +
+            '<span class="status">' + statusText + '</span>' +
+        '</div>' +
+    '</div>';
+}
+
+function loadServerInfo() {
+    refreshServerBtn.disabled = true;
+    refreshServerBtn.textContent = '加载中...';
+
+    /* 健康卡片显示加载中 */
+    healthGrid.innerHTML = '<div class="health-card">' +
+        '<div class="health-dot" style="background:#555;"></div>' +
+        '<div class="health-info"><span class="name">加载中...</span></div>' +
+    '</div>';
+
+    supabaseClient.functions.invoke('server-info', {
+        body: {}
+    }).then(function (res) {
+        refreshServerBtn.disabled = false;
+        refreshServerBtn.textContent = '🔄 刷新';
+
+        if (res.error) {
+            alert('加载失败：' + res.error.message);
+            return;
+        }
+        var data = res.data;
+        if (!data || !data.success) {
+            alert('加载失败：' + (data && data.error ? data.error : '未知错误'));
+            return;
+        }
+
+        /* 健康状态 */
+        var health = data.health || {};
+        var healthHtml = '';
+        healthHtml += renderHealthCard('Database',     health.database === true);
+        healthHtml += renderHealthCard('Auth',         health.auth === true);
+        healthHtml += renderHealthCard('Storage',      health.storage === true);
+        healthHtml += renderHealthCard('Edge Functions', health.edgeFunctions === true);
+        healthGrid.innerHTML = healthHtml;
+
+        /* 数据统计 */
+        var stats = data.stats || {};
+        statAuthUsers.textContent = stats.authUsers || 0;
+        statProfiles.textContent  = stats.profiles || 0;
+        statForgot.textContent    = stats.forgotRequests || 0;
+        statBlocked.textContent   = stats.blockedUsers || 0;
+        statAvatars.textContent   = stats.avatars || 0;
+        statAvatarSize.innerHTML  = (stats.avatarSizeMB || 0) + '<span class="unit">MB</span>';
+
+        /* 项目信息 */
+        var proj = data.project || {};
+        infoUrl.textContent       = proj.url || '—';
+        infoRegion.textContent    = proj.region || '—';
+
+        var rt = data.runtime || {};
+        infoQueryTime.textContent = (rt.queryTimeMs || 0) + ' ms';
+        infoMemory.textContent    = (rt.memoryUsageMB || 0) + ' MB';
+        infoDeno.textContent      = rt.denoVersion || '—';
+        infoTimestamp.textContent = data.timestamp ? new Date(data.timestamp).toLocaleString('zh-CN', { hour12: false }) : '—';
+
+        /* 最后更新时间 */
+        lastUpdateEl.textContent = '最后更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
+
+    }).catch(function (err) {
+        refreshServerBtn.disabled = false;
+        refreshServerBtn.textContent = '🔄 刷新';
+        alert('加载失败：' + (err && err.message ? err.message : err));
+    });
+}
+
+refreshServerBtn.addEventListener('click', loadServerInfo);
 </script>
 
 </body>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>齿轮盛宴 · 用户中心</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        color: rgba(255,255,255,0.9);
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ============================================================
+       侧边栏
+       ============================================================ */
+    .sidebar {
+        width: 260px;
+        background: rgba(25, 25, 25, 0.95);
+        border-right: 1px solid rgba(255,255,255,0.08);
+        display: flex;
+        flex-direction: column;
+        padding: 24px 0;
+        flex-shrink: 0;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        padding: 0 20px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        margin-bottom: 15px;
+        gap: 12px;
+    }
+    .avatar-wrapper {
+        position: relative;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+    .avatar-wrapper img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(255, 200, 100, 0.6);
+        background: rgba(255, 200, 100, 0.1);
+    }
+    .avatar-edit {
+        position: absolute;
+        bottom: 0; right: 0;
+        width: 18px; height: 18px;
+        background: rgba(255, 200, 100, 0.9);
+        color: #1a1a1a;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .avatar-edit:hover { transform: scale(1.1); }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+        gap: 6px;
+    }
+    .user-details .email {
+        font-size: 14px;
+        color: rgba(255,255,255,0.9);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-bottom-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .user-details .role {
+        font-size: 11px;
+        color: rgba(140, 200, 255, 0.95);
+        background: rgba(100, 180, 255, 0.15);
+        border: 1px solid rgba(100, 180, 255, 0.3);
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    .logout-btn-mini {
+        background: rgba(220, 60, 60, 0.4);
+        border: 1px solid rgba(255, 100, 100, 0.6);
+        color: #ffaaaa;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+        white-space: nowrap;
+    }
+    .logout-btn-mini:hover {
+        background: rgba(255, 80, 80, 0.7);
+        color: #fff;
+    }
+
+    .nav-menu { flex: 1; overflow-y: auto; }
+    .nav-item {
+        padding: 14px 22px;
+        color: rgba(255,255,255,0.65);
+        cursor: pointer;
+        transition: 0.2s;
+        border-left: 3px solid transparent;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item.active {
+        background: rgba(100, 180, 255, 0.1);
+        color: rgba(140, 200, 255, 0.95);
+        border-left-color: rgba(100, 180, 255, 0.85);
+    }
+
+    /* ============================================================
+       主区域
+       ============================================================ */
+    .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .main-content { flex: 1; padding: 28px; overflow-y: auto; }
+
+    .card {
+        background: rgba(45, 45, 45, 0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        display: none;
+    }
+    .card.active { display: block; }
+
+    .card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .card-head h2 {
+        font-size: 16px;
+        font-weight: 500;
+        color: rgba(140, 200, 255, 0.9);
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .card-head .badge {
+        background: rgba(100, 180, 255, 0.15);
+        border: 1px solid rgba(100, 180, 255, 0.35);
+        color: rgba(140, 200, 255, 0.95);
+        font-size: 12px;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+
+    /* ============================================================
+       欢迎卡片
+       ============================================================ */
+    .welcome-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 60px 30px;
+        gap: 20px;
+    }
+    .welcome-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 3px solid rgba(100, 180, 255, 0.55);
+        background: rgba(255, 255, 255, 0.05);
+        object-fit: cover;
+        box-shadow: 0 4px 30px rgba(100, 180, 255, 0.15);
+    }
+    .welcome-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: rgba(140, 200, 255, 0.95);
+        letter-spacing: 1px;
+    }
+    .welcome-email {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.55);
+        word-break: break-all;
+    }
+    .welcome-hint {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.35);
+        line-height: 1.8;
+        margin-top: 10px;
+        max-width: 420px;
+    }
+
+    /* ============================================================
+       信息卡片
+       ============================================================ */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+        margin-top: 6px;
+    }
+    .info-box {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .info-box .label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        letter-spacing: 0.5px;
+    }
+    .info-box .value {
+        font-size: 16px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+        word-break: break-all;
+    }
+    .info-box .value.empty {
+        color: rgba(255, 255, 255, 0.3);
+        font-style: italic;
+    }
+
+    /* ============================================================
+       响应式
+       ============================================================ */
+    @media (max-width: 768px) {
+        body { flex-direction: column; }
+        .sidebar {
+            width: 100%;
+            padding: 15px 0;
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .user-profile {
+            flex-direction: row;
+            padding: 0 15px;
+            border-bottom: none;
+            margin-bottom: 0;
+            gap: 10px;
+            flex: 1;
+        }
+        .avatar-wrapper { width: 40px; height: 40px; }
+        .avatar-edit { width: 16px; height: 16px; font-size: 9px; }
+        .user-details .email { font-size: 12px; }
+        .user-details .role { display: none; }
+        .nav-menu {
+            display: flex;
+            order: 3;
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .nav-item {
+            padding: 10px 15px;
+            white-space: nowrap;
+            border-left: none;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-item.active { border-left: none; border-bottom-color: rgba(100, 180, 255, 0.85); }
+        .main-content { padding: 16px; }
+        .card { padding: 16px; border-radius: 12px; }
+        .card-head h2 { font-size: 15px; }
+        .welcome-card { padding: 40px 20px; }
+        .welcome-avatar { width: 90px; height: 90px; }
+        .welcome-title { font-size: 18px; }
+    }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="user-profile">
+            <div class="avatar-wrapper">
+                <img id="avatarImg" src="image/default-avatar.png" alt="头像">
+                <label for="avatarInput" class="avatar-edit" title="更换头像">📷</label>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+            </div>
+            <div class="user-details">
+                <span class="email" id="userEmail">加载中...</span>
+                <div class="user-bottom-row">
+                    <span class="role">普通用户</span>
+                    <button class="logout-btn-mini" id="logoutBtn">退出</button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <div class="nav-item active" data-tab="home" onclick="switchTab('home')">🏠 我的主页</div>
+            <div class="nav-item" data-tab="profile" onclick="switchTab('profile')">👤 我的资料</div>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+        <main class="main-content">
+
+            <!-- 我的主页（欢迎） -->
+            <div class="card active" id="cardHome">
+                <div class="welcome-card">
+                    <img id="welcomeAvatar" class="welcome-avatar"
+                         src="image/default-avatar.png" alt="头像">
+                    <div class="welcome-title" id="welcomeTitle">欢迎回来</div>
+                    <div class="welcome-email" id="welcomeEmail">—</div>
+                    <div class="welcome-hint">
+                        这里是你的个人主页<br>
+                        当前登录端并不接入主服务器所以为空
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我的资料 -->
+            <div class="card" id="cardProfile">
+                <div class="card-head">
+                    <h2>👤 我的资料</h2>
+                    <span class="badge">仅自己可见</span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-box">
+                        <span class="label">邮箱</span>
+                        <span class="value" id="infoEmail">—</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="label">昵称</span>
+                        <span class="value" id="infoName">—</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="label">手机号</span>
+                        <span class="value" id="infoPhone">—</span>
+                    </div>
+                    <div class="info-box">
+                        <span class="label">注册时间</span>
+                        <span class="value" id="infoCreated">—</span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+<script>
+var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
+var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+var userEmailEl    = document.getElementById('userEmail');
+var logoutBtn      = document.getElementById('logoutBtn');
+var avatarInput    = document.getElementById('avatarInput');
+var avatarImg      = document.getElementById('avatarImg');
+var welcomeAvatar  = document.getElementById('welcomeAvatar');
+var welcomeTitle   = document.getElementById('welcomeTitle');
+var welcomeEmail   = document.getElementById('welcomeEmail');
+
+var infoEmail      = document.getElementById('infoEmail');
+var infoName       = document.getElementById('infoName');
+var infoPhone      = document.getElementById('infoPhone');
+var infoCreated    = document.getElementById('infoCreated');
+
+var DEFAULT_AVATAR = 'image/default-avatar.png';
+var currentUser = null;
+
+function switchTab(tab) {
+    document.querySelectorAll('.nav-item').forEach(function (el) {
+        el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+    });
+    document.getElementById('cardHome').classList.toggle('active', tab === 'home');
+    document.getElementById('cardProfile').classList.toggle('active', tab === 'profile');
+}
+
+/* ============================================================
+ * 头像上传
+ * ============================================================ */
+avatarInput.addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    var lastUpload = localStorage.getItem('last_avatar_upload');
+    if (lastUpload) {
+        var elapsed = Date.now() - parseInt(lastUpload, 10);
+        var oneHour = 60 * 60 * 1000;
+        if (elapsed < oneHour) {
+            var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
+            var msg = remainingMin >= 60
+                ? Math.floor(remainingMin / 60) + ' 小时 ' + (remainingMin % 60) + ' 分钟'
+                : remainingMin + ' 分钟';
+            alert('头像修改过于频繁\n请 ' + msg + ' 后再试');
+            this.value = '';
+            return;
+        }
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert('头像文件大小不能超过 5 MB！');
+        this.value = '';
+        return;
+    }
+    if (!file.type.startsWith('image/')) {
+        alert('请上传图片文件！');
+        this.value = '';
+        return;
+    }
+
+    supabaseClient.auth.getUser().then(function (userRes) {
+        if (userRes.error || !userRes.data.user) {
+            alert('获取用户信息失败，请重新登录');
+            return;
+        }
+        var user = userRes.data.user;
+        var userId = user.id;
+        var fileExt = file.name.split('.').pop();
+        var filePath = userId + '/' + Date.now() + '.' + fileExt;
+
+        supabaseClient.storage
+            .from('avatars')
+            .upload(filePath, file, { upsert: true })
+            .then(function (uploadRes) {
+                if (uploadRes.error) {
+                    alert('头像上传失败：' + uploadRes.error.message);
+                    return;
+                }
+                return supabaseClient.storage
+                    .from('avatars')
+                    .createSignedUrl(filePath, 60 * 60 * 24 * 365);
+            })
+            .then(function (signRes) {
+                if (!signRes || signRes.error) {
+                    if (signRes) alert('生成头像链接失败：' + signRes.error.message);
+                    return;
+                }
+                var signedUrl = signRes.data.signedUrl;
+
+                return supabaseClient.auth.updateUser({
+                    data: { avatar_url: signedUrl }
+                }).then(function (updateRes) {
+                    if (updateRes.error) {
+                        alert('头像保存失败：' + updateRes.error.message);
+                        return;
+                    }
+                    return supabaseClient
+                        .from('profiles')
+                        .update({ avatar_url: signedUrl })
+                        .eq('id', userId);
+                }).then(function (profileRes) {
+                    if (profileRes && profileRes.error) {
+                        console.warn('profiles 头像同步失败：', profileRes.error.message);
+                    }
+                    localStorage.setItem('last_avatar_upload', Date.now().toString());
+                    avatarImg.src = signedUrl;
+                    welcomeAvatar.src = signedUrl;
+                    alert('头像更新成功！\n下次修改需等待 1 小时');
+                });
+            });
+    });
+});
+
+/* 退出登录 */
+logoutBtn.addEventListener('click', function () {
+    supabaseClient.auth.signOut().then(function () {
+        location.href = 'index.html';
+    });
+});
+
+/* ============================================================
+ * 权限守卫（普通用户 + 管理员都能进，但界面显示普通用户）
+ * ============================================================ */
+supabaseClient.auth.getSession().then(function (res) {
+    var session = res.data && res.data.session;
+    if (!session) { location.href = 'index.html'; return; }
+
+    supabaseClient.auth.refreshSession().then(function (rr) {
+        if (rr.error || !rr.data.session) { location.href = 'index.html'; return; }
+
+        currentUser = rr.data.session.user;
+
+        /* ⭐ 如果当前是管理员，跳回管理后台 */
+        var role = currentUser.app_metadata && currentUser.app_metadata.role;
+        if (role === 'admin') {
+            location.href = 'admin-dashboard.html';
+            return;
+        }
+
+        /* 显示用户信息 */
+        userEmailEl.textContent = currentUser.email || '未知邮箱';
+        welcomeEmail.textContent = currentUser.email || '未知邮箱';
+
+        var avatarUrl = (currentUser.user_metadata && currentUser.user_metadata.avatar_url)
+            ? currentUser.user_metadata.avatar_url
+            : DEFAULT_AVATAR;
+
+        avatarImg.src = avatarUrl;
+        welcomeAvatar.src = avatarUrl;
+
+        /* 加载 profiles 表里的昵称、手机号 */
+        supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .maybeSingle()
+            .then(function (profileRes) {
+                var profile = profileRes.data || {};
+
+                welcomeTitle.textContent = profile.full_name
+                    ? '欢迎回来，' + profile.full_name
+                    : '欢迎回来';
+
+                infoEmail.textContent = currentUser.email || '—';
+                infoName.textContent  = profile.full_name || '未设置';
+                infoPhone.textContent = profile.phone || '未设置';
+                infoCreated.textContent = profile.created_at
+                    ? new Date(profile.created_at).toLocaleString('zh-CN', { hour12: false })
+                    : '—';
+            });
+    });
+});
+</script>
+
+</body>
+</html>
