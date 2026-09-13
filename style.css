@@ -1,8 +1,92 @@
 @charset "utf-8";
 
+/* ============================================================
+   设计令牌 · Design Tokens
+   ============================================================ */
+:root {
+    /* 背景层（低饱和冷色深底） */
+    --bg-base:        #131519;
+    --bg-top:         #15181d;
+    --bg-bottom:      #101216;
+
+    /* 卡片层 */
+    --card-bg:        rgba(24, 27, 32, 0.62);
+    --card-bg-solid:  rgba(26, 29, 34, 0.92);
+    --card-border:    rgba(255, 255, 255, 0.06);
+    --card-border-hi: rgba(255, 255, 255, 0.10);
+
+    /* 输入层 */
+    --input-bg:           rgba(255, 255, 255, 0.035);
+    --input-border:       rgba(255, 255, 255, 0.08);
+    --input-border-hover: rgba(255, 255, 255, 0.14);
+    --input-border-focus: rgba(124, 174, 224, 0.55);
+    --input-focus-glow:   rgba(124, 174, 224, 0.14);
+
+    /* 主色（柔和淡蓝） */
+    --accent:          #7caee0;
+    --accent-hover:    #96bfe9;
+    --accent-soft:     rgba(124, 174, 224, 0.12);
+    --accent-border:   rgba(124, 174, 224, 0.32);
+
+    /* 文字层（中性灰） */
+    --text:            #e9ebef;
+    --text-dim:        #8b9099;
+    --text-faint:      #5c616b;
+    --text-mute:       #43474f;
+
+    /* 危险色 */
+    --danger:          #d68b8b;
+    --danger-soft:     rgba(214, 139, 139, 0.10);
+    --danger-border:   rgba(214, 139, 139, 0.30);
+
+    /* 圆角 */
+    --r-sm:  6px;
+    --r-md:  10px;
+    --r-lg:  18px;
+    --r-xl:  22px;
+    --r-full: 999px;
+
+    /* 多层柔和阴影（越往外越淡） */
+    --shadow-xs:
+        0 1px 2px rgba(0, 0, 0, 0.20);
+    --shadow-sm:
+        0 1px 2px rgba(0, 0, 0, 0.20),
+        0 2px 6px rgba(0, 0, 0, 0.16);
+    --shadow-md:
+        0 1px 2px rgba(0, 0, 0, 0.20),
+        0 4px 12px rgba(0, 0, 0, 0.22),
+        0 12px 32px rgba(0, 0, 0, 0.24);
+    --shadow-lg:
+        0 1px 2px rgba(0, 0, 0, 0.24),
+        0 8px 24px rgba(0, 0, 0, 0.26),
+        0 24px 64px rgba(0, 0, 0, 0.32),
+        0 48px 120px rgba(0, 0, 0, 0.20);
+
+    /* 间距（4px 基准） */
+    --s-1: 4px;
+    --s-2: 8px;
+    --s-3: 12px;
+    --s-4: 16px;
+    --s-5: 20px;
+    --s-6: 24px;
+    --s-7: 32px;
+    --s-8: 40px;
+    --s-9: 56px;
+
+    /* 过渡（缓慢、柔和） */
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-fast: 0.18s;
+    --dur-base: 0.30s;
+    --dur-slow: 0.55s;
+}
+
+/* ============================================================
+   重置
+   ============================================================ */
 * {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 html {
@@ -16,17 +100,25 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
-    background: #1a1a1a;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    background: var(--bg-base);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
                  "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
                  "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     -webkit-tap-highlight-color: transparent;
 }
 
-/* ========================================================
-   背景层：图片 + 视频
-   ======================================================== */
+/* ============================================================
+   背景层（图片 / 视频 + 渐变遮罩）
+   ============================================================ */
 .bg-container {
     position: fixed;
     top: 0;
@@ -35,293 +127,388 @@ body {
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
 }
 
-.bg-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: no-repeat center center;
-    background-size: cover;
-    opacity: 1;
-    transition: opacity 1.2s ease;
-}
-
+.bg-image,
 .bg-video {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+}
+
+.bg-image {
+    background: no-repeat center center;
+    background-size: cover;
+    opacity: 1;
+    transition: opacity 1.2s var(--ease);
+}
+
+.bg-video {
     object-fit: cover;
     opacity: 0;
-    transition: opacity 1.2s ease;
+    transition: opacity 1.2s var(--ease);
     background: #000;
 }
 
-/* ========================================================
-   主盒子（毛玻璃）
-   ======================================================== */
+/* 渐变遮罩：给卡片提供稳定的对比度 */
+.bg-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(120% 80% at 50% 40%,
+            rgba(19, 21, 25, 0.35) 0%,
+            rgba(19, 21, 25, 0.65) 45%,
+            rgba(16, 18, 22, 0.88) 100%),
+        linear-gradient(180deg,
+            rgba(19, 21, 25, 0.20) 0%,
+            rgba(19, 21, 25, 0.50) 60%,
+            rgba(16, 18, 22, 0.80) 100%);
+    pointer-events: none;
+}
+
+/* ============================================================
+   主卡片 · Login Card
+   ============================================================ */
 .box {
-    border-radius: 20px;
+    position: relative;
+    z-index: 10;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 350px;
-    height: auto;
-    min-height: 380px;
-    padding: 30px 0;
-    border-top: 1px solid rgba(255,255,255,0.5);
-    border-left: 1px solid rgba(255,255,255,0.5);
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    border-right: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    background: rgba(50,50,50,0.2);
-    box-sizing: border-box;
+
+    width: 380px;
+    min-height: 400px;
+    padding: var(--s-8) var(--s-8);
+
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--r-lg);
+
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+
+    box-shadow: var(--shadow-lg);
+
+    transition:
+        border-color var(--dur-slow) var(--ease),
+        box-shadow var(--dur-slow) var(--ease);
+}
+
+/* 顶部细高光 —— 极简的“玻璃边缘” */
+.box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.12) 30%,
+        rgba(255, 255, 255, 0.12) 70%,
+        transparent);
+    pointer-events: none;
 }
 
 .box > h2 {
-    color: rgba(255,255,255,0.9);
-    margin-bottom: 20px;
+    color: var(--text);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: var(--s-7);
+    text-align: center;
 }
 
+/* ============================================================
+   输入框 · Input
+   ============================================================ */
 .box .input-box {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: start;
-    margin-bottom: 10px;
+    width: 100%;
+    margin-bottom: var(--s-4);
 }
 
 .box .input-box > label {
-    margin-bottom: 5px;
-    color: rgba(255,255,255,0.9);
-    font-size: 13px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: var(--s-2);
 }
 
 .box .input-box input {
-    box-sizing: border-box;
-    color: #000;
+    width: 100%;
+    height: 44px;
+    padding: 0 var(--s-4);
+
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--r-md);
+
+    color: var(--text);
     font-size: 14px;
-    height: 35px;
-    width: 250px;
-    background: rgba(255,255,255,0.3);
-    border: 1px solid rgba(255,255,255,0.5);
-    border-radius: 5px;
-    transition: 0.2s;
+    font-family: inherit;
+    letter-spacing: 0.01em;
+
     outline: none;
-    padding: 0 10px;
-    letter-spacing: 1px;
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        box-shadow var(--dur-base) var(--ease);
 }
 
 .box .input-box input::placeholder {
-    color: rgba(0,0,0,0.45);
+    color: var(--text-mute);
 }
 
+/* 输入框 hover：细微边框变化 */
+.box .input-box input:hover {
+    border-color: var(--input-border-hover);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* 输入框 focus：柔和淡蓝光圈 */
 .box .input-box input:focus {
-    border: 1px solid rgba(255,255,255,0.8);
+    border-color: var(--input-border-focus);
+    background: rgba(124, 174, 224, 0.04);
+    box-shadow: 0 0 0 4px var(--input-focus-glow);
 }
 
-/* ===== 按钮区 ===== */
+/* ============================================================
+   按钮区 · Button Box
+   ============================================================ */
 .box .btn-box {
-    width: 250px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: stretch;
+    margin-top: var(--s-3);
 }
 
+/* 「忘记密码?」 链接 */
 .box .btn-box > a {
-    font-size: 14px;
+    align-self: flex-end;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-dim);
     text-decoration: none;
-    color: rgba(255,255,255,0.9);
-    transition: 0.2s;
-    width: 250px;
-    text-align: end;
+    transition: color var(--dur-base) var(--ease);
+    margin-bottom: var(--s-5);
 }
 
 .box .btn-box > a:hover {
-    color: rgba(255,255,255,1);
+    color: var(--accent);
 }
 
+/* 按钮容器 */
 .box .btn-box > div {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: start;
-    margin-top: 20px;
-    width: 250px;
-}
-
-.box .btn-box > div > button {
-    width: 120px;
-    height: 35px;
-    border: 1px solid rgba(197, 81, 58,0.8);
-    background: rgba(197, 81, 58,0.5);
-    color: rgba(255,255,255,0.9);
-    border-radius: 5px;
-    transition: 0.2s;
-    cursor: pointer;
-}
-
-.box .btn-box > div > button:nth-of-type(2) {
-    margin-left: 10px;
-}
-
-.box .btn-box > div > button:only-child {
-    width: 250px;
-}
-
-.box .btn-box > div > button:hover {
-    border: 1px solid rgba(248, 108, 76,0.8);
-    background: rgba(248, 108, 76,0.5);
-}
-
-/* ===== 验证码行 ===== */
-.box .input-box .code-box {
-    display: flex;
     align-items: center;
-    width: 250px;
-    gap: 8px;
+    gap: var(--s-3);
+    width: 100%;
 }
 
-.box .input-box .code-box input {
+/* 通用按钮 */
+.box .btn-box > div > button {
     flex: 1;
-    min-width: 0;
-    width: auto;
-    text-align: center;
-    letter-spacing: 4px;
-    padding: 0 4px 0 8px;
-}
+    height: 44px;
+    padding: 0 var(--s-4);
 
-.box .input-box .code-box .code-btn {
-    flex-shrink: 0;
-    box-sizing: border-box;
-    width: 100px;
-    height: 35px;
-    font-size: 13px;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.9);
-    border: 1px solid rgba(255,255,255,0.5);
-    background: rgba(255,255,255,0.3);
-    border-radius: 5px;
-    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;    /* 👈 不换行 */
+
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: 0.2s;
-    white-space: nowrap;
+    outline: none;
+
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease),
+        box-shadow var(--dur-base) var(--ease),
+        transform var(--dur-fast) var(--ease);
 }
 
-.box .input-box .code-box .code-btn:hover:not(:disabled) {
-    border: 1px solid rgba(255,255,255,0.8);
+/* 主按钮 —— 登录（柔和淡蓝） */
+.box .btn-box > div > button:nth-of-type(1) {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
 }
 
-.box .input-box .code-box .code-btn:disabled {
-    opacity: 0.5;
+.box .btn-box > div > button:nth-of-type(1):hover:not(:disabled) {
+    background: rgba(124, 174, 224, 0.18);
+    border-color: rgba(124, 174, 224, 0.55);
+    color: var(--accent-hover);
+    box-shadow: 0 8px 24px rgba(124, 174, 224, 0.12);
+}
+
+/* 次按钮 —— 注册（幽灵） */
+.box .btn-box > div > button:nth-of-type(2) {
+    background: transparent;
+    border-color: var(--input-border);
+    color: var(--text-dim);
+}
+
+.box .btn-box > div > button:nth-of-type(2):hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--input-border-hover);
+    color: var(--text);
+}
+
+/* 单按钮（注册视图） */
+.box .btn-box > div > button:only-child {
+    width: 100%;
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+}
+
+.box .btn-box > div > button:only-child:hover:not(:disabled) {
+    background: rgba(124, 174, 224, 0.18);
+    border-color: rgba(124, 174, 224, 0.55);
+    color: var(--accent-hover);
+    box-shadow: 0 8px 24px rgba(124, 174, 224, 0.12);
+}
+
+.box .btn-box > div > button:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
 }
 
-/* ===== 提示文字 ===== */
+.box .btn-box > div > button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+/* ============================================================
+   提示文字 · Tip
+   ============================================================ */
 .box .tip {
-    width: 250px;
-    min-height: 16px;
-    margin: 2px 0 4px;
+    width: 100%;
+    min-height: 18px;
+    margin-top: var(--s-3);
     font-size: 12px;
-    text-align: left;
+    text-align: center;
+    color: var(--text-dim);
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity var(--dur-base) var(--ease);
 }
 
 .box .tip.show {
     opacity: 1;
 }
 
-/* ========================================================
+/* ============================================================
    右上角控制区（语言 + 背景）
-   ======================================================== */
+   ============================================================ */
 .top-right-controls {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: var(--s-6);
+    right: var(--s-6);
     z-index: 1000;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 10px;
+    gap: var(--s-2);
     font-family: inherit;
 }
 
 .lang-switcher,
-.bg-switcher {
-    position: relative;
-}
-
-.lang-switcher {
-    z-index: 2;
-}
-
-.bg-switcher {
-    z-index: 1;
-}
+.bg-switcher { position: relative; }
+.lang-switcher { z-index: 2; }
+.bg-switcher   { z-index: 1; }
 
 .lang-btn,
 .bg-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: var(--s-2);
+
     width: 130px;
     height: 36px;
     padding: 0;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(50, 50, 50, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+
+    color: var(--text-dim);
+    background: rgba(24, 27, 32, 0.55);
+    border: 1px solid var(--input-border);
+    border-radius: var(--r-md);
+
     outline: none;
     cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: 0.3s;
-    white-space: nowrap;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease),
+        box-shadow var(--dur-base) var(--ease);
 }
 
 .lang-btn:hover,
 .bg-btn:hover {
-    border-color: rgba(255, 255, 255, 0.8);
-    background: rgba(50, 50, 50, 0.4);
+    color: var(--text);
+    border-color: var(--input-border-hover);
+    background: rgba(30, 34, 40, 0.75);
+    box-shadow: var(--shadow-sm);
 }
 
-/* ===== 通用下拉容器 ===== */
+/* ============================================================
+   下拉菜单
+   ============================================================ */
 .lang-dropdown,
 .bg-dropdown {
     position: absolute;
     top: 100%;
     right: 0;
-    margin-top: 8px;
+    margin-top: var(--s-2);
     min-width: 130px;
+
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: rgba(50, 50, 50, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 10px;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+
+    background: rgba(22, 25, 30, 0.92);
+    border: 1px solid var(--card-border-hi);
+    border-radius: var(--r-md);
+
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+
+    box-shadow: var(--shadow-md);
 
     max-height: 0;
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
     pointer-events: none;
+
     transition:
-        max-height 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.45s ease,
-        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        max-height var(--dur-slow) var(--ease),
+        opacity var(--dur-base) var(--ease),
+        transform var(--dur-slow) var(--ease);
 }
 
 .lang-dropdown.show,
@@ -333,42 +520,43 @@ body {
 }
 
 .lang-dropdown a {
-    padding: 10px 15px;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+    padding: var(--s-3) var(--s-4);
+    font-size: 13px;
+    color: var(--text-dim);
     text-decoration: none;
     text-align: left;
-    transition: 0.2s;
     white-space: nowrap;
+    transition:
+        background-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease);
 }
 
 .lang-dropdown a:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
-/* ========================================================
-   背景切换器的分类 & 条目
-   ======================================================== */
-.bg-category {
-    display: flex;
-    flex-direction: column;
-}
+/* ============================================================
+   背景切换器分类
+   ============================================================ */
+.bg-category { display: flex; flex-direction: column; }
 
 .bg-cat-title {
-    padding: 10px 15px;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+    padding: var(--s-3) var(--s-4);
+    font-size: 13px;
+    color: var(--text);
     text-decoration: none;
     text-align: left;
-    transition: 0.2s;
     white-space: nowrap;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--card-border);
+    transition:
+        background-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease);
 }
 
 .bg-cat-title:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
 .bg-items {
@@ -377,12 +565,12 @@ body {
     overflow: hidden;
     max-height: 0;
     opacity: 0;
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     transition:
-        max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.4s ease,
-        transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-    background: rgba(0, 0, 0, 0.12);
+        max-height var(--dur-slow) var(--ease),
+        opacity var(--dur-base) var(--ease),
+        transform var(--dur-slow) var(--ease);
+    background: rgba(0, 0, 0, 0.18);
 }
 
 .bg-category.active .bg-items {
@@ -392,31 +580,42 @@ body {
 }
 
 .bg-items a {
-    padding: 9px 15px 9px 28px;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.85);
+    padding: var(--s-3) var(--s-4) var(--s-3) var(--s-6);
+    font-size: 12.5px;
+    color: var(--text-dim);
     text-decoration: none;
     text-align: left;
-    transition: 0.2s;
     white-space: nowrap;
     position: relative;
+    transition:
+        background-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease);
 }
 
 .bg-items a::before {
-    content: '·';
+    content: '';
     position: absolute;
-    left: 16px;
-    color: rgba(255, 255, 255, 0.5);
+    left: var(--s-4);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-mute);
 }
 
 .bg-items a:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
-/* ========================================================
+.bg-items a:hover::before {
+    background: var(--accent);
+}
+
+/* ============================================================
    忘记密码弹窗
-   ======================================================== */
+   ============================================================ */
 .modal-mask {
     position: fixed;
     top: 0;
@@ -424,17 +623,20 @@ body {
     width: 100vw;
     height: 100vh;
     height: 100dvh;
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+
     display: flex;
     justify-content: center;
     align-items: center;
+
+    background: rgba(10, 11, 14, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
     z-index: 2000;
-    animation: maskIn 0.2s ease;
+    padding: var(--s-5);
     overflow-y: auto;
-    padding: 20px;
-    box-sizing: border-box;
+
+    animation: maskIn var(--dur-base) var(--ease);
 }
 
 @keyframes maskIn {
@@ -443,95 +645,114 @@ body {
 }
 
 .modal-box {
-    width: 350px;
-    padding: 30px 0;
-    border-radius: 20px;
+    width: 380px;
+    max-width: 100%;
+    padding: var(--s-8) var(--s-7);
+
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    border-top: 1px solid rgba(255,255,255,0.5);
-    border-left: 1px solid rgba(255,255,255,0.5);
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    border-right: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    background: rgba(50,50,50,0.4);
-    animation: boxIn 0.25s ease;
-    box-sizing: border-box;
+
+    background: var(--card-bg-solid);
+    border: 1px solid var(--card-border-hi);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+
+    animation: boxIn var(--dur-base) var(--ease);
 }
 
 @keyframes boxIn {
-    from { transform: translateY(12px) scale(0.98); opacity: 0; }
-    to   { transform: translateY(0)   scale(1);    opacity: 1; }
+    from { transform: translateY(10px) scale(0.98); opacity: 0; }
+    to   { transform: translateY(0)    scale(1);    opacity: 1; }
 }
 
 .modal-box > h3 {
-    color: rgba(255,255,255,0.9);
+    color: var(--text);
     font-size: 18px;
-    font-weight: 500;
-    margin-bottom: 20px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: var(--s-6);
+    text-align: center;
 }
 
 .modal-box .input-box {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: start;
-    margin-bottom: 10px;
+    width: 100%;
+    margin-bottom: var(--s-4);
 }
 
 .modal-box .input-box > label {
-    margin-bottom: 5px;
-    color: rgba(255,255,255,0.9);
-    font-size: 13px;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: var(--s-2);
 }
 
 .modal-box .input-box input,
 .modal-box .input-box textarea {
-    box-sizing: border-box;
-    width: 250px;
-    color: #000;
+    width: 100%;
+    padding: 0 var(--s-4);
+
+    color: var(--text);
     font-size: 14px;
-    letter-spacing: 1px;
-    background: rgba(255,255,255,0.3);
-    border: 1px solid rgba(255,255,255,0.5);
-    border-radius: 5px;
-    outline: none;
-    transition: 0.2s;
     font-family: inherit;
+    letter-spacing: 0.01em;
+
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--r-md);
+
+    outline: none;
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        box-shadow var(--dur-base) var(--ease);
 }
 
 .modal-box .input-box input {
-    height: 35px;
-    padding: 0 10px;
+    height: 44px;
 }
 
 .modal-box .input-box textarea {
-    height: 70px;
-    padding: 8px 10px;
+    padding: var(--s-3) var(--s-4);
+    min-height: 88px;
     resize: none;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 .modal-box .input-box input::placeholder,
 .modal-box .input-box textarea::placeholder {
-    color: rgba(0,0,0,0.45);
+    color: var(--text-mute);
+}
+
+.modal-box .input-box input:hover,
+.modal-box .input-box textarea:hover {
+    border-color: var(--input-border-hover);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .modal-box .input-box input:focus,
 .modal-box .input-box textarea:focus {
-    border: 1px solid rgba(255,255,255,0.8);
+    border-color: var(--input-border-focus);
+    background: rgba(124, 174, 224, 0.04);
+    box-shadow: 0 0 0 4px var(--input-focus-glow);
 }
 
 .modal-box .tip {
-    width: 250px;
-    min-height: 16px;
-    margin: 2px 0 4px;
+    width: 100%;
+    min-height: 18px;
+    margin-top: var(--s-2);
     font-size: 12px;
-    text-align: left;
+    text-align: center;
+    color: var(--text-dim);
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity var(--dur-base) var(--ease);
 }
 
 .modal-box .tip.show {
@@ -539,48 +760,220 @@ body {
 }
 
 .modal-box .btn-box {
-    width: 250px;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin-top: var(--s-4);
 }
 
 .modal-box .btn-box > div {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: start;
-    margin-top: 10px;
-    width: 250px;
+    gap: var(--s-3);
+    width: 100%;
 }
 
 .modal-box .btn-box > div > button {
-    width: 120px;
-    height: 35px;
-    border: 1px solid rgba(197, 81, 58, 0.8);
-    background: rgba(197, 81, 58, 0.5);
-    color: rgba(255, 255, 255, 0.9);
-    border-radius: 5px;
-    transition: 0.2s;
+    flex: 1;
+    height: 44px;
+    padding: 0 var(--s-4);
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;    /* 👈 不换行 */
+
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
     cursor: pointer;
+    outline: none;
+
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease),
+        box-shadow var(--dur-base) var(--ease),
+        transform var(--dur-fast) var(--ease);
 }
 
+/* 提交（主） */
+.modal-box .btn-box > div > button:nth-of-type(1) {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+}
+
+.modal-box .btn-box > div > button:nth-of-type(1):hover:not(:disabled) {
+    background: rgba(124, 174, 224, 0.18);
+    border-color: rgba(124, 174, 224, 0.55);
+    color: var(--accent-hover);
+    box-shadow: 0 8px 24px rgba(124, 174, 224, 0.12);
+}
+
+/* 取消（幽灵） */
 .modal-box .btn-box > div > button:nth-of-type(2) {
-    margin-left: 10px;
+    background: transparent;
+    border-color: var(--input-border);
+    color: var(--text-dim);
 }
 
-.modal-box .btn-box > div > button:hover {
-    border: 1px solid rgba(248, 108, 76, 0.8);
-    background: rgba(248, 108, 76, 0.5);
+.modal-box .btn-box > div > button:nth-of-type(2):hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--input-border-hover);
+    color: var(--text);
+}
+
+.modal-box .btn-box > div > button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+/* ============================================================
+   账号封禁弹窗
+   ============================================================ */
+.ban-modal-box {
+    width: 380px;
+    max-width: 100%;
+    padding: var(--s-8) var(--s-7);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    background: var(--card-bg-solid);
+    border: 1px solid var(--danger-border);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+
+    animation: boxIn var(--dur-base) var(--ease);
+}
+
+.ban-icon-wrap {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--r-full);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--danger-soft);
+    border: 1px solid var(--danger-border);
+    margin-bottom: var(--s-5);
+}
+
+.ban-icon {
+    font-size: 30px;
+    filter: saturate(0.6);
+}
+
+.ban-title {
+    color: var(--text);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: var(--s-2);
+}
+
+.ban-desc {
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.65;
+    margin-bottom: var(--s-6);
+    max-width: 300px;
+}
+
+.ban-time-box {
+    width: 100%;
+    padding: var(--s-5) var(--s-5);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--card-border);
+    border-radius: var(--r-md);
+
+    margin-bottom: var(--s-5);
+}
+
+.ban-time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--s-3);
+}
+
+.ban-time-label {
+    font-size: 12px;
+    color: var(--text-faint);
+    letter-spacing: 0.04em;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.ban-time-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    word-break: break-all;
+    text-align: right;
+    letter-spacing: 0.01em;
+}
+
+.ban-time-value.highlight {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.ban-close-btn {
+    width: 100%;
+    height: 44px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+
+    color: var(--danger);
+    background: var(--danger-soft);
+    border: 1px solid var(--danger-border);
+    border-radius: var(--r-md);
+
+    cursor: pointer;
+    outline: none;
+
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease),
+        box-shadow var(--dur-base) var(--ease),
+        transform var(--dur-fast) var(--ease);
+}
+
+.ban-close-btn:hover {
+    background: rgba(214, 139, 139, 0.18);
+    border-color: rgba(214, 139, 139, 0.55);
+    color: #e6a3a3;
+    box-shadow: 0 8px 24px rgba(214, 139, 139, 0.10);
+}
+
+.ban-close-btn:active {
+    transform: scale(0.98);
 }
 
 /* ============================================================
    📱 移动端适配（480px 及以下）
-   桌面端样式一律不动，只在窄屏时覆盖
    ============================================================ */
 @media (max-width: 480px) {
 
-    /* ---------- 页面容器：允许滚动、顶部留空 ---------- */
     body {
         height: auto;
         min-height: 100vh;
@@ -588,105 +981,50 @@ body {
         overflow-x: hidden;
         overflow-y: auto;
         justify-content: flex-start;
-        padding: 76px 16px 30px;
-        box-sizing: border-box;
+        padding: 84px var(--s-4) var(--s-7);
     }
 
-    /* ---------- 主盒子：宽度自适应，左右留白 ---------- */
     .box {
         width: 100%;
-        max-width: 380px;
+        max-width: 400px;
         min-height: 0;
-        padding: 30px 18px;
-        border-radius: 16px;
-        margin: auto 0;   /* 内容不足时垂直居中 */
+        padding: var(--s-7) var(--s-6);
+        border-radius: var(--r-lg);
+        margin: auto 0;
+        box-shadow: var(--shadow-md);
     }
 
     .box > h2 {
-        font-size: 20px;
-        margin-bottom: 18px;
+        font-size: 22px;
+        margin-bottom: var(--s-6);
     }
 
-    /* 输入框：撑满盒子，高度加大到 44px */
     .box .input-box {
-        width: 100%;
-        margin-bottom: 12px;
-    }
-
-    .box .input-box > label {
-        font-size: 13px;
+        margin-bottom: var(--s-4);
     }
 
     .box .input-box input {
-        width: 100%;
-        height: 44px;
+        height: 46px;
         font-size: 15px;
-        letter-spacing: 0.5px;
-    }
-
-    /* 验证码行 */
-    .box .input-box .code-box {
-        width: 100%;
-        gap: 8px;
-    }
-
-    .box .input-box .code-box input {
-        height: 44px;
-        letter-spacing: 3px;
-        font-size: 16px;
-    }
-
-    .box .input-box .code-box .code-btn {
-        height: 44px;
-        width: 104px;
-        font-size: 13px;
-    }
-
-    /* 按钮区 */
-    .box .btn-box {
-        width: 100%;
-    }
-
-    .box .btn-box > a {
-        width: 100%;
-        font-size: 13px;
-    }
-
-    .box .btn-box > div {
-        width: 100%;
-        margin-top: 16px;
     }
 
     .box .btn-box > div > button {
-        flex: 1;
-        width: auto;
-        height: 44px;
-        font-size: 15px;
+        height: 46px;
+        font-size: 14px;
+        padding: 0 var(--s-3);
     }
 
-    .box .btn-box > div > button:only-child {
-        width: 100%;
-    }
-
-    /* 提示文字 */
-    .box .tip {
-        width: 100%;
-        font-size: 13px;
-    }
-
-    /* ---------- 右上角控制：小一点，别抢位置 ---------- */
     .top-right-controls {
-        top: 12px;
-        right: 12px;
-        gap: 8px;
+        top: var(--s-4);
+        right: var(--s-4);
+        gap: var(--s-2);
     }
 
     .lang-btn,
     .bg-btn {
         width: 104px;
         height: 34px;
-        font-size: 13px;
-        border-radius: 8px;
+        font-size: 12.5px;
     }
 
     .lang-dropdown,
@@ -694,139 +1032,95 @@ body {
         min-width: 118px;
     }
 
-    .lang-dropdown a {
-        padding: 10px 13px;
-        font-size: 13px;
-    }
+    .lang-dropdown a    { padding: var(--s-3) var(--s-4); font-size: 13px; }
+    .bg-cat-title       { padding: var(--s-3) var(--s-4); font-size: 13px; }
+    .bg-items a         { padding: var(--s-3) var(--s-4) var(--s-3) var(--s-6); font-size: 12.5px; }
 
-    .bg-cat-title {
-        padding: 10px 13px;
-        font-size: 13px;
-    }
-
-    .bg-items a {
-        padding: 9px 13px 9px 24px;
-        font-size: 12.5px;
-    }
-
-    /* ---------- 忘记密码弹窗：同样自适应 ---------- */
     .modal-mask {
-        padding: 16px;
+        padding: var(--s-4);
         align-items: flex-start;
     }
 
-    .modal-box {
+    .modal-box,
+    .ban-modal-box {
         width: 100%;
-        max-width: 380px;
-        padding: 24px 18px;
-        border-radius: 16px;
+        max-width: 400px;
+        padding: var(--s-7) var(--s-6);
+        border-radius: var(--r-lg);
         margin: auto 0;
     }
 
-    .modal-box > h3 {
-        font-size: 17px;
-        margin-bottom: 16px;
-    }
-
-    .modal-box .input-box {
-        width: 100%;
-    }
-
+    .modal-box > h3 { font-size: 17px; margin-bottom: var(--s-5); }
     .modal-box .input-box input,
-    .modal-box .input-box textarea {
-        width: 100%;
-    }
+    .modal-box .input-box textarea { font-size: 15px; }
+    .modal-box .input-box input { height: 46px; }
+    .modal-box .btn-box > div > button { height: 46px; font-size: 14px; padding: 0 var(--s-3); }
 
-    .modal-box .input-box input {
-        height: 44px;
-        font-size: 15px;
-    }
-
-    .modal-box .input-box textarea {
-        height: auto;
-        min-height: 84px;
-        font-size: 15px;
-    }
-
-    .modal-box .tip {
-        width: 100%;
-        font-size: 13px;
-    }
-
-    .modal-box .btn-box,
-    .modal-box .btn-box > div {
-        width: 100%;
-    }
-
-    .modal-box .btn-box > div > button {
-        flex: 1;
-        width: auto;
-        height: 44px;
-        font-size: 15px;
-    }
+    .ban-icon-wrap { width: 64px; height: 64px; }
+    .ban-icon      { font-size: 26px; }
+    .ban-title     { font-size: 18px; }
+    .ban-time-value { font-size: 12.5px; }
 }
 
 /* ============================================================
-   📱 超小屏（360px 以下）进一步压缩
+   📱 超小屏（360px 以下）
    ============================================================ */
 @media (max-width: 360px) {
-
-    body {
-        padding: 70px 12px 24px;
-    }
+    body { padding: 78px var(--s-3) var(--s-6); }
 
     .box {
-        padding: 24px 14px;
+        padding: var(--s-6) var(--s-5);
     }
 
     .box .input-box input,
-    .box .input-box .code-box input,
-    .box .input-box .code-box .code-btn,
     .box .btn-box > div > button {
-        height: 42px;
-    }
-
-    .box .input-box .code-box .code-btn {
-        width: 96px;
-        font-size: 12.5px;
+        height: 44px;
     }
 
     .lang-btn,
     .bg-btn {
         width: 96px;
         height: 32px;
-        font-size: 12.5px;
+        font-size: 12px;
     }
 }
 
 /* ============================================================
-   📱 触屏设备：移除 hover 的“粘滞”效果
+   📱 触屏设备：移除 hover 粘滞
    ============================================================ */
 @media (hover: none) {
-
-    .box .btn-box > div > button:hover {
-        border: 1px solid rgba(197, 81, 58, 0.8);
-        background: rgba(197, 81, 58, 0.5);
+    .box .btn-box > div > button:hover,
+    .box .btn-box > div > button:nth-of-type(1):hover:not(:disabled),
+    .box .btn-box > div > button:nth-of-type(2):hover:not(:disabled),
+    .box .btn-box > div > button:only-child:hover:not(:disabled) {
+        background: var(--accent-soft);
+        border-color: var(--accent-border);
+        box-shadow: none;
+        color: var(--accent);
     }
-
-    .box .input-box .code-box .code-btn:hover:not(:disabled) {
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        background: rgba(255, 255, 255, 0.3);
+    .box .btn-box > div > button:nth-of-type(2):hover:not(:disabled) {
+        background: transparent;
+        border-color: var(--input-border);
+        color: var(--text-dim);
     }
-
+    .box .btn-box > a:hover {
+        color: var(--text-dim);
+    }
+    .box .input-box input:hover {
+        border-color: var(--input-border);
+        background: var(--input-bg);
+    }
     .lang-btn:hover,
     .bg-btn:hover {
-        border-color: rgba(255, 255, 255, 0.5);
-        background: rgba(50, 50, 50, 0.2);
-    }
-
-    .box .btn-box > a:hover {
-        color: rgba(255, 255, 255, 0.9);
+        color: var(--text-dim);
+        border-color: var(--input-border);
+        background: rgba(24, 27, 32, 0.55);
+        box-shadow: none;
     }
 }
 
 /* ============================================================
-   📱 横屏矮屏：允许滚动
+   📱 横屏矮屏
    ============================================================ */
 @media (max-height: 520px) {
     body {
@@ -834,134 +1128,9 @@ body {
         min-height: 100dvh;
         overflow-y: auto;
         justify-content: flex-start;
-        padding: 70px 16px 20px;
+        padding: 78px var(--s-4) var(--s-6);
     }
-
     .box {
         margin: 0 auto;
     }
-}
-/* ============================================================
-   🔒 账号封禁弹窗
-   ============================================================ */
-.ban-modal-box {
-    width: 360px;
-    max-width: 90%;
-    padding: 32px 24px;
-    border-radius: 20px;
-    background: rgba(50, 30, 30, 0.85);
-    border: 1px solid rgba(255, 100, 100, 0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 80, 80, 0.15);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    animation: boxIn 0.3s ease;
-    box-sizing: border-box;
-}
-
-.ban-icon-wrap {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: rgba(220, 60, 60, 0.15);
-    border: 2px solid rgba(255, 100, 100, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-    box-shadow: 0 0 30px rgba(255, 80, 80, 0.2);
-}
-
-.ban-icon {
-    font-size: 32px;
-}
-
-.ban-title {
-    color: rgba(255, 180, 180, 0.95);
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    letter-spacing: 1px;
-}
-
-.ban-desc {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 13px;
-    line-height: 1.6;
-    margin-bottom: 20px;
-}
-
-.ban-time-box {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 100, 100, 0.2);
-    border-radius: 12px;
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-    box-sizing: border-box;
-}
-
-.ban-time-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-}
-
-.ban-time-label {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.5);
-    white-space: nowrap;
-}
-
-.ban-time-value {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 500;
-    font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
-    word-break: break-all;
-    text-align: right;
-}
-
-.ban-time-value.highlight {
-    color: #ff8888;
-    font-weight: 600;
-}
-
-.ban-close-btn {
-    width: 100%;
-    height: 44px;
-    border: 1px solid rgba(255, 100, 100, 0.6);
-    background: rgba(220, 60, 60, 0.4);
-    color: rgba(255, 200, 200, 0.95);
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.ban-close-btn:hover {
-    background: rgba(255, 80, 80, 0.7);
-    color: #fff;
-    box-shadow: 0 0 20px rgba(255, 80, 80, 0.3);
-}
-
-@media (max-width: 480px) {
-    .ban-modal-box {
-        width: 100%;
-        max-width: 340px;
-        padding: 28px 20px;
-    }
-    .ban-icon-wrap { width: 60px; height: 60px; }
-    .ban-icon { font-size: 26px; }
-    .ban-title { font-size: 18px; }
-    .ban-time-value { font-size: 13px; }
 }
