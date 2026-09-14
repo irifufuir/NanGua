@@ -51,6 +51,7 @@
         display: flex;
         -webkit-font-smoothing: antialiased;
         -webkit-tap-highlight-color: transparent;
+        overflow-x: hidden;
     }
 
     .sidebar {
@@ -84,17 +85,51 @@
     }
     .avatar-edit:hover { transform: scale(1.08); }
 
-    .user-details { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: var(--space-2); }
-    .user-details .email {
-        font-size: 0.92em; font-weight: 500; color: var(--theme-text);
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+        gap: var(--space-2);
     }
-    .user-bottom-row { display: flex; align-items: center; gap: var(--space-2); }
-    .user-details .role {
-        font-size: 0.72em; font-weight: 500;
-        color: var(--theme-accent); background: var(--theme-accent-soft);
+    .user-name-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-width: 0;
+        flex: 1;
+    }
+    .user-name-row .email {
+        font-size: 0.92em;
+        font-weight: 500;
+        color: var(--theme-text);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+    }
+    .user-name-row .role {
+        font-size: 0.72em;
+        font-weight: 500;
+        color: var(--theme-accent);
+        background: var(--theme-accent-soft);
         border: 1px solid var(--theme-accent-border);
-        padding: 2px 10px; border-radius: var(--radius-full);
+        padding: 2px 10px;
+        border-radius: var(--radius-full);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .user-action-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        width: 100%;
+    }
+    .user-action-row .avatar-change-btn,
+    .user-action-row .logout-btn-mini {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
     }
     .logout-btn-mini {
         background: transparent; border: 1px solid var(--theme-border);
@@ -105,6 +140,17 @@
     }
     .logout-btn-mini:hover {
         background: var(--theme-info-box); color: var(--theme-text);
+    }
+    .avatar-change-btn {
+        background: transparent; border: 1px solid var(--theme-border);
+        color: var(--theme-text-dim); font-size: 0.72em; font-family: inherit;
+        padding: 3px 10px; border-radius: var(--radius-full);
+        cursor: pointer; white-space: nowrap;
+        transition: all var(--transition-base);
+    }
+    .avatar-change-btn:hover {
+        background: var(--theme-info-box); color: var(--theme-text);
+        border-color: var(--theme-text-faint);
     }
 
     .nav-menu { flex: 1; overflow-y: auto; padding: var(--space-2) 0; scrollbar-width: thin; }
@@ -226,6 +272,20 @@
         font-size: 0.76em; font-weight: 500;
         padding: 4px 12px; border-radius: var(--radius-full);
     }
+    .refresh-btn-mini {
+        width: 30px; height: 30px; border-radius: var(--radius-full);
+        background: var(--theme-info-box); border: 1px solid var(--theme-border);
+        color: var(--theme-accent); font-size: 14px; line-height: 1;
+        cursor: pointer; transition: all var(--transition-base);
+        display: flex; align-items: center; justify-content: center;
+        padding: 0; outline: none;
+    }
+    .refresh-btn-mini:hover:not(:disabled) {
+        background: var(--theme-accent-soft); border-color: var(--theme-accent-border);
+    }
+    .refresh-btn-mini:disabled { opacity: 0.5; cursor: not-allowed; }
+    .refresh-btn-mini.spinning { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .welcome-card {
         display: flex; flex-direction: column; align-items: center;
@@ -367,6 +427,237 @@
     }
     .checkin-stat .v { font-size: 1.4em; font-weight: 600; color: var(--theme-text); }
     .checkin-stat .k { font-size: 0.76em; color: var(--theme-text-faint); }
+
+    /* ========== 积分商城 · iOS 深色毛玻璃风格 ========== */
+    .shop-hint {
+        font-size: 0.86em;
+        color: var(--theme-text-dim);
+        margin-bottom: var(--space-5);
+        padding: var(--space-3) var(--space-4);
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 3px solid var(--theme-accent);
+        border-radius: 12px;
+        line-height: 1.6;
+    }
+
+    /* 桌面端：每行 4~5 个 */
+    .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--space-3);
+        margin-bottom: var(--space-7);
+    }
+
+    .shop-item {
+        position: relative;
+        background: rgba(255, 255, 255, 0.035);
+        border: none;
+        border-radius: 20px;
+        padding: var(--space-4) var(--space-3);
+        display: flex; flex-direction: column; gap: var(--space-2);
+        backdrop-filter: blur(20px) saturate(140%);
+        -webkit-backdrop-filter: blur(20px) saturate(140%);
+        box-shadow:
+            0 1px 2px rgba(0, 0, 0, 0.15),
+            0 4px 12px rgba(0, 0, 0, 0.10);
+        transition: transform .25s cubic-bezier(.4,0,.2,1),
+                    box-shadow .25s cubic-bezier(.4,0,.2,1),
+                    background-color .25s cubic-bezier(.4,0,.2,1);
+    }
+    .shop-item:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.055);
+        box-shadow:
+            0 2px 4px rgba(0, 0, 0, 0.18),
+            0 8px 24px rgba(0, 0, 0, 0.16);
+    }
+    .shop-item.out-of-stock { opacity: 0.55; }
+
+    .shop-item-stock {
+        position: absolute;
+        top: 8px; right: 8px;
+        font-size: 0.65em;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--theme-text-dim);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        font-weight: 500;
+        letter-spacing: 0.02em;
+    }
+    .shop-item-icon {
+        font-size: 1.9em;
+        line-height: 1;
+        text-align: center;
+        margin-top: 2px;
+        filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
+    }
+    .shop-item-name {
+        font-size: 0.92em;
+        font-weight: 600;
+        color: var(--theme-text);
+        text-align: center;
+        word-break: break-word;
+        line-height: 1.35;
+    }
+    .shop-item-desc {
+        font-size: 0.72em;
+        color: var(--theme-text-faint);
+        line-height: 1.5;
+        text-align: center;
+        min-height: 2em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    .shop-item-price {
+        font-size: 0.95em;
+        font-weight: 700;
+        color: var(--theme-accent);
+        text-align: center;
+        display: flex; align-items: center; justify-content: center; gap: 3px;
+        margin-top: auto;
+        letter-spacing: 0.01em;
+    }
+    .shop-buy-btn {
+        height: 34px;
+        background: var(--theme-accent-soft);
+        border: none;
+        color: var(--theme-accent);
+        font-size: 0.8em;
+        font-weight: 500;
+        font-family: inherit;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color .2s ease,
+                    color .2s ease,
+                    transform .12s ease;
+        outline: none;
+    }
+    .shop-buy-btn:hover:not(:disabled) {
+        background: rgba(124, 174, 224, 0.22);
+        color: #a7c8ec;
+    }
+    .shop-buy-btn:active:not(:disabled) { transform: scale(0.96); }
+    .shop-buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .shop-section-title {
+        font-size: 0.82em; color: var(--theme-accent);
+        text-transform: uppercase; letter-spacing: 0.12em;
+        font-weight: 600;
+        margin-bottom: var(--space-4);
+        padding-bottom: var(--space-3);
+        border-bottom: 1px solid var(--theme-border-soft);
+    }
+    .shop-history {
+        display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .shop-history-item {
+        display: flex; align-items: center; gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: rgba(255, 255, 255, 0.03);
+        border: none;
+        border-radius: 14px;
+        font-size: 0.88em;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        transition: background-color .2s ease;
+    }
+    .shop-history-item:hover { background: rgba(255, 255, 255, 0.055); }
+    .shop-history-item .h-icon { font-size: 1.4em; }
+    .shop-history-item .h-info { flex: 1; min-width: 0; }
+    .shop-history-item .h-name { color: var(--theme-text); font-weight: 500; }
+    .shop-history-item .h-time {
+        font-size: 0.78em; color: var(--theme-text-faint);
+        margin-top: 2px;
+    }
+    .shop-history-item .h-price {
+        color: var(--danger); font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* ========== 商品详情弹窗（左图右文） ========== */
+    .modal-mask {
+        position: fixed; inset: 0;
+        background: rgba(10,11,14,.55);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 3500; padding: var(--space-5);
+    }
+    .item-detail-box {
+        width: 640px; max-width: 100%;
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        overflow: hidden;
+        animation: boxIn var(--transition-base) var(--ease);
+    }
+    .item-detail-left {
+        width: 42%;
+        background: var(--theme-info-box);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 260px;
+        position: relative;
+    }
+    .item-detail-left img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        position: absolute; inset: 0;
+    }
+    #detailIconFallback {
+        font-size: 5em;
+        align-items: center;
+        justify-content: center;
+        width: 100%; height: 100%;
+        line-height: 1;
+    }
+    .item-detail-right {
+        width: 58%;
+        padding: var(--space-7) var(--space-6);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+    .item-detail-right h3 {
+        font-size: 1.25em;
+        font-weight: 600;
+        color: var(--theme-text);
+        margin: 0;
+        word-break: break-word;
+    }
+    .detail-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: var(--space-3);
+        border-bottom: 1px solid var(--theme-border-soft);
+        font-size: 0.9em;
+    }
+    .detail-info-row .label { color: var(--theme-text-faint); }
+    .detail-info-row .value { color: var(--theme-text); font-weight: 500; }
+    .detail-info-row .value.highlight { color: var(--theme-accent); font-weight: 700; font-size: 1.1em; }
+    .item-detail-close {
+        margin-top: auto;
+        height: 42px;
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.95em;
+        font-weight: 500;
+        transition: all var(--transition-base);
+        outline: none;
+    }
+    .item-detail-close:hover { border-color: var(--theme-accent); }
 
     .add-friend-box {
         display: flex; gap: var(--space-3);
@@ -602,9 +893,10 @@
     @media (max-width: 900px) {
         .main-content { padding: var(--space-7) var(--space-6); }
         .card { padding: var(--space-7) var(--space-6); }
+        /* 中等屏：每行 3 个 */
+        .shop-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     }
 
-    /* ⭐ 修改：加触屏横屏条件（解决横屏按钮点不了） */
     @media (max-width: 768px),
            (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         body { flex-direction: column; }
@@ -636,10 +928,12 @@
             bottom: -1px; right: -1px;
         }
         .user-details { gap: 0; }
-        .user-details .email { font-size: 0.82em; }
-        .user-bottom-row { gap: 6px; }
-        .user-details .role { display: none; }
-        .logout-btn-mini {
+        .user-name-row { gap: 6px; }
+        .user-name-row .email { font-size: 0.82em; }
+        .user-name-row .role { display: none; }
+        .user-action-row { gap: 6px; }
+        .logout-btn-mini,
+        .avatar-change-btn {
             font-size: 0.66em;
             padding: 2px 8px;
             border-radius: 8px;
@@ -783,7 +1077,7 @@
 
         .card {
             padding: 16px;
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: 0 1px 2px rgba(0,0,0,.06);
         }
         .card-head {
@@ -832,6 +1126,27 @@
         .checkin-stat { padding: 8px 4px; }
         .checkin-stat .v { font-size: 1.1em; }
         .checkin-stat .k { font-size: 0.66em; }
+
+        /* 手机端：单列，卡片占满宽度 */
+        .shop-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .shop-item {
+            padding: 16px;
+            gap: 8px;
+            border-radius: 18px;
+        }
+        .shop-item-icon { font-size: 2.2em; }
+        .shop-item-name { font-size: 0.95em; }
+        .shop-item-desc { font-size: 0.78em; min-height: 1.4em; -webkit-line-clamp: 2; }
+        .shop-item-price { font-size: 1em; }
+        .shop-buy-btn { height: 40px; font-size: 0.88em; border-radius: 14px; }
+        .shop-history-item { padding: 10px 12px; font-size: 0.85em; }
+
+        .item-detail-box { flex-direction: column; }
+        .item-detail-left { width: 100%; min-height: 180px; }
+        .item-detail-right { width: 100%; padding: var(--space-5); }
 
         .add-friend-box { flex-direction: column; gap: 8px; margin-bottom: 18px; }
         .add-friend-box input,
@@ -903,8 +1218,9 @@
     @media (max-width: 380px) {
         .user-profile { padding: 4px 10px 2px; gap: 6px; }
         .avatar-wrapper { width: 26px; height: 26px; }
-        .user-details .email { font-size: 0.76em; }
-        .logout-btn-mini { font-size: 0.62em; padding: 2px 6px; }
+        .user-name-row .email { font-size: 0.76em; }
+        .logout-btn-mini,
+        .avatar-change-btn { font-size: 0.62em; padding: 2px 6px; }
 
         .nav-main-row .nav-item,
         .nav-main-row .nav-group {
@@ -925,9 +1241,10 @@
         .info-grid { grid-template-columns: 1fr; }
         .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
         .checkin-stat { padding: 8px 3px; }
+
+        .shop-grid { grid-template-columns: 1fr; }
     }
 
-    /* ⭐ 新增：横屏矮屏压缩顶部，避免按钮被挤掉 */
     @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         .user-profile {
             padding: 2px 10px 1px;
@@ -937,8 +1254,9 @@
         .avatar-edit {
             width: 12px; height: 12px; font-size: 6px;
         }
-        .user-details .email { font-size: 0.76em; }
-        .logout-btn-mini {
+        .user-name-row .email { font-size: 0.76em; }
+        .logout-btn-mini,
+        .avatar-change-btn {
             font-size: 0.62em;
             padding: 1px 6px;
         }
@@ -962,20 +1280,21 @@
     }
     </style>
 </head>
-</head>
 <body>
 
     <aside class="sidebar">
         <div class="user-profile">
             <div class="avatar-wrapper">
                 <img id="avatarImg" src="image/default-avatar.png" alt="头像">
-                <label for="avatarInput" class="avatar-edit" title="更换头像">📷</label>
                 <input type="file" id="avatarInput" accept="image/*" style="display:none;">
             </div>
             <div class="user-details">
-                <span class="email" id="userEmail">加载中...</span>
-                <div class="user-bottom-row">
+                <div class="user-name-row">
                     <span class="role">普通用户</span>
+                    <span class="email" id="userEmail">加载中...</span>
+                </div>
+                <div class="user-action-row">
+                    <button class="avatar-change-btn" id="avatarChangeBtn" title="更换头像">📷 换头像</button>
                     <button class="logout-btn-mini" id="logoutBtn">退出</button>
                 </div>
             </div>
@@ -991,12 +1310,16 @@
                 <span class="nav-text">📬 消息通知</span>
                 <span class="nav-arrow" id="msgArrow">▾</span>
             </div>
-           <div class="nav-sub" id="msgSub" data-sub="msg">
-    <div class="nav-sub-item" data-tab="announce">📢 公告栏</div>
-</div>
+            <div class="nav-sub" id="msgSub" data-sub="msg">
+                <div class="nav-sub-item" data-tab="announce">📢 公告栏</div>
+            </div>
 
             <div class="nav-item" data-tab="checkin">
                 <span class="nav-text">📅 每日签到</span>
+            </div>
+
+            <div class="nav-item" data-tab="shop">
+                <span class="nav-text">🛒 积分商城</span>
             </div>
 
             <div class="nav-item" data-tab="friends">
@@ -1085,6 +1408,27 @@
                 </div>
             </div>
 
+            <!-- 积分商城 -->
+            <div class="card" id="cardShop">
+                <div class="card-head">
+                    <h2>🛒 积分商城</h2>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span class="badge" id="shopMyPoints">积分：—</span>
+                        <button class="refresh-btn-mini" id="refreshUserShopBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="shop-hint">
+                    用积分兑换心仪的商品，兑换后积分立即扣除。
+                </div>
+                <div class="shop-grid" id="shopGrid">
+                    <div class="empty-state">加载中...</div>
+                </div>
+                <div class="shop-section-title">🎁 我的兑换记录</div>
+                <div class="shop-history" id="shopHistory">
+                    <div class="empty-state">暂无记录</div>
+                </div>
+            </div>
+
             <div class="card" id="cardFriends">
                 <div class="card-head">
                     <h2>👥 我的好友</h2>
@@ -1164,6 +1508,46 @@
             </div>
 
         </main>
+    </div>
+
+    <!-- 商品详情弹窗（左图右文） -->
+    <div class="modal-mask" id="itemDetailModal" style="display:none;">
+        <div class="item-detail-box">
+            <div class="item-detail-left">
+                <img id="detailImage" src="" alt=""
+                     onerror="this.style.display='none'; document.getElementById('detailIconFallback').style.display='flex';">
+                <div id="detailIconFallback" style="display:none;">🎁</div>
+            </div>
+            <div class="item-detail-right">
+                <h3 id="detailName">商品名称</h3>
+
+                <div class="detail-info-row">
+                    <span class="label">消耗积分</span>
+                    <span class="value highlight" id="detailPrice">-0</span>
+                </div>
+
+                <div class="detail-info-row">
+                    <span class="label">兑换时间</span>
+                    <span class="value" id="detailTime">—</span>
+                </div>
+
+                <div class="detail-info-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
+                    <span class="label" style="margin-bottom:4px;">商品详情</span>
+                    <span class="value" id="detailDesc"
+                          style="text-align:left; font-size:0.85em; line-height:1.6;
+                                 color:var(--theme-text-dim); white-space:pre-wrap;
+                                 word-break:break-word;">—</span>
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:auto;">
+                    <button class="item-detail-close" id="detailCloseBtn" style="flex:1;">关 闭</button>
+                    <button class="item-detail-close" id="detailDeleteBtn"
+                            style="flex:1; background:rgba(214,139,139,.15);
+                                   border-color:rgba(214,139,139,.45);
+                                   color:var(--danger);">删除记录</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="chat-mask" id="chatModal" style="display:none;">
@@ -1320,7 +1704,7 @@
 })();
 
 /* ============================================================
- *  以下为页面原有逻辑（未改动）
+ *  以下为页面原有逻辑
  * ============================================================ */
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
@@ -1368,7 +1752,7 @@ function bootUser(user) {
             var mainRow = navMenu.querySelector('.nav-main-row') || navMenu;
             mainRow.appendChild(entry);
         }
-        var roleBadge = document.querySelector('.user-details .role');
+        var roleBadge = document.querySelector('.user-name-row .role');
         if (roleBadge) roleBadge.textContent = '管理员';
     }
 
@@ -1439,6 +1823,7 @@ var CARDS = {
     home:     'cardHome',
     announce: 'cardAnnounce',
     checkin:  'cardCheckin',
+    shop:     'cardShop',
     friends:  'cardFriends',
     theme:    'cardTheme'
 };
@@ -1462,6 +1847,7 @@ function switchTab(tab) {
 
     if (tab === 'announce') loadAnnouncements();
     if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); }
+    if (tab === 'shop')     loadShop();
     if (tab === 'friends')  loadFriends();
 
     if (window.syncMobileSubRow) {
@@ -1678,6 +2064,194 @@ document.getElementById('checkinBtn').addEventListener('click', function () {
     });
 });
 
+/* ============================================================
+ *  积分商城
+ * ============================================================ */
+function loadShop() {
+    if (!currentUser) return;
+
+    /* 刷新顶部积分显示 */
+    supabaseClient.from('profiles').select('points').eq('id', currentUser.id).maybeSingle()
+        .then(function (r) {
+            var p = (r.data && r.data.points) || 0;
+            document.getElementById('shopMyPoints').textContent = '积分：' + p;
+        });
+
+    /* 加载商品 */
+    var grid = document.getElementById('shopGrid');
+    grid.innerHTML = '<div class="empty-state">加载中...</div>';
+
+    supabaseClient.from('shop_items').select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                grid.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var items = res.data || [];
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty-state">暂时没有商品</div>';
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (it) {
+                var soldOut = (it.stock === 0);
+                var stockTag = '';
+                if (it.stock > 0) stockTag = '<span class="shop-item-stock">仅剩 ' + it.stock + '</span>';
+                else if (it.stock === 0) stockTag = '<span class="shop-item-stock">已售罄</span>';
+
+                html +=
+                    '<div class="shop-item' + (soldOut ? ' out-of-stock' : '') + '" data-id="' + it.id + '">' +
+                        stockTag +
+                        '<div class="shop-item-icon">' + escapeHtml(it.icon || '🎁') + '</div>' +
+                        '<div class="shop-item-name">' + escapeHtml(it.name) + '</div>' +
+                        '<div class="shop-item-desc">' + escapeHtml(it.description || '') + '</div>' +
+                        '<div class="shop-item-price">' + it.price + ' 积分</div>' +
+                        '<button class="shop-buy-btn" data-id="' + it.id + '" data-name="' + escapeHtml(it.name) + '" data-price="' + it.price + '"' + (soldOut ? ' disabled' : '') + '>' +
+                            (soldOut ? '已售罄' : '立即兑换') +
+                        '</button>' +
+                    '</div>';
+            });
+            grid.innerHTML = html;
+
+            grid.querySelectorAll('.shop-buy-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var name = this.getAttribute('data-name');
+                    var price = parseInt(this.getAttribute('data-price'), 10);
+                    doPurchase(id, name, price);
+                });
+            });
+        });
+
+    /* 加载兑换记录 */
+    var hist = document.getElementById('shopHistory');
+    hist.innerHTML = '<div class="empty-state">加载中...</div>';
+
+    supabaseClient.from('user_purchases').select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+        .then(function (res) {
+            if (res.error) {
+                hist.innerHTML = '<div class="empty-state">加载失败</div>';
+                return;
+            }
+            var list = res.data || [];
+            if (list.length === 0) {
+                hist.innerHTML = '<div class="empty-state">暂无记录</div>';
+                return;
+            }
+            var h = '';
+            list.forEach(function (p) {
+                var t = new Date(p.created_at).toLocaleString('zh-CN', { hour12: false });
+                h +=
+                    '<div class="shop-history-item" style="cursor:pointer;" ' +
+                        'data-id="'     + p.id + '" ' +
+                        'data-name="'   + escapeHtml(p.item_name  || '未知商品') + '" ' +
+                        'data-icon="'   + escapeHtml(p.item_icon  || '🎁')      + '" ' +
+                        'data-image="'  + escapeHtml(p.item_image || '')        + '" ' +
+                        'data-detail="' + escapeHtml(p.item_detail || '暂无详情') + '" ' +
+                        'data-price="'  + (p.price_paid || 0) + '" ' +
+                        'data-time="'   + t + '">' +
+                        '<span class="h-icon">' + escapeHtml(p.item_icon || '🎁') + '</span>' +
+                        '<div class="h-info">' +
+                            '<div class="h-name">' + escapeHtml(p.item_name || '未知商品') + '</div>' +
+                            '<div class="h-time">' + t + '</div>' +
+                        '</div>' +
+                        '<span class="h-price">-' + (p.price_paid || 0) + '</span>' +
+                    '</div>';
+            });
+            hist.innerHTML = h;
+
+            /* 点击记录 → 打开商品详情弹窗 */
+            hist.querySelectorAll('.shop-history-item').forEach(function (el) {
+                el.addEventListener('click', function () {
+                    var id     = this.getAttribute('data-id');
+                    var name   = this.getAttribute('data-name');
+                    var icon   = this.getAttribute('data-icon');
+                    var image  = this.getAttribute('data-image');
+                    var detail = this.getAttribute('data-detail');
+                    var price  = this.getAttribute('data-price');
+                    var time   = this.getAttribute('data-time');
+
+                    document.getElementById('detailName').textContent  = name;
+                    document.getElementById('detailPrice').textContent = '-' + price;
+                    document.getElementById('detailTime').textContent  = time;
+                    document.getElementById('detailDesc').textContent  = detail;
+                    document.getElementById('detailDeleteBtn').dataset.purchaseId = id;
+
+                    var imgEl      = document.getElementById('detailImage');
+                    var fallbackEl = document.getElementById('detailIconFallback');
+                    if (image) {
+                        imgEl.src = image;
+                        imgEl.style.display = 'block';
+                        fallbackEl.style.display = 'none';
+                    } else {
+                        imgEl.style.display = 'none';
+                        fallbackEl.style.display = 'flex';
+                        fallbackEl.textContent = icon;
+                    }
+
+                    document.getElementById('itemDetailModal').style.display = 'flex';
+                });
+            });
+        });
+}
+
+function doPurchase(itemId, itemName, price) {
+    if (!currentUser) return;
+
+    var topPointsEl = document.getElementById('shopMyPoints');
+    var currentPoints = parseInt((topPointsEl.textContent || '').replace(/\D/g, ''), 10) || 0;
+    if (currentPoints < price) {
+        alert('积分不足，还差 ' + (price - currentPoints) + ' 分');
+        return;
+    }
+
+    if (!confirm('确定用 ' + price + ' 积分兑换「' + itemName + '」吗？')) return;
+
+    supabaseClient.rpc('purchase_item', { p_item_id: itemId })
+        .then(function (res) {
+            if (res.error) {
+                alert('兑换失败：' + res.error.message);
+                return;
+            }
+            var data = res.data || {};
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            if (typeof data.newPoints === 'number') {
+                topPointsEl.textContent = '积分：' + data.newPoints;
+                var myPts = document.getElementById('myPoints');
+                if (myPts) myPts.textContent = data.newPoints;
+            }
+            alert('兑换成功！\n消耗 ' + data.points + ' 积分\n剩余 ' + data.newPoints + ' 积分');
+            loadShop();
+        })
+        .catch(function (err) {
+            alert('兑换失败：' + (err.message || err));
+        });
+}
+
+/* 用户端商城刷新按钮 */
+(function () {
+    var b = document.getElementById('refreshUserShopBtn');
+    if (!b) return;
+    b.addEventListener('click', function () {
+        b.classList.add('spinning');
+        loadShop();
+        setTimeout(function () { b.classList.remove('spinning'); }, 500);
+    });
+})();
+
+/* ============================================================
+ *  好友系统
+ * ============================================================ */
 var friendsCache = [];
 var currentChatFriend = null;
 var chatPollTimer = null;
@@ -1973,6 +2547,11 @@ document.getElementById('chatInput').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') sendMessage();
 });
 
+/* 更换头像按钮 */
+document.getElementById('avatarChangeBtn').addEventListener('click', function () {
+    document.getElementById('avatarInput').click();
+});
+
 avatarInput.addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
@@ -2024,6 +2603,38 @@ logoutBtn.addEventListener('click', function () {
     if (chatPollTimer) clearInterval(chatPollTimer);
     supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
 });
+
+/* 商品详情弹窗：关闭 + 删除记录 */
+(function () {
+    var modal     = document.getElementById('itemDetailModal');
+    var btnClose  = document.getElementById('detailCloseBtn');
+    var btnDelete = document.getElementById('detailDeleteBtn');
+
+    if (modal) {
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) modal.style.display = 'none';
+        });
+    }
+    if (btnClose) {
+        btnClose.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+    }
+    if (btnDelete) {
+        btnDelete.addEventListener('click', function () {
+            var id = this.dataset.purchaseId;
+            if (!id) return;
+            if (!confirm('确定删除这条兑换记录吗？删除后不可恢复。')) return;
+
+            supabaseClient.from('user_purchases').delete().eq('id', id)
+                .then(function (r) {
+                    if (r.error) { alert('删除失败：' + r.error.message); return; }
+                    modal.style.display = 'none';
+                    loadShop();
+                });
+        });
+    }
+})();
 
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';

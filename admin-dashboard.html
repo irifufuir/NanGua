@@ -84,17 +84,51 @@
     }
     .avatar-edit:hover { transform: scale(1.08); box-shadow: var(--shadow-md); }
 
-    .user-details { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: var(--space-2); }
-    .user-details .email {
-        font-size: 0.92em; font-weight: 500; color: var(--theme-text);
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    .user-details {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+        gap: var(--space-2);
     }
-    .user-bottom-row { display: flex; align-items: center; gap: var(--space-2); }
-    .user-details .role {
-        font-size: 0.72em; font-weight: 500;
-        color: var(--theme-accent); background: var(--theme-accent-soft);
+    .user-name-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-width: 0;
+        flex: 1;
+    }
+    .user-name-row .email {
+        font-size: 0.92em;
+        font-weight: 500;
+        color: var(--theme-text);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+    }
+    .user-name-row .role {
+        font-size: 0.72em;
+        font-weight: 500;
+        color: var(--theme-accent);
+        background: var(--theme-accent-soft);
         border: 1px solid var(--theme-accent-border);
-        padding: 2px 10px; border-radius: var(--radius-full);
+        padding: 2px 10px;
+        border-radius: var(--radius-full);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .user-action-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        width: 100%;
+    }
+    .user-action-row .avatar-change-btn,
+    .user-action-row .logout-btn-mini {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
     }
     .logout-btn-mini {
         background: transparent; border: 1px solid var(--theme-border);
@@ -104,6 +138,17 @@
         transition: all var(--transition-base);
     }
     .logout-btn-mini:hover {
+        background: var(--theme-info-box); color: var(--theme-text);
+        border-color: var(--theme-text-faint);
+    }
+    .avatar-change-btn {
+        background: transparent; border: 1px solid var(--theme-border);
+        color: var(--theme-text-dim); font-size: 0.72em; font-family: inherit;
+        padding: 3px 10px; border-radius: var(--radius-full);
+        cursor: pointer; white-space: nowrap;
+        transition: all var(--transition-base);
+    }
+    .avatar-change-btn:hover {
         background: var(--theme-info-box); color: var(--theme-text);
         border-color: var(--theme-text-faint);
     }
@@ -343,6 +388,16 @@
         color: var(--theme-text); outline: none;
         transition: all var(--transition-base);
     }
+    .announce-form input[type="number"] {
+        height: 42px;
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: 0 var(--space-3);
+        font-size: 0.95em; font-family: inherit;
+        color: var(--theme-text); outline: none;
+        transition: all var(--transition-base);
+    }
     .announce-form textarea {
         width: 100%; min-height: 90px;
         background: var(--theme-card);
@@ -553,7 +608,6 @@
         transition: all var(--transition-base); outline: none;
     }
     .btn-reset:hover { background: var(--theme-info-box); color: var(--theme-text); }
-
     .info-toolbar {
         display: flex; justify-content: space-between; align-items: center;
         margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-3);
@@ -644,6 +698,82 @@
     .theme-section-hint {
         font-size: 0.88em; color: var(--theme-text-dim);
         line-height: 1.7; margin-bottom: var(--space-7); max-width: 520px;
+    }
+
+    /* ========== 积分商城（管理端） ========== */
+    .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+        gap: var(--space-4);
+    }
+    .shop-item {
+        position: relative;
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: var(--space-5);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        transition: all var(--transition-base);
+    }
+    .shop-item:hover {
+        border-color: var(--theme-accent-border);
+        box-shadow: var(--shadow-sm);
+    }
+    .shop-item-icon {
+        font-size: 2.4em;
+        text-align: center;
+        line-height: 1;
+    }
+    .shop-item-name {
+        font-size: 1em;
+        font-weight: 600;
+        text-align: center;
+        word-break: break-word;
+    }
+    .shop-item-price {
+        font-size: 1.05em;
+        font-weight: 700;
+        color: var(--theme-accent);
+        text-align: center;
+    }
+    .shop-item-stock {
+        font-size: 0.78em;
+        color: var(--theme-text-faint);
+        text-align: center;
+    }
+    .shop-item-actions {
+        display: flex;
+        gap: var(--space-2);
+        margin-top: auto;
+    }
+    .shop-item-actions button {
+        flex: 1;
+        height: 36px;
+        font-size: 0.85em;
+        font-family: inherit;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        outline: none;
+        border: 1px solid transparent;
+    }
+    .shop-item-actions .btn-edit {
+        background: var(--theme-accent-soft);
+        border-color: var(--theme-accent-border);
+        color: var(--theme-accent);
+    }
+    .shop-item-actions .btn-edit:hover {
+        border-color: var(--theme-accent);
+    }
+    .shop-item-actions .btn-del {
+        background: rgba(214,139,139,.10);
+        border-color: rgba(214,139,139,.30);
+        color: var(--danger);
+    }
+    .shop-item-actions .btn-del:hover {
+        background: rgba(214,139,139,.22);
     }
 
     .toggle-row {
@@ -1085,6 +1215,87 @@
         gap: var(--space-3);
     }
 
+    /* ========== 编辑商品弹窗（新增） ========== */
+    .edit-shop-dialog {
+        width: 480px;
+        max-width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    .edit-shop-form {
+        display: flex; flex-direction: column; gap: var(--space-3);
+    }
+    .edit-shop-form .form-group {
+        display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .edit-shop-form .form-group label {
+        font-size: 0.85em; color: var(--theme-text-dim); font-weight: 500;
+    }
+    .edit-shop-form .form-group input,
+    .edit-shop-form .form-group textarea {
+        width: 100%;
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: 0 var(--space-4);
+        font-size: 0.95em; font-family: inherit;
+        color: var(--theme-text); outline: none;
+        transition: all var(--transition-base);
+    }
+    .edit-shop-form .form-group input { height: 42px; }
+    .edit-shop-form .form-group textarea {
+        min-height: 70px; resize: vertical; padding: var(--space-3) var(--space-4);
+    }
+    .edit-shop-form .form-group input:focus,
+    .edit-shop-form .form-group textarea:focus {
+        border-color: var(--theme-accent-border);
+        box-shadow: 0 0 0 3px var(--theme-accent-soft);
+    }
+
+    /* ========== 上架表单（新布局：标签在上，输入在下） ========== */
+    .shop-add-form {
+        display: flex; flex-direction: column; gap: var(--space-4);
+        padding: var(--space-5);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-6);
+    }
+    .shop-add-form .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-4);
+    }
+    .shop-add-form .form-group {
+        display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .shop-add-form .form-group label {
+        font-size: 0.85em; color: var(--theme-text-dim); font-weight: 500;
+    }
+    .shop-add-form .form-group input,
+    .shop-add-form .form-group textarea {
+        width: 100%;
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: 0 var(--space-4);
+        font-size: 0.95em; font-family: inherit;
+        color: var(--theme-text); outline: none;
+        transition: all var(--transition-base);
+    }
+    .shop-add-form .form-group input { height: 42px; }
+    .shop-add-form .form-group textarea {
+        min-height: 70px; resize: vertical; padding: var(--space-3) var(--space-4);
+    }
+    .shop-add-form .form-group input:focus,
+    .shop-add-form .form-group textarea:focus {
+        border-color: var(--theme-accent-border);
+        box-shadow: 0 0 0 3px var(--theme-accent-soft);
+    }
+    .shop-add-form .form-submit {
+        display: flex; justify-content: flex-end;
+    }
+
     /* ============================================================
      *  手机端适配
      * ============================================================ */
@@ -1101,7 +1312,6 @@
         .preview-hint { display: none; }
     }
 
-    /* ⭐ 修改：加触屏横屏条件（解决横屏按钮点不了） */
     @media (max-width: 768px),
            (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         body { flex-direction: column; }
@@ -1133,10 +1343,12 @@
             bottom: -1px; right: -1px;
         }
         .user-details { gap: 0; }
-        .user-details .email { font-size: 0.82em; }
-        .user-bottom-row { gap: 6px; }
-        .user-details .role { display: none; }
-        .logout-btn-mini {
+        .user-name-row { gap: 6px; }
+        .user-name-row .email { font-size: 0.82em; }
+        .user-name-row .role { display: none; }
+        .user-action-row { gap: 6px; }
+        .logout-btn-mini,
+        .avatar-change-btn {
             font-size: 0.66em;
             padding: 2px 8px;
             border-radius: 8px;
@@ -1315,6 +1527,7 @@
 
         .announce-form { padding: 12px; gap: 10px; margin-bottom: 14px; }
         .announce-form input[type="text"] { height: 42px; font-size: 16px; }
+        .announce-form input[type="number"] { font-size: 16px; }
         .announce-form textarea { font-size: 16px; min-height: 80px; }
         .announce-form-row {
             flex-direction: column;
@@ -1516,8 +1729,9 @@
     @media (max-width: 380px) {
         .user-profile { padding: 4px 10px 2px; gap: 6px; }
         .avatar-wrapper { width: 26px; height: 26px; }
-        .user-details .email { font-size: 0.76em; }
-        .logout-btn-mini { font-size: 0.62em; padding: 2px 6px; }
+        .user-name-row .email { font-size: 0.76em; }
+        .logout-btn-mini,
+        .avatar-change-btn { font-size: 0.62em; padding: 2px 6px; }
 
         .nav-main-row .nav-item,
         .nav-main-row .nav-group {
@@ -1546,7 +1760,6 @@
         .checkin-stat { padding: 8px 3px; }
     }
 
-    /* ⭐ 新增：横屏矮屏压缩顶部，避免按钮被挤掉 */
     @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         .user-profile {
             padding: 2px 10px 1px;
@@ -1556,8 +1769,9 @@
         .avatar-edit {
             width: 12px; height: 12px; font-size: 6px;
         }
-        .user-details .email { font-size: 0.76em; }
-        .logout-btn-mini {
+        .user-name-row .email { font-size: 0.76em; }
+        .logout-btn-mini,
+        .avatar-change-btn {
             font-size: 0.62em;
             padding: 1px 6px;
         }
@@ -1587,13 +1801,15 @@
         <div class="user-profile">
             <div class="avatar-wrapper">
                 <img id="avatarImg" src="image/default-avatar.png" alt="头像">
-                <label for="avatarInput" class="avatar-edit" title="更换头像">📷</label>
                 <input type="file" id="avatarInput" accept="image/*" style="display:none;">
             </div>
             <div class="user-details">
-                <span class="email" id="adminEmail">加载中...</span>
-                <div class="user-bottom-row">
+                <div class="user-name-row">
                     <span class="role">管理员</span>
+                    <span class="email" id="adminEmail">加载中...</span>
+                </div>
+                <div class="user-action-row">
+                    <button class="avatar-change-btn" id="avatarChangeBtn" title="更换头像">📷 换头像</button>
                     <button class="logout-btn-mini" id="logoutBtn">退出</button>
                 </div>
             </div>
@@ -1622,6 +1838,10 @@
 
             <div class="nav-item" data-tab="server">
                 <span class="nav-text">📊 服务端信息</span>
+            </div>
+
+            <div class="nav-item" data-tab="shop">
+                <span class="nav-text">🛒 积分商城</span>
             </div>
 
             <div class="nav-item" data-tab="myCheckin">
@@ -1656,7 +1876,6 @@
                         <button class="refresh-btn-mini" id="refreshAnnounceBtn" title="刷新">🔄</button>
                     </div>
                 </div>
-                <!-- ⭐ 修改：用 form 包裹 + 反自动填充 -->
                 <form class="announce-form" autocomplete="off" onsubmit="return false;">
                     <input type="text" id="announceTitle" name="notice_title_field"
                            placeholder="公告标题" autocomplete="off" autocorrect="off" spellcheck="false"/>
@@ -1849,6 +2068,60 @@
                             <button class="btn-reset" id="resetManageBtn">清空</button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- 积分商城（管理端） -->
+            <div class="card" id="cardShop">
+                <div class="card-head">
+                    <h2>🛒 积分商城管理</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeShop">—</span>
+                        <button class="refresh-btn-mini" id="refreshShopBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+
+                <!-- 上架表单：标签在上、输入在下，按序号排 -->
+                <div class="shop-add-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>① 商品名称</label>
+                            <input type="text" id="addShopName" placeholder="请输入商品名称"/>
+                        </div>
+                        <div class="form-group">
+                            <label>② 积分价格</label>
+                            <input type="number" id="addShopPrice" placeholder="请输入积分价格" min="0"/>
+                        </div>
+                        <div class="form-group">
+                            <label>③ 库存</label>
+                            <input type="number" id="addShopStock" placeholder="请输入库存" min="0" value="10"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>④ 商品描述（用户看到的简短介绍）</label>
+                        <textarea id="addShopDesc" rows="2" placeholder="请输入商品描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>⑤ 商品详情（用户兑换后才能看到）</label>
+                        <textarea id="addShopDetail" rows="3" placeholder="请输入商品详情"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>⑥ 商品图片展示链接（可选）</label>
+                            <input type="text" id="addShopImage" placeholder="https://..."/>
+                        </div>
+                        <div class="form-group">
+                            <label>⑦ 商品图标（Emoji）</label>
+                            <input type="text" id="addShopIcon" placeholder="如 🎁" value="🎁"/>
+                        </div>
+                    </div>
+                    <div class="form-submit">
+                        <button class="btn-save" id="addShopBtn" style="padding: 0 24px; width: auto;">➕ 上架商品</button>
+                    </div>
+                </div>
+
+                <div class="shop-grid" id="adminShopGrid">
+                    <div class="empty">加载中...</div>
                 </div>
             </div>
 
@@ -2078,6 +2351,47 @@
         </div>
     </div>
 
+    <!-- 编辑商品弹窗（新增） -->
+    <div class="mask" id="editShopModal" style="display:none;">
+        <div class="dialog edit-shop-dialog">
+            <h3>编辑商品信息</h3>
+            <div class="edit-shop-form">
+                <div class="form-group">
+                    <label>① 商品名称</label>
+                    <input type="text" id="editShopName"/>
+                </div>
+                <div class="form-group">
+                    <label>② 积分价格</label>
+                    <input type="number" id="editShopPrice" min="0"/>
+                </div>
+                <div class="form-group">
+                    <label>③ 库存</label>
+                    <input type="number" id="editShopStock" min="0"/>
+                </div>
+                <div class="form-group">
+                    <label>④ 商品描述</label>
+                    <textarea id="editShopDesc" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>⑤ 商品详情</label>
+                    <textarea id="editShopDetail" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>⑥ 商品图片展示链接</label>
+                    <input type="text" id="editShopImage"/>
+                </div>
+                <div class="form-group">
+                    <label>⑦ 商品图标</label>
+                    <input type="text" id="editShopIcon"/>
+                </div>
+            </div>
+            <div class="dialog-actions" style="margin-top: 16px;">
+                <button type="button" class="btn-cancel" id="editShopCancelBtn">取消</button>
+                <button type="button" class="btn-confirm" id="editShopSaveBtn" style="background:var(--theme-accent-soft);border-color:var(--theme-accent-border);color:var(--theme-accent);">保存修改</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 聊天弹窗 -->
     <div class="chat-mask" id="myChatModal" style="display:none;">
         <div class="chat-box">
@@ -2233,7 +2547,7 @@
 })();
 
 /* ============================================================
- *  以下为页面原有逻辑（未改动）
+ *  以下为页面原有逻辑
  * ============================================================ */
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
@@ -2244,6 +2558,7 @@ var allProfiles = [];
 var currentAdmin = null;
 var currentBanUserId = null;
 var currentPointsUserId = null;
+var currentEditShopId = null;
 
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -2305,6 +2620,7 @@ var CARDS = {
     profiles:  'cardProfiles',
     manage:    'cardManage',
     server:    'cardServer',
+    shop:      'cardShop',
     theme:     'cardTheme',
     sound:     'cardSound',
     myCheckin: 'cardMyCheckin',
@@ -2331,6 +2647,7 @@ function switchTab(tab) {
     if (tab === 'forgot')    loadForgotRequests();
     if (tab === 'profiles')  loadProfiles();
     if (tab === 'server')    loadServerInfo();
+    if (tab === 'shop')      loadAdminShop();
     if (tab === 'myCheckin') { myRefreshCheckinUI(); myLoadCheckinCalendar(); }
     if (tab === 'myFriends') myLoadFriends();
 
@@ -2382,6 +2699,11 @@ supabaseClient.auth.getSession().then(function (res) {
 });
 supabaseClient.auth.onAuthStateChange(function (event, session) {
     if (event === 'SIGNED_OUT' || !session) location.href = 'index.html';
+});
+
+/* 更换头像按钮 */
+document.getElementById('avatarChangeBtn').addEventListener('click', function () {
+    document.getElementById('avatarInput').click();
 });
 
 /* 头像上传 */
@@ -3010,6 +3332,185 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
         }
         loadProfiles();
     });
+});
+
+/* ============================================================
+ *  管理端积分商城
+ * ============================================================ */
+function loadAdminShop() {
+    var grid = document.getElementById('adminShopGrid');
+    var badge = document.getElementById('badgeShop');
+    if (!grid) return;
+
+    grid.innerHTML = '<div class="empty">加载中...</div>';
+
+    supabaseClient.from('shop_items').select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                grid.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var items = res.data || [];
+            badge.textContent = items.length + ' 件';
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty">暂无商品，请在上方上架</div>';
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (it) {
+                var stockText = (it.stock === 0) ? '已售罄' : ('库存: ' + (it.stock || 0));
+                var activeTag = it.is_active === false ? '（已下架）' : '';
+                html +=
+                    '<div class="shop-item">' +
+                        '<div class="shop-item-icon">' + escapeHtml(it.icon || '🎁') + '</div>' +
+                        '<div class="shop-item-name">' + escapeHtml(it.name) + activeTag + '</div>' +
+                        '<div class="shop-item-price">' + (it.price || 0) + ' 积分</div>' +
+                        '<div class="shop-item-stock">' + stockText + '</div>' +
+                        '<div class="shop-item-actions">' +
+                            '<button class="btn-edit" data-id="' + it.id + '">编辑</button>' +
+                            '<button class="btn-del" data-id="' + it.id + '">删除</button>' +
+                        '</div>' +
+                    '</div>';
+            });
+            grid.innerHTML = html;
+
+            // 删除商品
+            grid.querySelectorAll('.btn-del').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    if (!confirm('确定删除该商品吗？此操作不可恢复。')) return;
+                    supabaseClient.from('shop_items').delete().eq('id', id)
+                        .then(function (r) {
+                            if (r.error) { alert('删除失败：' + r.error.message); return; }
+                            loadAdminShop();
+                        });
+                });
+            });
+
+            // 编辑商品（弹窗）
+            grid.querySelectorAll('.btn-edit').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var it = items.find(function (x) { return String(x.id) === String(id); });
+                    if (!it) return;
+
+                    currentEditShopId = id;
+
+                    document.getElementById('editShopName').value   = it.name || '';
+                    document.getElementById('editShopPrice').value  = it.price || 0;
+                    document.getElementById('editShopStock').value  = it.stock || 0;
+                    document.getElementById('editShopDesc').value   = it.description || '';
+                    document.getElementById('editShopDetail').value = it.detail || '';
+                    document.getElementById('editShopImage').value  = it.image_url || '';
+                    document.getElementById('editShopIcon').value   = it.icon || '🎁';
+
+                    document.getElementById('editShopModal').style.display = 'flex';
+                });
+            });
+        });
+}
+
+document.getElementById('refreshShopBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadAdminShop();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
+});
+
+/* 上架商品 */
+document.getElementById('addShopBtn').addEventListener('click', function () {
+    var name   = document.getElementById('addShopName').value.trim();
+    var price  = parseInt(document.getElementById('addShopPrice').value, 10) || 0;
+    var stock  = parseInt(document.getElementById('addShopStock').value, 10) || 0;
+    var desc   = document.getElementById('addShopDesc').value.trim();
+    var detail = document.getElementById('addShopDetail').value.trim();
+    var image  = document.getElementById('addShopImage').value.trim();
+    var icon   = document.getElementById('addShopIcon').value.trim() || '🎁';
+
+    if (!name) { alert('请填写商品名称'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '上架中...';
+
+    supabaseClient.from('shop_items').insert([{
+        name: name,
+        description: desc,
+        detail: detail,
+        price: price,
+        stock: stock,
+        icon: icon,
+        image_url: image,
+        is_active: true,
+        sort_order: 0
+    }]).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '➕ 上架商品';
+        if (res.error) {
+            alert('上架失败：' + res.error.message);
+            return;
+        }
+        alert('上架成功！所有用户刷新页面即可看到。');
+        ['addShopName','addShopPrice','addShopDesc','addShopDetail','addShopImage'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('addShopStock').value = '10';
+        document.getElementById('addShopIcon').value  = '🎁';
+        loadAdminShop();
+    });
+});
+
+/* 保存编辑商品 */
+document.getElementById('editShopSaveBtn').addEventListener('click', function () {
+    var id = currentEditShopId;
+    if (!id) return;
+
+    var name   = document.getElementById('editShopName').value.trim();
+    var price  = parseInt(document.getElementById('editShopPrice').value, 10) || 0;
+    var stock  = parseInt(document.getElementById('editShopStock').value, 10) || 0;
+    var desc   = document.getElementById('editShopDesc').value.trim();
+    var detail = document.getElementById('editShopDetail').value.trim();
+    var image  = document.getElementById('editShopImage').value.trim();
+    var icon   = document.getElementById('editShopIcon').value.trim() || '🎁';
+
+    if (!name) { alert('商品名称不能为空'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+
+    supabaseClient.from('shop_items').update({
+        name: name,
+        price: price,
+        stock: stock,
+        description: desc,
+        detail: detail,
+        image_url: image,
+        icon: icon
+    }).eq('id', id).then(function (r) {
+        btn.disabled = false;
+        btn.textContent = '保存修改';
+        if (r.error) { alert('保存失败：' + r.error.message); return; }
+        document.getElementById('editShopModal').style.display = 'none';
+        currentEditShopId = null;
+        loadAdminShop();
+    });
+});
+
+document.getElementById('editShopCancelBtn').addEventListener('click', function () {
+    document.getElementById('editShopModal').style.display = 'none';
+    currentEditShopId = null;
+});
+document.getElementById('editShopModal').addEventListener('click', function (e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+        currentEditShopId = null;
+    }
 });
 
 /* 服务端信息 */
