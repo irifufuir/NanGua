@@ -7,6 +7,32 @@
     <title>齿轮盛宴 · 个人账户</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 
+    <!-- 设备识别：自动区分手机/电脑 -->
+    <script>
+    (function () {
+        var root = document.documentElement;
+        function detectDevice() {
+            var ua = navigator.userAgent || '';
+            var w  = window.innerWidth || root.clientWidth;
+            var hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            var mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|HarmonyOS/i.test(ua);
+            var narrow = w <= 768;
+            var isMobile = narrow || (hasTouch && narrow && mobileUA);
+            root.setAttribute('data-device', isMobile ? 'mobile' : 'desktop');
+            root.setAttribute('data-touch', hasTouch ? 'yes' : 'no');
+        }
+        detectDevice();
+        var t = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(t);
+            t = setTimeout(detectDevice, 120);
+        });
+        window.addEventListener('orientationchange', function () {
+            setTimeout(detectDevice, 200);
+        });
+    })();
+    </script>
+
     <link rel="stylesheet" href="other/theme.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -580,27 +606,31 @@
         line-height: 1.7; margin-bottom: var(--space-7); max-width: 520px;
     }
 
-    /* ================================================================
-       ========== 移动端适配（重新优化） ==========
-       ================================================================ */
+    /* ============================================================
+     *  手机端适配（≤768px）
+     *  · 顶部第1行：用户信息（小）
+     *  · 顶部第2行：所有导航横向滚动，子菜单紧跟其后
+     *  · 整体只占顶部约 100px
+     * ============================================================ */
     @media (max-width: 900px) {
         .main-content { padding: var(--space-7) var(--space-6); }
         .card { padding: var(--space-7) var(--space-6); }
     }
 
     @media (max-width: 768px) {
+
         body { flex-direction: column; }
 
-        /* ---------- 侧边栏：吸附顶部，两行结构 ---------- */
+        /* ---------- 侧边栏：变成顶部两行容器 ---------- */
         .sidebar {
             width: 100%;
-            padding: 6px 0 0;
+            padding: 0;
             border-right: none;
             border-bottom: 1px solid var(--theme-border-soft);
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
+
+            flex-direction: column;
+            align-items: stretch;
+
             position: sticky;
             top: 0;
             z-index: 50;
@@ -609,107 +639,143 @@
             -webkit-backdrop-filter: blur(12px);
         }
 
-        /* 用户信息行：紧凑 */
+        /* ---------- 第1行：用户信息（小条） ---------- */
         .user-profile {
-            flex-direction: row;
-            padding: 4px 12px;
+            padding: 6px 12px 4px;
             margin-bottom: 0;
             gap: 8px;
-            flex: 1;
-            min-width: 0;
         }
-        .avatar-wrapper { width: 34px; height: 34px; }
+        .avatar-wrapper { width: 30px; height: 30px; }
         .avatar-edit {
-            width: 15px; height: 15px;
-            font-size: 8px;
+            width: 13px; height: 13px;
+            font-size: 7px;
             bottom: -1px; right: -1px;
         }
-        .user-details { gap: 2px; }
-        .user-details .email { font-size: 0.84em; }
+        .user-details { gap: 0; }
+        .user-details .email { font-size: 0.82em; }
         .user-bottom-row { gap: 6px; }
         .user-details .role { display: none; }
         .logout-btn-mini {
-            font-size: 0.68em;
+            font-size: 0.66em;
             padding: 2px 8px;
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
-        /* ---------- 导航：横滚 + 垂直布局 ---------- */
+        /* ---------- 第2行：导航横滚条 ---------- */
         .nav-menu {
+            flex: none;
             display: flex;
-            order: 3;
-            width: 100%;
-            overflow-x: auto;
-            margin-top: 4px;
-            padding: 4px 6px 8px;
+            flex-direction: row;
             flex-wrap: nowrap;
+            align-items: center;
             gap: 4px;
+            width: 100%;
+            padding: 2px 8px 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
             scroll-snap-type: x proximity;
         }
         .nav-menu::-webkit-scrollbar { display: none; }
 
-        .nav-item, .nav-group {
+        /* 主菜单项 */
+        .nav-menu > .nav-item,
+        .nav-menu > .nav-group {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3px;
-            padding: 8px 10px;
-            white-space: nowrap;
-            font-size: 0.75em;
-            flex-shrink: 0;
+            gap: 2px;
+
+            padding: 6px 12px;
             min-width: 62px;
-            border-radius: 10px;
+            flex-shrink: 0;
+
+            font-size: 0.72em;
             line-height: 1.15;
             text-align: center;
+            white-space: nowrap;
+
+            border-radius: 10px;
             scroll-snap-align: start;
-            transition: all 0.25s ease;
+            color: var(--theme-text-dim);
+            background: transparent;
+            position: relative;
+            transition: background 0.2s ease, color 0.2s ease;
         }
-        .nav-item::before, .nav-group::before { display: none; }
-        .nav-item.active, .nav-group.open {
-            padding-left: 10px;
+        .nav-menu > .nav-item::before,
+        .nav-menu > .nav-group::before { display: none; }
+
+        .nav-menu > .nav-item:hover,
+        .nav-menu > .nav-group:hover {
+            padding-left: 12px;
+            background: var(--theme-hover);
+        }
+        .nav-menu > .nav-item.active,
+        .nav-menu > .nav-group.open {
+            padding-left: 12px;
             background: var(--theme-accent-soft);
+            color: var(--theme-accent);
         }
-        .nav-text {
+
+        .nav-menu .nav-text {
             font-size: 1em;
-            text-align: center;
-            line-height: 1.2;
-            max-width: 66px;
+            max-width: 72px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            text-align: center;
+            flex: none;
         }
-        .nav-arrow { display: none; }
+        .nav-menu .nav-arrow { display: none; }
 
-        /* nav-sub 内联 */
-        .nav-sub {
-            display: flex !important;
-            max-height: none !important;
-            opacity: 1 !important;
+        /* 子菜单：跟在主菜单后面，横向排列 */
+        .nav-menu > .nav-sub {
+            display: none;
+            flex-direction: row;
             flex-shrink: 0;
             gap: 4px;
             padding: 0;
+            max-height: none;
+            overflow: visible;
+            opacity: 1;
+            transition: none;
         }
-        .nav-sub-item {
+        .nav-menu > .nav-sub.open { display: flex; }
+
+        .nav-menu > .nav-sub .nav-sub-item {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
             justify-content: center;
-            padding: 8px 10px;
-            white-space: nowrap;
-            font-size: 0.75em;
-            min-width: 62px;
-            border-radius: 10px;
-            text-align: center;
-            line-height: 1.15;
+
+            padding: 7px 12px;
             flex-shrink: 0;
             scroll-snap-align: start;
+
+            font-size: 0.76em;
+            line-height: 1.15;
+            white-space: nowrap;
+
+            border-radius: 999px;
+            background: var(--theme-info-box);
+            border: 1px solid var(--theme-border-soft);
+            color: var(--theme-text-dim);
+
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
-        .nav-sub-item::before { display: none; }
-        .nav-sub-item.active {
+        .nav-menu > .nav-sub .nav-sub-item::before { display: none; }
+
+        .nav-menu > .nav-sub .nav-sub-item:hover {
+            background: var(--theme-hover);
+            color: var(--theme-text);
+        }
+        .nav-menu > .nav-sub .nav-sub-item.active {
             background: var(--theme-accent-soft);
+            border-color: var(--theme-accent-border);
+            color: var(--theme-accent);
+            font-weight: 500;
         }
 
         /* ---------- 主内容 ---------- */
@@ -754,113 +820,91 @@
         .info-box .label { font-size: 0.72em; }
         .info-box .value { font-size: 0.9em; }
 
-        /* ---------- 签到日历 ---------- */
-        .checkin-hero {
-            padding: 16px 0;
-            gap: 16px;
-        }
+        /* ---------- 签到 ---------- */
+        .checkin-hero { padding: 14px 0; gap: 14px; }
         .checkin-points .num { font-size: 2.4em; }
-        .checkin-points .lbl { font-size: 0.74em; }
-        .checkin-btn {
-            padding: 12px 32px;
-            font-size: 0.95em;
-        }
+        .checkin-points .lbl { font-size: 0.72em; }
+        .checkin-btn { padding: 12px 30px; font-size: 0.95em; }
         .checkin-calendar {
-            grid-template-columns: repeat(7, 1fr);
-            gap: 3px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
             max-width: 100%;
-            margin-top: 16px;
+            margin-top: 12px;
         }
-        .checkin-day {
-            padding: 6px 2px;
-            border-radius: 8px;
-            gap: 1px;
-        }
-        .checkin-day .day-name { font-size: 0.6em; }
-        .checkin-day .day-date { font-size: 0.82em; }
-        .checkin-day .day-points { font-size: 0.6em; }
+        .checkin-day { padding: 6px 3px; border-radius: 8px; gap: 1px; }
+        .checkin-day .day-name { font-size: 0.62em; }
+        .checkin-day .day-date { font-size: 0.84em; }
+        .checkin-day .day-points { font-size: 0.62em; }
 
         .checkin-stats {
+            grid-template-columns: 1fr 1fr 1fr !important;
+            max-width: 100% !important;
             gap: 6px;
             margin-top: 8px;
         }
-        .checkin-stat {
-            padding: 10px 6px;
-        }
-        .checkin-stat .v { font-size: 1.15em; }
-        .checkin-stat .k { font-size: 0.68em; }
+        .checkin-stat { padding: 8px 4px; }
+        .checkin-stat .v { font-size: 1.1em; }
+        .checkin-stat .k { font-size: 0.66em; }
 
-        /* ---------- 好友列表 ---------- */
-        .add-friend-box {
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
+        /* ---------- 好友 ---------- */
+        .add-friend-box { flex-direction: column; gap: 8px; margin-bottom: 18px; }
         .add-friend-box input,
-        .add-friend-box button {
-            width: 100%;
-            height: 42px;
-            font-size: 16px;
-        }
-        .friend-section { margin-bottom: 20px; }
+        .add-friend-box button { width: 100%; height: 44px; font-size: 16px; }
+        .friend-section { margin-bottom: 18px; }
         .friend-section-title {
-            font-size: 0.76em;
+            font-size: 0.74em;
             margin-bottom: 10px;
             padding-bottom: 8px;
         }
-        .friend-item {
-            padding: 10px 12px;
-            gap: 10px;
-        }
-        .friend-item img {
-            width: 38px; height: 38px;
-        }
-        .friend-item .friend-name { font-size: 0.9em; }
-        .friend-item .friend-email { font-size: 0.74em; }
-        .friend-item.pending .friend-actions {
-            flex-direction: column;
-            gap: 4px;
-        }
+        .friend-item { padding: 10px 12px; gap: 10px; }
+        .friend-item img { width: 38px; height: 38px; }
+        .friend-item .friend-name { font-size: 0.88em; }
+        .friend-item .friend-email { font-size: 0.72em; }
+        .friend-item.pending .friend-actions { flex-direction: column; gap: 4px; }
         .friend-item.pending .friend-actions button {
-            padding: 5px 10px;
-            font-size: 0.76em;
+            padding: 4px 10px;
+            font-size: 0.74em;
         }
 
         /* ---------- 公告 ---------- */
         .announce-list { gap: 10px; }
-        .announce-item { padding: 14px; }
-        .announce-item .announce-title { font-size: 0.94em; }
-        .announce-item .announce-content { font-size: 0.86em; line-height: 1.7; }
-        .announce-item .announce-time { font-size: 0.72em; }
+        .announce-item { padding: 12px; }
+        .announce-item .announce-title { font-size: 0.92em; }
+        .announce-item .announce-content { font-size: 0.84em; line-height: 1.7; }
+        .announce-item .announce-time { font-size: 0.7em; }
+
+        /* ---------- 主题 / 音效 ---------- */
+        .theme-section-hint { font-size: 0.82em; margin-bottom: 16px; }
+        .theme-switcher { padding: 12px; gap: 8px; }
+        .theme-dot { width: 30px; height: 30px; }
+        .theme-switcher-label { font-size: 0.78em; margin-bottom: 0; }
+        .setting-group { margin-bottom: 18px; }
+        .setting-label { margin-bottom: 10px; }
+        .setting-title { font-size: 0.9em; }
+        .setting-desc { font-size: 0.78em; }
+        .setting-options { gap: 6px; }
+        .setting-btn { min-width: 0; padding: 10px 8px; font-size: 0.84em; }
+        .setting-reset-row { margin-top: 18px; padding-top: 14px; }
+        .setting-reset-btn { width: 100%; padding: 10px 16px; font-size: 0.84em; }
 
         /* ---------- 聊天弹窗：底部弹出 ---------- */
-        .chat-mask {
-            padding: 0;
-            align-items: flex-end;
-        }
+        .chat-mask { padding: 0; align-items: flex-end; }
         .chat-box {
             width: 100%;
             max-width: 100%;
-            height: 88vh;
-            max-height: 88vh;
+            height: 90vh;
+            max-height: 90vh;
             border-radius: 20px 20px 0 0;
             border-bottom: none;
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
         }
-        .chat-header { padding: 12px 16px; }
+        .chat-header { padding: 12px 14px; }
         .chat-header img { width: 34px; height: 34px; }
         .chat-header .chat-name { font-size: 0.9em; }
         .chat-close-btn { width: 28px; height: 28px; }
         .chat-body { padding: 12px; gap: 8px; }
-        .chat-msg {
-            max-width: 82%;
-            padding: 8px 12px;
-            font-size: 0.9em;
-        }
-        .chat-input-box {
-            padding: 10px 12px;
-            gap: 8px;
-        }
+        .chat-msg { max-width: 82%; padding: 8px 12px; font-size: 0.9em; }
+        .chat-input-box { padding: 10px 12px; gap: 8px; }
         .chat-input-box input {
             height: 40px;
             font-size: 16px;
@@ -871,70 +915,34 @@
             padding: 0 16px;
             font-size: 0.9em;
         }
-
-        /* ---------- 外观设置（theme.js 动态生成） ---------- */
-        .theme-switcher {
-            padding: 12px;
-            gap: 8px;
-        }
-        .theme-dot {
-            width: 30px;
-            height: 30px;
-        }
-        .theme-switcher-label {
-            font-size: 0.78em;
-            margin-bottom: 0;
-        }
-        .setting-group { margin-bottom: 20px; }
-        .setting-label { margin-bottom: 10px; }
-        .setting-title { font-size: 0.9em; }
-        .setting-desc { font-size: 0.78em; }
-        .setting-options { gap: 6px; }
-        .setting-btn {
-            min-width: 0;
-            padding: 10px 8px;
-            font-size: 0.84em;
-        }
-        .setting-reset-row {
-            margin-top: 20px;
-            padding-top: 16px;
-        }
-        .setting-reset-btn {
-            padding: 10px 16px;
-            font-size: 0.82em;
-        }
-        .theme-section-hint {
-            font-size: 0.82em;
-            margin-bottom: 20px;
-        }
     }
 
-    /* ========== 超小屏（≤ 380px）：进一步收紧 ========== */
+    /* ========== 超小屏（≤380px） ========== */
     @media (max-width: 380px) {
-        .sidebar { padding-top: 4px; }
-        .user-profile { padding: 4px 10px; gap: 6px; }
-        .avatar-wrapper { width: 30px; height: 30px; }
-        .user-details .email { font-size: 0.78em; }
-        .logout-btn-mini { font-size: 0.64em; padding: 2px 6px; }
+        .user-profile { padding: 4px 10px 2px; gap: 6px; }
+        .avatar-wrapper { width: 26px; height: 26px; }
+        .user-details .email { font-size: 0.76em; }
+        .logout-btn-mini { font-size: 0.62em; padding: 2px 6px; }
 
-        .nav-item, .nav-group,
-        .nav-sub-item {
+        .nav-menu > .nav-item,
+        .nav-menu > .nav-group {
             min-width: 56px;
-            padding: 6px 8px;
-            font-size: 0.7em;
+            padding: 6px 10px;
+            font-size: 0.68em;
         }
-        .nav-text { font-size: 1em; max-width: 60px; }
+        .nav-menu .nav-text { max-width: 64px; }
+
+        .nav-menu > .nav-sub .nav-sub-item {
+            padding: 6px 10px;
+            font-size: 0.72em;
+        }
 
         .main-content { padding: 10px; }
         .card { padding: 14px; }
 
         .info-grid { grid-template-columns: 1fr; }
-
-        .checkin-calendar {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-        }
-        .checkin-stat { padding: 8px 4px; }
+        .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
+        .checkin-stat { padding: 8px 3px; }
     }
     </style>
 </head>
@@ -1428,7 +1436,7 @@ function loadAnnouncements() {
         });
 }
 
-/* 每日签到 - 改查 checkins 表 */
+/* 每日签到 */
 function refreshCheckinUI() {
     if (!currentUser) return;
     var today = toDateStr(new Date());
