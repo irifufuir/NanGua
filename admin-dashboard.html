@@ -3639,10 +3639,16 @@ function myToDateStr(d) {
     return y + '-' + m + '-' + dd;
 }
 
+/* 签到日期统一按 Asia/Shanghai（北京时间）计算，与服务端 do_checkin 保持一致 */
+function myShanghaiNow() {
+    var now = new Date();
+    return new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000);
+}
+
 function myLoadCheckinCalendar() {
     if (!currentAdmin) return;
 
-    var today = new Date();
+    var today = myShanghaiNow();
     var dow = today.getDay();
     var diff = dow === 0 ? -6 : 1 - dow;
     var monday = new Date(today);
@@ -3673,7 +3679,7 @@ function myLoadCheckinCalendar() {
 function myRenderCalendar(monday, cfg, checked) {
     var names = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     var keys  = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-    var todayStr = myToDateStr(new Date());
+    var todayStr = myToDateStr(myShanghaiNow());
 
     var html = '';
     for (var i = 0; i < 7; i++) {
@@ -3700,7 +3706,7 @@ function myRenderCalendar(monday, cfg, checked) {
 
 function myRefreshCheckinUI() {
     if (!currentAdmin) return;
-    var today = myToDateStr(new Date());
+    var today = myToDateStr(myShanghaiNow());
 
     Promise.all([
         supabaseClient.from('profiles')

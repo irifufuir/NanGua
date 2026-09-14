@@ -492,13 +492,18 @@
     if (!boxToggle || !boxEl) return;
     boxToggle.addEventListener('click', function (e) {
         e.stopPropagation();
-        playBoxClose(); 
+        if (boxEl.classList.contains('collapsed')) {
+            expandBox();
+        } else {
+            collapseBox();
+        }
     });
 }
 
 /* ---------- 卡片打开动画 ---------- */
 function playBoxOpen() {
     if (!boxEl) return;
+    boxEl.classList.remove('is-closing');
     boxEl.classList.add('is-opening');
     boxEl.addEventListener('animationend', function onOpenEnd(e) {
         if (e.animationName !== 'cardOpen') return;
@@ -507,19 +512,26 @@ function playBoxOpen() {
     });
 }
 
-/* ---------- 卡片关闭动画（结束后移除 DOM） ---------- */
-function playBoxClose() {
-    if (!boxEl || boxEl.classList.contains('is-closing')) return;
+/* ---------- 收起：靠 CSS transition 平滑缩成 46x46 小方块 ---------- */
+function collapseBox() {
+    if (!boxEl || boxEl.classList.contains('collapsed')) return;
     boxEl.classList.remove('is-opening');
-    // 强制重排，确保移除 is-opening 后立即应用 is-closing
-    void boxEl.offsetWidth;
-    boxEl.classList.add('is-closing');
+    boxEl.classList.add('collapsed');
+    // 等收缩过渡差不多完成再切换按钮文字，避免"−"还在中间就变"+"
+    setTimeout(function () {
+        if (boxEl.classList.contains('collapsed')) {
+            boxToggle.textContent = '+';
+            boxToggle.title = '展开';
+        }
+    }, 220);
+}
 
-    boxEl.addEventListener('animationend', function onCloseEnd(e) {
-        if (e.animationName !== 'cardClose') return;
-        boxEl.removeEventListener('animationend', onCloseEnd);
-        if (boxEl.parentNode) boxEl.parentNode.removeChild(boxEl);
-    });
+/* ---------- 展开：靠 CSS transition 平滑恢复登录卡片 ---------- */
+function expandBox() {
+    if (!boxEl || !boxEl.classList.contains('collapsed')) return;
+    boxToggle.textContent = '−';
+    boxToggle.title = '收起 / 展开';
+    boxEl.classList.remove('collapsed');
 }
 
     loginEmail.addEventListener('blur', function () {
@@ -593,6 +605,7 @@ function playBoxClose() {
         }, 300);
     }
 
+    regEmail.addEventListener('input', updateRegEmailSuffixTag);
     regEmail.addEventListener('input', scheduleRegExistsCheck);
     regEmail.addEventListener('blur',  scheduleRegExistsCheck);
 

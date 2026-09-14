@@ -1827,7 +1827,7 @@ function bootUser(user) {
             document.getElementById('myPoints').textContent = profile.points || 0;
             document.getElementById('myStreak').textContent = profile.checkin_streak || 0;
 
-            var todayStr = toDateStr(new Date());
+            var todayStr = toDateStr(shanghaiNow());
             supabaseClient.from('checkins')
                 .select('points')
                 .eq('user_id', user.id)
@@ -1920,10 +1920,16 @@ function toDateStr(d) {
     return y + '-' + m + '-' + dd;
 }
 
+/* 签到日期统一按 Asia/Shanghai（北京时间）计算，与服务端 do_checkin 保持一致 */
+function shanghaiNow() {
+    var now = new Date();
+    return new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000);
+}
+
 function loadCheckinCalendar() {
     if (!currentUser) return;
 
-    var today = new Date();
+    var today = shanghaiNow();
     var dow = today.getDay();
     var diff = dow === 0 ? -6 : 1 - dow;
     var monday = new Date(today);
@@ -1954,7 +1960,7 @@ function loadCheckinCalendar() {
 function renderCalendar(monday, cfg, checked) {
     var names = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
     var keys  = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-    var todayStr = toDateStr(new Date());
+    var todayStr = toDateStr(shanghaiNow());
 
     var html = '';
     for (var i = 0; i < 7; i++) {
@@ -2016,7 +2022,7 @@ function loadAnnouncements() {
 
 function refreshCheckinUI() {
     if (!currentUser) return;
-    var today = toDateStr(new Date());
+    var today = toDateStr(shanghaiNow());
 
     Promise.all([
         supabaseClient.from('profiles')

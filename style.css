@@ -185,7 +185,11 @@ body {
 
     box-shadow: var(--shadow-lg);
 
+    overflow: hidden;
+
     transition:
+        width var(--dur-base) var(--ease),
+        min-height var(--dur-base) var(--ease),
         border-color var(--dur-slow) var(--ease),
         box-shadow var(--dur-slow) var(--ease),
         padding var(--dur-base) var(--ease);
@@ -233,6 +237,8 @@ body {
     outline: none;
 
     transition:
+        top var(--dur-base) var(--ease),
+        left var(--dur-base) var(--ease),
         background-color var(--dur-base) var(--ease),
         border-color var(--dur-base) var(--ease),
         color var(--dur-base) var(--ease),
@@ -260,10 +266,23 @@ body {
     max-width: 46px !important;
 }
 
+.box > h2,
+.box > .view,
+.box > .tip {
+    max-height: 400px;
+    overflow: hidden;
+    transition: opacity var(--dur-base) var(--ease),
+                max-height var(--dur-base) var(--ease),
+                margin var(--dur-base) var(--ease);
+}
+
 .box.collapsed > h2,
 .box.collapsed > .view,
 .box.collapsed > .tip {
-    display: none;
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    pointer-events: none;
 }
 
 .box.collapsed .box-toggle {
@@ -1607,3 +1626,4 @@ body.dragging-active * {
 .box.is-opening {
     user-select: none;
 }
+/* （注：内容由AI生成） */
