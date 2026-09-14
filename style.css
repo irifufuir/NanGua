@@ -188,11 +188,11 @@ body {
     overflow: hidden;
 
     transition:
-        width var(--dur-base) var(--ease),
-        min-height var(--dur-base) var(--ease),
+        width 0.25s var(--ease),
+        min-height 0.25s var(--ease),
         border-color var(--dur-slow) var(--ease),
         box-shadow var(--dur-slow) var(--ease),
-        padding var(--dur-base) var(--ease);
+        padding 0.25s var(--ease);
 }
 
 .box::before {
@@ -237,8 +237,8 @@ body {
     outline: none;
 
     transition:
-        top var(--dur-base) var(--ease),
-        left var(--dur-base) var(--ease),
+        top 0.25s var(--ease),
+        left 0.25s var(--ease),
         background-color var(--dur-base) var(--ease),
         border-color var(--dur-base) var(--ease),
         color var(--dur-base) var(--ease),
@@ -266,23 +266,10 @@ body {
     max-width: 46px !important;
 }
 
-.box > h2,
-.box > .view,
-.box > .tip {
-    max-height: 400px;
-    overflow: hidden;
-    transition: opacity var(--dur-base) var(--ease),
-                max-height var(--dur-base) var(--ease),
-                margin var(--dur-base) var(--ease);
-}
-
 .box.collapsed > h2,
 .box.collapsed > .view,
 .box.collapsed > .tip {
-    max-height: 0;
-    opacity: 0;
-    margin: 0;
-    pointer-events: none;
+    display: none;
 }
 
 .box.collapsed .box-toggle {
