@@ -579,6 +579,14 @@
         white-space: nowrap;
     }
 
+    /* ⭐ 新增：卡片上的限购标签 */
+    .shop-item-limit {
+        font-size: 0.7em;
+        color: var(--theme-accent);
+        text-align: center;
+        letter-spacing: 0.02em;
+    }
+
     /* ========== 商品详情弹窗（左图右文） ========== */
     .modal-mask {
         position: fixed; inset: 0;
@@ -1343,7 +1351,6 @@
                 <span class="nav-arrow" id="profileArrow" title="展开 / 收起资料">▾</span>
             </div>
 
-            <!-- ⭐ 修复：加上 data-group="msg" 让移动端能展开 -->
             <div class="nav-group" id="msgGroup" data-group="msg">
                 <span class="nav-text">📬 消息通知</span>
                 <span class="nav-arrow" id="msgArrow">▾</span>
@@ -2141,12 +2148,19 @@ function loadShop() {
                 if (it.stock > 0) stockTag = '<span class="shop-item-stock">仅剩 ' + it.stock + '</span>';
                 else if (it.stock === 0) stockTag = '<span class="shop-item-stock">已售罄</span>';
 
+                /* ⭐ 新增：限购标签 */
+                var limitTag = '';
+                if (it.per_user_limit != null && it.per_user_limit > 0) {
+                    limitTag = '<div class="shop-item-limit">每人限购 ' + it.per_user_limit + ' 份</div>';
+                }
+
                 html +=
                     '<div class="shop-item' + (soldOut ? ' out-of-stock' : '') + '" data-id="' + it.id + '">' +
                         stockTag +
                         '<div class="shop-item-icon">' + escapeHtml(it.icon || '🎁') + '</div>' +
                         '<div class="shop-item-name">' + escapeHtml(it.name) + '</div>' +
                         '<div class="shop-item-desc">' + escapeHtml(it.description || '') + '</div>' +
+                        limitTag +
                         '<div class="shop-item-price">' + it.price + ' 积分</div>' +
                         '<button class="shop-buy-btn" data-id="' + it.id + '" data-name="' + escapeHtml(it.name) + '" data-price="' + it.price + '"' + (soldOut ? ' disabled' : '') + '>' +
                             (soldOut ? '已售罄' : '立即兑换') +

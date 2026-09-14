@@ -608,6 +608,7 @@
         transition: all var(--transition-base); outline: none;
     }
     .btn-reset:hover { background: var(--theme-info-box); color: var(--theme-text); }
+
     .info-toolbar {
         display: flex; justify-content: space-between; align-items: center;
         margin-bottom: var(--space-6); flex-wrap: wrap; gap: var(--space-3);
@@ -743,6 +744,12 @@
         color: var(--theme-text-faint);
         text-align: center;
     }
+    .shop-item-limit {
+        font-size: 0.72em;
+        color: var(--theme-accent);
+        text-align: center;
+        letter-spacing: 0.02em;
+    }
     .shop-item-actions {
         display: flex;
         gap: var(--space-2);
@@ -776,10 +783,199 @@
         background: rgba(214,139,139,.22);
     }
 
-    .toggle-row {
+    /* 上架表单：标签在上、输入在下，按序号排 */
+    .shop-add-form {
+        display: flex; flex-direction: column; gap: var(--space-4);
+        padding: var(--space-5);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-6);
+    }
+    .shop-add-form .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-4);
+    }
+    .shop-add-form .form-group {
+        display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .shop-add-form .form-group label {
+        font-size: 0.85em; color: var(--theme-text-dim); font-weight: 500;
+    }
+    .shop-add-form .form-group input,
+    .shop-add-form .form-group textarea {
+        width: 100%;
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: 0 var(--space-4);
+        font-size: 0.95em; font-family: inherit;
+        color: var(--theme-text); outline: none;
+        transition: all var(--transition-base);
+    }
+    .shop-add-form .form-group input { height: 42px; }
+    .shop-add-form .form-group textarea {
+        min-height: 70px; resize: vertical; padding: var(--space-3) var(--space-4);
+    }
+    .shop-add-form .form-group input:focus,
+    .shop-add-form .form-group textarea:focus {
+        border-color: var(--theme-accent-border);
+        box-shadow: 0 0 0 3px var(--theme-accent-soft);
+    }
+    .shop-add-form .form-submit {
+        display: flex; justify-content: flex-end;
+    }
+
+    /* ========== 限购开关 ========== */
+    .limit-row {
+        display: flex; align-items: center; gap: 10px;
+    }
+    .limit-toggle {
+        flex-shrink: 0;
+        height: 34px;
+        padding: 0 14px;
+        font-family: inherit;
+        font-size: 0.85em;
+        font-weight: 500;
+        border-radius: 999px;
+        border: 1px solid var(--theme-border);
+        background: var(--theme-info-box);
+        color: var(--theme-text-dim);
+        cursor: pointer;
+        transition: all var(--transition-base);
+        outline: none;
+        white-space: nowrap;
+    }
+    .limit-toggle[data-on="true"] {
+        background: var(--theme-accent-soft);
+        border-color: var(--theme-accent-border);
+        color: var(--theme-accent);
+    }
+    .limit-row input[type="number"] {
+        width: 80px;
+        height: 34px;
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: 0 10px;
+        font-size: 0.9em;
+        font-family: inherit;
+        color: var(--theme-text);
+        outline: none;
+        transition: all var(--transition-base);
+    }
+    .limit-row input[type="number"]:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    .limit-row .limit-unit {
+        font-size: 0.85em;
+        color: var(--theme-text-faint);
+    }
+
+    /* ========== 兑换记录（按用户折叠） ========== */
+    .purchase-users {
         display: flex;
-        align-items: center;
-        justify-content: space-between;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    .purchase-user {
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        transition: all var(--transition-base);
+    }
+    .purchase-user-head {
+        display: flex; align-items: center; gap: var(--space-3);
+        padding: var(--space-4) var(--space-5);
+        cursor: pointer;
+        user-select: none;
+        transition: background var(--transition-base);
+    }
+    .purchase-user-head:hover {
+        background: var(--theme-hover);
+    }
+    .purchase-user-head .pu-avatar {
+        width: 36px; height: 36px;
+        border-radius: var(--radius-full);
+        object-fit: cover;
+        border: 1px solid var(--theme-border-soft);
+        background: var(--theme-card);
+        flex-shrink: 0;
+    }
+    .purchase-user-head .pu-info {
+        flex: 1; min-width: 0;
+        display: flex; flex-direction: column; gap: 2px;
+    }
+    .purchase-user-head .pu-name {
+        font-size: 0.95em; font-weight: 500; color: var(--theme-text);
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .purchase-user-head .pu-email {
+        font-size: 0.78em; color: var(--theme-text-faint);
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .purchase-user-head .pu-count {
+        font-size: 0.72em;
+        padding: 2px 10px;
+        border-radius: var(--radius-full);
+        background: var(--theme-accent-soft);
+        color: var(--theme-accent);
+        border: 1px solid var(--theme-accent-border);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .purchase-user-head .pu-last {
+        font-size: 0.78em;
+        color: var(--theme-text-faint);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .purchase-user-head .pu-arrow {
+        color: var(--theme-text-faint);
+        font-size: 0.9em;
+        transition: transform var(--transition-base);
+        flex-shrink: 0;
+    }
+    .purchase-user.open .purchase-user-head .pu-arrow {
+        transform: rotate(180deg);
+        color: var(--theme-accent);
+    }
+    .purchase-user-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height var(--transition-slow);
+        background: rgba(0, 0, 0, 0.15);
+    }
+    .purchase-user.open .purchase-user-body {
+        max-height: 2000px;
+    }
+    .purchase-record {
+        display: flex; align-items: center; gap: var(--space-3);
+        padding: var(--space-3) var(--space-5) var(--space-3) calc(var(--space-5) + 36px + var(--space-3));
+        border-top: 1px solid var(--theme-border-soft);
+    }
+    .purchase-record .pr-icon { font-size: 1.4em; }
+    .purchase-record .pr-info { flex: 1; min-width: 0; }
+    .purchase-record .pr-name {
+        font-size: 0.9em; color: var(--theme-text); font-weight: 500;
+    }
+    .purchase-record .pr-time {
+        font-size: 0.76em; color: var(--theme-text-faint);
+        margin-top: 2px;
+    }
+    .purchase-record .pr-price {
+        color: var(--danger);
+        font-weight: 600;
+        white-space: nowrap;
+        font-size: 0.88em;
+    }
+
+    /* ========== 音效设置 · 开关 ========== */
+    .toggle-row {
+        display: flex; align-items: center; justify-content: space-between;
         gap: var(--space-4);
         padding: 14px 18px;
         background: var(--theme-info-box);
@@ -789,45 +985,28 @@
         transition: border-color var(--transition-base);
     }
     .toggle-row:hover { border-color: var(--theme-border); }
-
     .toggle-label {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        min-width: 0;
-        flex: 1;
+        display: flex; flex-direction: column; gap: 2px;
+        min-width: 0; flex: 1;
     }
     .toggle-label .title {
-        font-size: 0.94em;
-        font-weight: 500;
-        color: var(--theme-text);
+        font-size: 0.94em; font-weight: 500; color: var(--theme-text);
     }
     .toggle-label .desc {
-        font-size: 0.78em;
-        color: var(--theme-text-faint);
+        font-size: 0.78em; color: var(--theme-text-faint);
     }
-
     .toggle-switch {
-        position: relative;
-        width: 54px;
-        height: 30px;
+        position: relative; width: 54px; height: 30px;
         flex-shrink: 0;
         background: var(--theme-border);
         border-radius: 999px;
-        cursor: pointer;
-        border: none;
-        outline: none;
-        padding: 0;
+        cursor: pointer; border: none; outline: none; padding: 0;
         transition: background 0.3s cubic-bezier(.4,0,.2,1);
     }
     .toggle-switch::after {
         content: '';
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
+        position: absolute; top: 3px; left: 3px;
+        width: 24px; height: 24px; border-radius: 50%;
         background: var(--theme-text-dim);
         box-shadow: 0 2px 6px rgba(0,0,0,0.28);
         transition: transform 0.3s cubic-bezier(.34,1.2,.64,1),
@@ -839,309 +1018,11 @@
         background: #ffffff;
     }
     .toggle-switch:active::after { width: 28px; }
-    .toggle-switch:focus-visible {
-        box-shadow: 0 0 0 4px var(--theme-accent-soft);
-    }
+    .toggle-switch:focus-visible { box-shadow: 0 0 0 4px var(--theme-accent-soft); }
 
-    .checkin-hero {
-        display: flex; flex-direction: column; align-items: center;
-        text-align: center; padding: var(--space-6) var(--space-5);
-        gap: var(--space-5);
-    }
-    .checkin-points { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
-    .checkin-points .num {
-        font-size: 3em; font-weight: 700; color: var(--theme-accent);
-        line-height: 1; letter-spacing: -0.02em;
-    }
-    .checkin-points .lbl {
-        font-size: 0.82em; color: var(--theme-text-faint);
-        letter-spacing: 0.08em; text-transform: uppercase;
-    }
-    .checkin-btn {
-        padding: var(--space-4) var(--space-8);
-        font-size: 1em; font-weight: 600; font-family: inherit;
-        letter-spacing: 0.04em; border-radius: var(--radius-full);
-        border: 1px solid var(--theme-accent-border);
-        background: var(--theme-accent-soft);
-        color: var(--theme-accent);
-        cursor: pointer;
-        transition: all var(--transition-base); outline: none;
-    }
-    .checkin-btn:hover:not(:disabled) {
-        border-color: var(--theme-accent);
-        box-shadow: 0 0 0 6px var(--theme-accent-soft);
-    }
-    .checkin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .checkin-calendar {
-        display: grid; grid-template-columns: repeat(7, 1fr);
-        gap: var(--space-2); width: 100%; max-width: 560px;
-        margin-top: var(--space-5);
-    }
-    .checkin-day {
-        background: var(--theme-info-box);
-        border: 1px solid var(--theme-border-soft);
-        border-radius: var(--radius-md);
-        padding: var(--space-3) var(--space-2);
-        display: flex; flex-direction: column;
-        align-items: center; gap: var(--space-1);
-        min-width: 0;
-    }
-    .checkin-day .day-name { font-size: 0.72em; color: var(--theme-text-faint); white-space: nowrap; }
-    .checkin-day .day-date { font-size: 0.95em; font-weight: 600; color: var(--theme-text); line-height: 1.1; }
-    .checkin-day .day-points { font-size: 0.72em; color: var(--theme-text-faint); white-space: nowrap; font-weight: 500; }
-    .checkin-day.today {
-        border-color: var(--theme-accent-border);
-        background: var(--theme-accent-soft);
-        box-shadow: 0 0 0 2px var(--theme-accent-soft);
-    }
-    .checkin-day.today .day-name, .checkin-day.today .day-points { color: var(--theme-accent); }
-    .checkin-day.checked { border-color: rgba(130,200,150,.4); background: rgba(130,200,150,.08); }
-    .checkin-day.checked .day-points { color: #8cc8a0; font-weight: 600; }
-    .checkin-day.checked .day-date::after {
-        content: '✓'; display: inline-block; margin-left: 3px;
-        font-size: 0.7em; color: #8cc8a0;
-    }
-
-    .checkin-stats {
-        display: grid; grid-template-columns: 1fr 1fr;
-        gap: var(--space-3); width: 100%; max-width: 400px;
-        margin-top: var(--space-3);
-    }
-    .checkin-stat {
-        background: var(--theme-info-box);
-        border: 1px solid var(--theme-border-soft);
-        border-radius: var(--radius-md);
-        padding: var(--space-4);
-        display: flex; flex-direction: column;
-        gap: var(--space-1); align-items: center;
-    }
-    .checkin-stat .v { font-size: 1.4em; font-weight: 600; color: var(--theme-text); }
-    .checkin-stat .k { font-size: 0.76em; color: var(--theme-text-faint); }
-
-    .add-friend-box {
-        display: flex; gap: var(--space-3);
-        margin-bottom: var(--space-7);
-        flex-wrap: wrap;
-    }
-    .add-friend-box input {
-        flex: 1; min-width: 200px; height: 42px;
-        background: var(--theme-info-box);
-        border: 1px solid var(--theme-border-soft);
-        border-radius: var(--radius-md);
-        padding: 0 var(--space-4);
-        font-size: 0.95em; font-family: inherit;
-        color: var(--theme-text); outline: none;
-        transition: all var(--transition-base);
-    }
-    .add-friend-box input:focus {
-        border-color: var(--theme-accent-border);
-        box-shadow: 0 0 0 3px var(--theme-accent-soft);
-    }
-    .add-friend-box input::placeholder { color: var(--theme-text-faint); }
-    .add-friend-box button {
-        flex-shrink: 0; padding: 0 var(--space-6); height: 42px;
-        background: var(--theme-accent-soft);
-        border: 1px solid var(--theme-accent-border);
-        color: var(--theme-accent);
-        font-size: 0.95em; font-weight: 500; font-family: inherit;
-        border-radius: var(--radius-md); cursor: pointer;
-        transition: all var(--transition-base); outline: none;
-    }
-    .add-friend-box button:hover:not(:disabled) {
-        border-color: var(--theme-accent);
-        box-shadow: var(--shadow-md), 0 0 0 4px var(--theme-accent-soft);
-    }
-    .add-friend-box button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .friend-section { margin-bottom: var(--space-7); }
-    .friend-section:last-child { margin-bottom: 0; }
-    .friend-section-title {
-        font-size: 0.82em; color: var(--theme-accent);
-        text-transform: uppercase; letter-spacing: 0.12em;
-        font-weight: 600; margin-bottom: var(--space-4);
-        padding-bottom: var(--space-3);
-        border-bottom: 1px solid var(--theme-border-soft);
-    }
-
-    .friend-list { display: flex; flex-direction: column; gap: var(--space-3); }
-    .friend-item {
-        display: flex; align-items: center; gap: var(--space-4);
-        padding: var(--space-4);
-        background: var(--theme-info-box);
-        border: 1px solid var(--theme-border-soft);
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: all var(--transition-base);
-    }
-    .friend-item:hover {
-        border-color: var(--theme-accent-border);
-        box-shadow: var(--shadow-sm);
-    }
-    .friend-item img {
-        width: 44px; height: 44px; border-radius: var(--radius-full);
-        object-fit: cover; flex-shrink: 0;
-        background: var(--theme-card);
-        border: 1px solid var(--theme-border-soft);
-    }
-    .friend-item .friend-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-    .friend-item .friend-name { font-size: 0.95em; font-weight: 500; color: var(--theme-text); }
-    .friend-item .friend-email { font-size: 0.78em; color: var(--theme-text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .friend-item .friend-arrow { color: var(--theme-text-faint); font-size: 1.1em; flex-shrink: 0; }
-
-    .friend-item.pending { cursor: default; }
-    .friend-item.pending .friend-actions { display: flex; gap: var(--space-2); }
-    .friend-item.pending .friend-actions button {
-        padding: 5px 12px; font-size: 0.82em; font-family: inherit;
-        border-radius: var(--radius-sm); cursor: pointer;
-        outline: none; transition: all var(--transition-base);
-        border: 1px solid transparent;
-    }
-    .friend-item.pending .friend-actions .accept-btn {
-        background: rgba(130,200,150,.12);
-        border-color: rgba(130,200,150,.30);
-        color: #8cc8a0;
-    }
-    .friend-item.pending .friend-actions .accept-btn:hover {
-        background: rgba(130,200,150,.22);
-    }
-    .friend-item.pending .friend-actions .reject-btn {
-        background: rgba(214,139,139,.10);
-        border-color: rgba(214,139,139,.30);
-        color: var(--danger);
-    }
-    .friend-item.pending .friend-actions .reject-btn:hover {
-        background: rgba(214,139,139,.22);
-    }
-
-    .empty-state {
-        text-align: center; color: var(--theme-text-faint);
-        padding: var(--space-6) 0; font-size: 0.9em;
-    }
-
-    .chat-mask {
-        position: fixed; inset: 0;
-        background: rgba(10,11,14,.55);
-        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-        display: flex; justify-content: center; align-items: center;
-        z-index: 3000; padding: var(--space-5);
-        animation: maskIn var(--transition-base) var(--ease);
-    }
-    @keyframes maskIn { from { opacity: 0; } to { opacity: 1; } }
-
-    .chat-box {
-        width: 460px; max-width: 100%;
-        height: 620px; max-height: 90vh;
-        border-radius: var(--radius-lg);
-        background: var(--theme-card);
-        border: 1px solid var(--theme-border);
-        box-shadow: var(--shadow-lg);
-        display: flex; flex-direction: column;
-        overflow: hidden;
-        animation: boxIn var(--transition-base) var(--ease);
-    }
-    @keyframes boxIn {
-        from { transform: translateY(10px) scale(.98); opacity: 0; }
-        to   { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    .chat-header {
-        display: flex; align-items: center; gap: var(--space-3);
-        padding: var(--space-4) var(--space-5);
-        border-bottom: 1px solid var(--theme-border-soft);
-        background: var(--theme-info-box);
-        flex-shrink: 0;
-    }
-    .chat-header img {
-        width: 36px; height: 36px; border-radius: var(--radius-full);
-        object-fit: cover; background: var(--theme-card);
-    }
-    .chat-header .chat-name { font-size: 0.95em; font-weight: 600; color: var(--theme-text); }
-    .chat-close-btn {
-        margin-left: auto; width: 30px; height: 30px;
-        border-radius: var(--radius-full);
-        background: transparent; border: 1px solid var(--theme-border);
-        color: var(--theme-text-dim); cursor: pointer;
-        font-size: 14px; line-height: 1;
-        transition: all var(--transition-base); outline: none;
-    }
-    .chat-close-btn:hover {
-        background: var(--theme-card);
-        color: var(--theme-text);
-    }
-
-    .chat-body {
-        flex: 1; overflow-y: auto;
-        padding: var(--space-5);
-        display: flex; flex-direction: column; gap: var(--space-3);
-        scrollbar-width: thin;
-    }
-    .chat-body::-webkit-scrollbar { width: 6px; }
-    .chat-body::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 3px; }
-
-    .chat-msg {
-        max-width: 75%; padding: var(--space-3) var(--space-4);
-        border-radius: var(--radius-md);
-        font-size: 0.92em; line-height: 1.55;
-        word-break: break-word;
-        position: relative;
-    }
-    .chat-msg.mine {
-        align-self: flex-end;
-        background: var(--theme-accent-soft);
-        color: var(--theme-accent);
-        border: 1px solid var(--theme-accent-border);
-    }
-    .chat-msg.theirs {
-        align-self: flex-start;
-        background: var(--theme-info-box);
-        color: var(--theme-text);
-        border: 1px solid var(--theme-border-soft);
-    }
-    .chat-msg .chat-time {
-        display: block; font-size: 0.7em;
-        color: rgba(255,255,255,0.4);
-        margin-top: 4px;
-    }
-    .chat-msg.mine .chat-time { color: rgba(124,174,224,0.65); }
-    .chat-msg.theirs .chat-time { color: var(--theme-text-faint); }
-
-    .chat-input-box {
-        display: flex; gap: var(--space-3);
-        padding: var(--space-4) var(--space-5);
-        border-top: 1px solid var(--theme-border-soft);
-        background: var(--theme-info-box);
-        flex-shrink: 0;
-    }
-    .chat-input-box input {
-        flex: 1; height: 40px;
-        background: var(--theme-card);
-        border: 1px solid var(--theme-border-soft);
-        border-radius: var(--radius-md);
-        padding: 0 var(--space-4);
-        font-size: 0.95em; font-family: inherit;
-        color: var(--theme-text); outline: none;
-        transition: all var(--transition-base);
-    }
-    .chat-input-box input:focus {
-        border-color: var(--theme-accent-border);
-        box-shadow: 0 0 0 3px var(--theme-accent-soft);
-    }
-    .chat-input-box input::placeholder { color: var(--theme-text-faint); }
-    .chat-input-box button {
-        padding: 0 var(--space-5); height: 40px;
-        background: var(--theme-accent-soft);
-        border: 1px solid var(--theme-accent-border);
-        color: var(--theme-accent);
-        font-size: 0.92em; font-weight: 500; font-family: inherit;
-        border-radius: var(--radius-md); cursor: pointer;
-        transition: all var(--transition-base); outline: none;
-    }
-    .chat-input-box button:hover:not(:disabled) {
-        border-color: var(--theme-accent);
-    }
-    .chat-input-box button:disabled { opacity: 0.5; cursor: not-allowed; }
-
+    /* ============================================================
+     *  弹窗 · 通用
+     * ============================================================ */
     .mask {
         position: fixed; inset: 0;
         background: rgba(10,11,14,.55);
@@ -1151,6 +1032,7 @@
         box-sizing: border-box;
         animation: maskIn var(--transition-base) var(--ease);
     }
+    @keyframes maskIn { from { opacity: 0; } to { opacity: 1; } }
 
     .dialog {
         width: 380px; max-width: 100%;
@@ -1208,32 +1090,99 @@
         background: rgba(214,139,139,.30); border-color: rgba(214,139,139,.7);
     }
     .dialog .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
-
     .dialog .field-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: var(--space-3);
     }
 
-    /* ========== 编辑商品弹窗（新增） ========== */
-    .edit-shop-dialog {
-        width: 480px;
-        max-width: 95%;
-        max-height: 90vh;
-        overflow-y: auto;
+    /* ============================================================
+     *  每日签到（管理员本人的签到）
+     * ============================================================ */
+    .checkin-hero {
+        display: flex; flex-direction: column; align-items: center;
+        text-align: center; padding: var(--space-6) var(--space-5);
+        gap: var(--space-5);
     }
-    .edit-shop-form {
-        display: flex; flex-direction: column; gap: var(--space-3);
+    .checkin-points { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+    .checkin-points .num {
+        font-size: 3em; font-weight: 700; color: var(--theme-accent);
+        line-height: 1; letter-spacing: -0.02em;
     }
-    .edit-shop-form .form-group {
-        display: flex; flex-direction: column; gap: var(--space-2);
+    .checkin-points .lbl {
+        font-size: 0.82em; color: var(--theme-text-faint);
+        letter-spacing: 0.08em; text-transform: uppercase;
     }
-    .edit-shop-form .form-group label {
-        font-size: 0.85em; color: var(--theme-text-dim); font-weight: 500;
+    .checkin-btn {
+        padding: var(--space-4) var(--space-8);
+        font-size: 1em; font-weight: 600; font-family: inherit;
+        letter-spacing: 0.04em; border-radius: var(--radius-full);
+        border: 1px solid var(--theme-accent-border);
+        background: var(--theme-accent-soft);
+        color: var(--theme-accent);
+        cursor: pointer;
+        transition: all var(--transition-base); outline: none;
     }
-    .edit-shop-form .form-group input,
-    .edit-shop-form .form-group textarea {
-        width: 100%;
+    .checkin-btn:hover:not(:disabled) {
+        border-color: var(--theme-accent);
+        box-shadow: 0 0 0 6px var(--theme-accent-soft);
+    }
+    .checkin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .checkin-calendar {
+        display: grid; grid-template-columns: repeat(7, 1fr);
+        gap: var(--space-2); width: 100%; max-width: 560px;
+        margin-top: var(--space-5);
+    }
+    .checkin-day {
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: var(--space-3) var(--space-2);
+        display: flex; flex-direction: column;
+        align-items: center; gap: var(--space-1);
+        min-width: 0;
+    }
+    .checkin-day .day-name { font-size: 0.72em; color: var(--theme-text-faint); white-space: nowrap; }
+    .checkin-day .day-date { font-size: 0.95em; font-weight: 600; color: var(--theme-text); line-height: 1.1; }
+    .checkin-day .day-points { font-size: 0.72em; color: var(--theme-text-faint); white-space: nowrap; font-weight: 500; }
+    .checkin-day.today {
+        border-color: var(--theme-accent-border);
+        background: var(--theme-accent-soft);
+        box-shadow: 0 0 0 2px var(--theme-accent-soft);
+    }
+    .checkin-day.today .day-name, .checkin-day.today .day-points { color: var(--theme-accent); }
+    .checkin-day.checked { border-color: rgba(130,200,150,.4); background: rgba(130,200,150,.08); }
+    .checkin-day.checked .day-points { color: #8cc8a0; font-weight: 600; }
+    .checkin-day.checked .day-date::after {
+        content: '✓'; display: inline-block; margin-left: 3px;
+        font-size: 0.7em; color: #8cc8a0;
+    }
+    .checkin-stats {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: var(--space-3); width: 100%; max-width: 400px;
+        margin-top: var(--space-3);
+    }
+    .checkin-stat {
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        padding: var(--space-4);
+        display: flex; flex-direction: column;
+        gap: var(--space-1); align-items: center;
+    }
+    .checkin-stat .v { font-size: 1.4em; font-weight: 600; color: var(--theme-text); }
+    .checkin-stat .k { font-size: 0.76em; color: var(--theme-text-faint); }
+
+    /* ============================================================
+     *  好友系统
+     * ============================================================ */
+    .add-friend-box {
+        display: flex; gap: var(--space-3);
+        margin-bottom: var(--space-7);
+        flex-wrap: wrap;
+    }
+    .add-friend-box input {
+        flex: 1; min-width: 200px; height: 42px;
         background: var(--theme-info-box);
         border: 1px solid var(--theme-border-soft);
         border-radius: var(--radius-md);
@@ -1242,39 +1191,176 @@
         color: var(--theme-text); outline: none;
         transition: all var(--transition-base);
     }
-    .edit-shop-form .form-group input { height: 42px; }
-    .edit-shop-form .form-group textarea {
-        min-height: 70px; resize: vertical; padding: var(--space-3) var(--space-4);
-    }
-    .edit-shop-form .form-group input:focus,
-    .edit-shop-form .form-group textarea:focus {
+    .add-friend-box input:focus {
         border-color: var(--theme-accent-border);
         box-shadow: 0 0 0 3px var(--theme-accent-soft);
     }
-
-    /* ========== 上架表单（新布局：标签在上，输入在下） ========== */
-    .shop-add-form {
-        display: flex; flex-direction: column; gap: var(--space-4);
-        padding: var(--space-5);
+    .add-friend-box input::placeholder { color: var(--theme-text-faint); }
+    .add-friend-box button {
+        flex-shrink: 0; padding: 0 var(--space-6); height: 42px;
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        font-size: 0.95em; font-weight: 500; font-family: inherit;
+        border-radius: var(--radius-md); cursor: pointer;
+        transition: all var(--transition-base); outline: none;
+    }
+    .add-friend-box button:hover:not(:disabled) {
+        border-color: var(--theme-accent);
+        box-shadow: var(--shadow-md), 0 0 0 4px var(--theme-accent-soft);
+    }
+    .add-friend-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .friend-section { margin-bottom: var(--space-7); }
+    .friend-section:last-child { margin-bottom: 0; }
+    .friend-section-title {
+        font-size: 0.82em; color: var(--theme-accent);
+        text-transform: uppercase; letter-spacing: 0.12em;
+        font-weight: 600; margin-bottom: var(--space-4);
+        padding-bottom: var(--space-3);
+        border-bottom: 1px solid var(--theme-border-soft);
+    }
+    .friend-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .friend-item {
+        display: flex; align-items: center; gap: var(--space-4);
+        padding: var(--space-4);
         background: var(--theme-info-box);
         border: 1px solid var(--theme-border-soft);
         border-radius: var(--radius-md);
-        margin-bottom: var(--space-6);
+        cursor: pointer;
+        transition: all var(--transition-base);
     }
-    .shop-add-form .form-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: var(--space-4);
+    .friend-item:hover {
+        border-color: var(--theme-accent-border);
+        box-shadow: var(--shadow-sm);
     }
-    .shop-add-form .form-group {
-        display: flex; flex-direction: column; gap: var(--space-2);
+    .friend-item img {
+        width: 44px; height: 44px; border-radius: var(--radius-full);
+        object-fit: cover; flex-shrink: 0;
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border-soft);
     }
-    .shop-add-form .form-group label {
-        font-size: 0.85em; color: var(--theme-text-dim); font-weight: 500;
+    .friend-item .friend-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .friend-item .friend-name { font-size: 0.95em; font-weight: 500; color: var(--theme-text); }
+    .friend-item .friend-email { font-size: 0.78em; color: var(--theme-text-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .friend-item .friend-arrow { color: var(--theme-text-faint); font-size: 1.1em; flex-shrink: 0; }
+    .friend-item.pending { cursor: default; }
+    .friend-item.pending .friend-actions { display: flex; gap: var(--space-2); }
+    .friend-item.pending .friend-actions button {
+        padding: 5px 12px; font-size: 0.82em; font-family: inherit;
+        border-radius: var(--radius-sm); cursor: pointer;
+        outline: none; transition: all var(--transition-base);
+        border: 1px solid transparent;
     }
-    .shop-add-form .form-group input,
-    .shop-add-form .form-group textarea {
-        width: 100%;
+    .friend-item.pending .friend-actions .accept-btn {
+        background: rgba(130,200,150,.12);
+        border-color: rgba(130,200,150,.30);
+        color: #8cc8a0;
+    }
+    .friend-item.pending .friend-actions .accept-btn:hover { background: rgba(130,200,150,.22); }
+    .friend-item.pending .friend-actions .reject-btn {
+        background: rgba(214,139,139,.10);
+        border-color: rgba(214,139,139,.30);
+        color: var(--danger);
+    }
+    .friend-item.pending .friend-actions .reject-btn:hover { background: rgba(214,139,139,.22); }
+    .empty-state {
+        text-align: center; color: var(--theme-text-faint);
+        padding: var(--space-6) 0; font-size: 0.9em;
+    }
+
+    /* ============================================================
+     *  聊天弹窗
+     * ============================================================ */
+    .chat-mask {
+        position: fixed; inset: 0;
+        background: rgba(10,11,14,.55);
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        display: flex; justify-content: center; align-items: center;
+        z-index: 3000; padding: var(--space-5);
+        animation: maskIn var(--transition-base) var(--ease);
+    }
+    @keyframes boxIn {
+        from { transform: translateY(10px) scale(.98); opacity: 0; }
+        to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .chat-box {
+        width: 460px; max-width: 100%;
+        height: 620px; max-height: 90vh;
+        border-radius: var(--radius-lg);
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border);
+        box-shadow: var(--shadow-lg);
+        display: flex; flex-direction: column;
+        overflow: hidden;
+        animation: boxIn var(--transition-base) var(--ease);
+    }
+    .chat-header {
+        display: flex; align-items: center; gap: var(--space-3);
+        padding: var(--space-4) var(--space-5);
+        border-bottom: 1px solid var(--theme-border-soft);
+        background: var(--theme-info-box);
+        flex-shrink: 0;
+    }
+    .chat-header img {
+        width: 36px; height: 36px; border-radius: var(--radius-full);
+        object-fit: cover; background: var(--theme-card);
+    }
+    .chat-header .chat-name { font-size: 0.95em; font-weight: 600; color: var(--theme-text); }
+    .chat-close-btn {
+        margin-left: auto; width: 30px; height: 30px;
+        border-radius: var(--radius-full);
+        background: transparent; border: 1px solid var(--theme-border);
+        color: var(--theme-text-dim); cursor: pointer;
+        font-size: 14px; line-height: 1;
+        transition: all var(--transition-base); outline: none;
+    }
+    .chat-close-btn:hover {
+        background: var(--theme-card);
+        color: var(--theme-text);
+    }
+    .chat-body {
+        flex: 1; overflow-y: auto;
+        padding: var(--space-5);
+        display: flex; flex-direction: column; gap: var(--space-3);
+        scrollbar-width: thin;
+    }
+    .chat-body::-webkit-scrollbar { width: 6px; }
+    .chat-body::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 3px; }
+    .chat-msg {
+        max-width: 75%; padding: var(--space-3) var(--space-4);
+        border-radius: var(--radius-md);
+        font-size: 0.92em; line-height: 1.55;
+        word-break: break-word;
+        position: relative;
+    }
+    .chat-msg.mine {
+        align-self: flex-end;
+        background: var(--theme-accent-soft);
+        color: var(--theme-accent);
+        border: 1px solid var(--theme-accent-border);
+    }
+    .chat-msg.theirs {
+        align-self: flex-start;
+        background: var(--theme-info-box);
+        color: var(--theme-text);
+        border: 1px solid var(--theme-border-soft);
+    }
+    .chat-msg .chat-time {
+        display: block; font-size: 0.7em;
+        color: rgba(255,255,255,0.4);
+        margin-top: 4px;
+    }
+    .chat-msg.mine .chat-time { color: rgba(124,174,224,0.65); }
+    .chat-msg.theirs .chat-time { color: var(--theme-text-faint); }
+    .chat-input-box {
+        display: flex; gap: var(--space-3);
+        padding: var(--space-4) var(--space-5);
+        border-top: 1px solid var(--theme-border-soft);
+        background: var(--theme-info-box);
+        flex-shrink: 0;
+    }
+    .chat-input-box input {
+        flex: 1; height: 40px;
         background: var(--theme-card);
         border: 1px solid var(--theme-border-soft);
         border-radius: var(--radius-md);
@@ -1283,18 +1369,22 @@
         color: var(--theme-text); outline: none;
         transition: all var(--transition-base);
     }
-    .shop-add-form .form-group input { height: 42px; }
-    .shop-add-form .form-group textarea {
-        min-height: 70px; resize: vertical; padding: var(--space-3) var(--space-4);
-    }
-    .shop-add-form .form-group input:focus,
-    .shop-add-form .form-group textarea:focus {
+    .chat-input-box input:focus {
         border-color: var(--theme-accent-border);
         box-shadow: 0 0 0 3px var(--theme-accent-soft);
     }
-    .shop-add-form .form-submit {
-        display: flex; justify-content: flex-end;
+    .chat-input-box input::placeholder { color: var(--theme-text-faint); }
+    .chat-input-box button {
+        padding: 0 var(--space-5); height: 40px;
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        font-size: 0.92em; font-weight: 500; font-family: inherit;
+        border-radius: var(--radius-md); cursor: pointer;
+        transition: all var(--transition-base); outline: none;
     }
+    .chat-input-box button:hover:not(:disabled) { border-color: var(--theme-accent); }
+    .chat-input-box button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ============================================================
      *  手机端适配
@@ -1315,156 +1405,85 @@
     @media (max-width: 768px),
            (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         body { flex-direction: column; }
-
         .sidebar {
-            width: 100%;
-            padding: 0;
+            width: 100%; padding: 0;
             border-right: none;
             border-bottom: 1px solid var(--theme-border-soft);
-            flex-direction: column;
-            align-items: stretch;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+            flex-direction: column; align-items: stretch;
+            position: sticky; top: 0; z-index: 50;
             background: var(--theme-sidebar);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
-
-        .user-profile {
-            padding: 6px 12px 4px;
-            margin-bottom: 0;
-            gap: 8px;
-        }
+        .user-profile { padding: 6px 12px 4px; margin-bottom: 0; gap: 8px; }
         .avatar-wrapper { width: 30px; height: 30px; }
-        .avatar-edit {
-            width: 13px; height: 13px;
-            font-size: 7px;
-            bottom: -1px; right: -1px;
-        }
+        .avatar-edit { width: 13px; height: 13px; font-size: 7px; bottom: -1px; right: -1px; }
         .user-details { gap: 0; }
         .user-name-row { gap: 6px; }
         .user-name-row .email { font-size: 0.82em; }
         .user-name-row .role { display: none; }
-        .user-action-row { gap: 6px; }
+        .user-action-row { gap: 6px; width: auto; flex-wrap: nowrap; }
+        .user-action-row .avatar-change-btn,
+        .user-action-row .logout-btn-mini { flex: 0 0 auto; width: auto; text-align: center; justify-content: center; }
         .logout-btn-mini,
-        .avatar-change-btn {
-            font-size: 0.66em;
-            padding: 2px 8px;
-            border-radius: 8px;
-        }
-
-        .nav-menu {
-            flex: none;
-            width: 100%;
-            padding: 0;
-            display: block;
-            overflow: visible;
-        }
-
+        .avatar-change-btn { font-size: 0.66em; padding: 2px 8px; border-radius: 8px; }
+        .nav-menu { flex: none; width: 100%; padding: 0; display: block; overflow: visible; }
         .nav-main-row {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: center;
-            gap: 4px;
+            display: flex; flex-direction: row; flex-wrap: nowrap;
+            align-items: center; gap: 4px;
             padding: 2px 8px 6px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
             scroll-snap-type: x proximity;
         }
         .nav-main-row::-webkit-scrollbar { display: none; }
-
         .nav-main-row .nav-item,
         .nav-main-row .nav-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            padding: 6px 12px;
-            min-width: 66px;
-            flex-shrink: 0;
-            font-size: 0.72em;
-            line-height: 1.15;
-            text-align: center;
-            white-space: nowrap;
-            border-radius: 10px;
-            scroll-snap-align: start;
-            color: var(--theme-text-dim);
-            background: transparent;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 2px; padding: 6px 12px; min-width: 66px; flex-shrink: 0;
+            font-size: 0.72em; line-height: 1.15; text-align: center; white-space: nowrap;
+            border-radius: 10px; scroll-snap-align: start;
+            color: var(--theme-text-dim); background: transparent;
             transition: background 0.2s ease, color 0.2s ease;
             cursor: pointer;
         }
         .nav-main-row .nav-item::before,
         .nav-main-row .nav-group::before { display: none; }
         .nav-main-row .nav-item:hover,
-        .nav-main-row .nav-group:hover {
-            padding-left: 12px;
-            background: var(--theme-hover);
-        }
+        .nav-main-row .nav-group:hover { padding-left: 12px; background: var(--theme-hover); }
         .nav-main-row .nav-item.active,
-        .nav-main-row .nav-group.open {
-            padding-left: 12px;
-            background: var(--theme-accent-soft);
-            color: var(--theme-accent);
-        }
+        .nav-main-row .nav-group.open { padding-left: 12px; background: var(--theme-accent-soft); color: var(--theme-accent); }
         .nav-main-row .nav-text {
-            font-size: 1em;
-            max-width: 78px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: center;
-            flex: none;
+            font-size: 1em; max-width: 78px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            text-align: center; flex: none;
         }
         .nav-main-row .nav-arrow { display: none; }
-
         .nav-sub-row {
-            display: none;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: center;
-            gap: 6px;
+            display: none; flex-direction: row; flex-wrap: nowrap;
+            align-items: center; gap: 6px;
             padding: 6px 8px 8px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
             scroll-snap-type: x proximity;
             border-top: 1px solid var(--theme-border-soft);
         }
         .nav-sub-row::-webkit-scrollbar { display: none; }
         .nav-sub-row.show { display: flex; }
-
         .nav-sub-row .nav-sub {
             display: none !important;
-            flex-direction: row;
-            flex-shrink: 0;
-            gap: 6px;
-            padding: 0;
-            max-height: none;
-            overflow: visible;
-            opacity: 1;
-            transition: none;
-            background: transparent;
-            border: none;
+            flex-direction: row; flex-shrink: 0; gap: 6px;
+            padding: 0; max-height: none; overflow: visible;
+            opacity: 1; transition: none;
+            background: transparent; border: none;
         }
         .nav-sub-row .nav-sub.show { display: flex !important; }
-
         .nav-sub-row .nav-sub-item {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 14px;
-            flex-shrink: 0;
+            display: flex; flex-direction: row;
+            align-items: center; justify-content: center;
+            padding: 8px 14px; flex-shrink: 0;
             scroll-snap-align: start;
-            font-size: 0.78em;
-            line-height: 1.15;
-            white-space: nowrap;
+            font-size: 0.78em; line-height: 1.15; white-space: nowrap;
             border-radius: 999px;
             background: var(--theme-info-box);
             border: 1px solid var(--theme-border-soft);
@@ -1473,77 +1492,42 @@
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
         .nav-sub-row .nav-sub-item::before { display: none; }
-        .nav-sub-row .nav-sub-item:hover {
-            background: var(--theme-hover);
-            color: var(--theme-text);
-        }
+        .nav-sub-row .nav-sub-item:hover { background: var(--theme-hover); color: var(--theme-text); }
         .nav-sub-row .nav-sub-item.active {
             background: var(--theme-accent-soft);
             border-color: var(--theme-accent-border);
             color: var(--theme-accent);
             font-weight: 500;
         }
-
-        .main-content {
-            padding: 12px;
-            scrollbar-width: none;
-        }
+        .main-content { padding: 12px; scrollbar-width: none; }
         .main-content::-webkit-scrollbar { display: none; }
-
-        .card {
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,.06);
-        }
-        .card-head {
-            margin-bottom: 14px;
-            padding-bottom: 12px;
-            gap: 8px;
-        }
+        .card { padding: 16px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+        .card-head { margin-bottom: 14px; padding-bottom: 12px; gap: 8px; }
         .card-head h2 { font-size: 1em; }
-        .card-head .badge {
-            font-size: 0.68em;
-            padding: 3px 10px;
-        }
-        .refresh-btn-mini {
-            width: 30px;
-            height: 30px;
-            font-size: 13px;
-        }
-
-        .table-wrap {
-            border-radius: 8px;
-            position: relative;
-        }
+        .card-head .badge { font-size: 0.68em; padding: 3px 10px; }
+        .refresh-btn-mini { width: 30px; height: 30px; font-size: 13px; }
+        .table-wrap { border-radius: 8px; position: relative; }
         table { font-size: 0.8em; min-width: 640px; }
         th, td { padding: 8px 10px; }
         th { font-size: 0.78em; }
         .user-avatar { width: 26px; height: 26px; }
         .user-cell { gap: 6px; }
-
         .action-btn { padding: 4px 8px; font-size: 0.76em; margin-right: 3px; }
         .status-tag { font-size: 0.72em; padding: 2px 8px; }
         .remaining-tag { font-size: 0.68em; padding: 2px 6px; margin-left: 2px; }
-
         .announce-form { padding: 12px; gap: 10px; margin-bottom: 14px; }
         .announce-form input[type="text"] { height: 42px; font-size: 16px; }
         .announce-form input[type="number"] { font-size: 16px; }
         .announce-form textarea { font-size: 16px; min-height: 80px; }
-        .announce-form-row {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-        }
+        .announce-form-row { flex-direction: column; align-items: stretch; gap: 10px; }
         .announce-form-row label { font-size: 0.84em; }
         .announce-form-row .btn-save { width: 100% !important; height: 42px; }
-
         .announce-list { gap: 10px; }
         .announce-item { padding: 12px; }
         .announce-item .announce-title { font-size: 0.92em; }
         .announce-item .announce-content { font-size: 0.84em; line-height: 1.7; }
         .announce-item .announce-time { font-size: 0.7em; }
         .announce-actions .action-btn { padding: 4px 10px; }
-
         .config-section { margin-bottom: 18px; }
         .config-title { font-size: 0.76em; margin-bottom: 10px; padding-bottom: 8px; }
         .config-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
@@ -1551,54 +1535,23 @@
         .config-field input { height: 40px; font-size: 16px; padding: 0 4px; }
         .config-actions { padding-top: 12px; }
         .config-actions .btn-save { width: 100%; padding: 0 12px; }
-
         .manage-layout { grid-template-columns: 1fr; gap: 14px; }
         .manage-preview {
-            position: static;
-            flex-direction: row;
-            text-align: left;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
+            position: static; flex-direction: row; text-align: left;
+            align-items: center; gap: 12px; padding: 12px;
         }
-        .preview-avatar {
-            width: 56px;
-            height: 56px;
-            border-width: 1px;
-            box-shadow: 0 0 0 2px var(--theme-accent-soft);
-        }
+        .preview-avatar { width: 56px; height: 56px; border-width: 1px; box-shadow: 0 0 0 2px var(--theme-accent-soft); }
         .preview-name { font-size: 0.95em; text-align: left; }
         .preview-email { font-size: 0.76em; text-align: left; }
         .preview-divider { display: none; }
         .preview-hint { display: none; }
-
         .manage-form { gap: 14px; max-width: 100%; }
         .form-section-title { font-size: 0.72em; padding-bottom: 8px; }
         .form-group label { font-size: 0.8em; }
-        .form-group input,
-        .form-group select {
-            height: 44px;
-            font-size: 16px;
-            padding: 0 12px;
-        }
-        .form-actions {
-            flex-direction: column;
-            gap: 8px;
-            padding-top: 14px;
-            margin-top: 0;
-        }
-        .btn-save, .btn-reset {
-            width: 100%;
-            height: 44px;
-            font-size: 0.95em;
-        }
-
-        .info-toolbar {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 10px;
-            margin-bottom: 14px;
-        }
+        .form-group input, .form-group select { height: 44px; font-size: 16px; padding: 0 12px; }
+        .form-actions { flex-direction: column; gap: 8px; padding-top: 14px; margin-top: 0; }
+        .btn-save, .btn-reset { width: 100%; height: 44px; font-size: 0.95em; }
+        .info-toolbar { flex-direction: column; align-items: stretch; gap: 10px; margin-bottom: 14px; }
         .info-toolbar .last-update { font-size: 0.76em; text-align: center; }
         .refresh-btn { width: 100%; height: 40px; font-size: 0.9em; }
         .stat-section-title { font-size: 0.76em; margin-bottom: 10px; padding-bottom: 8px; }
@@ -1606,61 +1559,41 @@
         .health-card { padding: 10px 12px; gap: 8px; }
         .health-info .name { font-size: 0.8em; }
         .health-info .status { font-size: 0.68em; }
-
         .stat-grid { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
         .stat-box { padding: 12px; gap: 4px; }
         .stat-box .label { font-size: 0.72em; }
         .stat-box .value { font-size: 1.3em; }
-
         .project-info { padding: 12px; }
         .info-row { padding: 8px 0; gap: 8px; }
         .info-row .key { font-size: 0.78em; }
         .info-row .val { font-size: 0.78em; word-break: break-all; }
-
         .checkin-hero { padding: 14px 0; gap: 14px; }
         .checkin-points .num { font-size: 2.4em; }
         .checkin-points .lbl { font-size: 0.72em; }
         .checkin-btn { padding: 12px 30px; font-size: 0.95em; }
-        .checkin-calendar {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            max-width: 100%;
-            margin-top: 12px;
-        }
+        .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 4px; max-width: 100%; margin-top: 12px; }
         .checkin-day { padding: 6px 3px; border-radius: 8px; gap: 1px; }
         .checkin-day .day-name { font-size: 0.62em; }
         .checkin-day .day-date { font-size: 0.84em; }
         .checkin-day .day-points { font-size: 0.62em; }
-
         .checkin-stats {
             grid-template-columns: 1fr 1fr 1fr !important;
             max-width: 100% !important;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 6px; margin-top: 8px;
         }
         .checkin-stat { padding: 8px 4px; }
         .checkin-stat .v { font-size: 1.1em; }
         .checkin-stat .k { font-size: 0.66em; }
-
         .add-friend-box { flex-direction: column; gap: 8px; margin-bottom: 18px; }
-        .add-friend-box input,
-        .add-friend-box button { width: 100%; height: 44px; font-size: 16px; }
+        .add-friend-box input, .add-friend-box button { width: 100%; height: 44px; font-size: 16px; }
         .friend-section { margin-bottom: 18px; }
-        .friend-section-title {
-            font-size: 0.74em;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-        }
+        .friend-section-title { font-size: 0.74em; margin-bottom: 10px; padding-bottom: 8px; }
         .friend-item { padding: 10px 12px; gap: 10px; }
         .friend-item img { width: 38px; height: 38px; }
         .friend-item .friend-name { font-size: 0.88em; }
         .friend-item .friend-email { font-size: 0.72em; }
         .friend-item.pending .friend-actions { flex-direction: column; gap: 4px; }
-        .friend-item.pending .friend-actions button {
-            padding: 4px 10px;
-            font-size: 0.74em;
-        }
-
+        .friend-item.pending .friend-actions button { padding: 4px 10px; font-size: 0.74em; }
         .theme-section-hint { font-size: 0.82em; margin-bottom: 16px; }
         .theme-switcher { padding: 12px; gap: 8px; }
         .theme-dot { width: 30px; height: 30px; }
@@ -1673,18 +1606,15 @@
         .setting-btn { min-width: 0; padding: 10px 8px; font-size: 0.84em; }
         .setting-reset-row { margin-top: 18px; padding-top: 14px; }
         .setting-reset-btn { width: 100%; padding: 10px 16px; font-size: 0.84em; }
-
         .toggle-row { padding: 12px 14px; gap: 12px; margin-bottom: 10px; }
         .toggle-label .title { font-size: 0.88em; }
         .toggle-label .desc { font-size: 0.72em; }
         .toggle-switch { width: 48px; height: 28px; }
         .toggle-switch::after { width: 22px; height: 22px; }
         .toggle-switch.active::after { transform: translateX(20px); }
-
         .mask { padding: 0; align-items: flex-end; }
         .dialog {
-            width: 100%;
-            max-width: 100%;
+            width: 100%; max-width: 100%;
             border-radius: 20px 20px 0 0;
             padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
         }
@@ -1696,15 +1626,11 @@
         .dialog .dialog-preview { font-size: 0.82em; min-height: 40px; }
         .dialog .dialog-actions button { height: 42px; font-size: 0.9em; }
         .dialog .field-row { grid-template-columns: 1fr 1fr; gap: 10px; }
-
         .chat-mask { padding: 0; align-items: flex-end; }
         .chat-box {
-            width: 100%;
-            max-width: 100%;
-            height: 90vh;
-            max-height: 90vh;
-            border-radius: 20px 20px 0 0;
-            border-bottom: none;
+            width: 100%; max-width: 100%;
+            height: 90vh; max-height: 90vh;
+            border-radius: 20px 20px 0 0; border-bottom: none;
             padding-bottom: env(safe-area-inset-bottom, 0px);
         }
         .chat-header { padding: 12px 14px; }
@@ -1714,15 +1640,12 @@
         .chat-body { padding: 12px; gap: 8px; }
         .chat-msg { max-width: 82%; padding: 8px 12px; font-size: 0.9em; }
         .chat-input-box { padding: 10px 12px; gap: 8px; }
-        .chat-input-box input {
-            height: 40px;
-            font-size: 16px;
-            padding: 0 12px;
-        }
-        .chat-input-box button {
-            height: 40px;
-            padding: 0 16px;
-            font-size: 0.9em;
+        .chat-input-box input { height: 40px; font-size: 16px; padding: 0 12px; }
+        .chat-input-box button { height: 40px; padding: 0 16px; font-size: 0.9em; }
+        .purchase-user-head { padding: var(--space-3) var(--space-4); }
+        .purchase-user-head .pu-last { display: none; }
+        .purchase-record {
+            padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + 36px + var(--space-2));
         }
     }
 
@@ -1730,68 +1653,38 @@
         .user-profile { padding: 4px 10px 2px; gap: 6px; }
         .avatar-wrapper { width: 26px; height: 26px; }
         .user-name-row .email { font-size: 0.76em; }
-        .logout-btn-mini,
-        .avatar-change-btn { font-size: 0.62em; padding: 2px 6px; }
-
-        .nav-main-row .nav-item,
-        .nav-main-row .nav-group {
-            min-width: 58px;
-            padding: 6px 10px;
-            font-size: 0.68em;
-        }
+        .user-action-row { gap: 6px; width: auto; flex-wrap: nowrap; }
+        .user-action-row .avatar-change-btn,
+        .user-action-row .logout-btn-mini { flex: 0 0 auto; width: auto; }
+        .logout-btn-mini, .avatar-change-btn { font-size: 0.62em; padding: 2px 6px; }
+        .nav-main-row .nav-item, .nav-main-row .nav-group { min-width: 58px; padding: 6px 10px; font-size: 0.68em; }
         .nav-main-row .nav-text { max-width: 66px; }
-
-        .nav-sub-row .nav-sub-item {
-            padding: 6px 10px;
-            font-size: 0.72em;
-        }
-
+        .nav-sub-row .nav-sub-item { padding: 6px 10px; font-size: 0.72em; }
         .main-content { padding: 10px; }
         .card { padding: 14px; }
-
         table { min-width: 560px; font-size: 0.75em; }
         th, td { padding: 6px 8px; }
-
         .config-grid { grid-template-columns: repeat(3, 1fr); }
         .health-grid { grid-template-columns: 1fr; }
         .stat-grid { grid-template-columns: 1fr; }
-
         .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
         .checkin-stat { padding: 8px 3px; }
     }
 
     @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-        .user-profile {
-            padding: 2px 10px 1px;
-            gap: 6px;
-        }
+        .user-profile { padding: 2px 10px 1px; gap: 6px; }
         .avatar-wrapper { width: 26px; height: 26px; }
-        .avatar-edit {
-            width: 12px; height: 12px; font-size: 6px;
-        }
+        .avatar-edit { width: 12px; height: 12px; font-size: 6px; }
         .user-name-row .email { font-size: 0.76em; }
-        .logout-btn-mini,
-        .avatar-change-btn {
-            font-size: 0.62em;
-            padding: 1px 6px;
-        }
-        .nav-main-row {
-            padding: 1px 8px 4px;
-        }
-        .nav-main-row .nav-item,
-        .nav-main-row .nav-group {
-            padding: 4px 10px;
-            min-width: 58px;
-            font-size: 0.68em;
-        }
+        .user-action-row { gap: 6px; width: auto; flex-wrap: nowrap; }
+        .user-action-row .avatar-change-btn,
+        .user-action-row .logout-btn-mini { flex: 0 0 auto; width: auto; }
+        .logout-btn-mini, .avatar-change-btn { font-size: 0.62em; padding: 1px 6px; }
+        .nav-main-row { padding: 1px 8px 4px; }
+        .nav-main-row .nav-item, .nav-main-row .nav-group { padding: 4px 10px; min-width: 58px; font-size: 0.68em; }
         .nav-main-row .nav-text { max-width: 68px; }
-        .nav-sub-row {
-            padding: 4px 8px 6px;
-        }
-        .nav-sub-row .nav-sub-item {
-            padding: 6px 12px;
-            font-size: 0.74em;
-        }
+        .nav-sub-row { padding: 4px 8px 6px; }
+        .nav-sub-row .nav-sub-item { padding: 6px 12px; font-size: 0.74em; }
     }
     </style>
 </head>
@@ -1823,8 +1716,17 @@
             </div>
             <div class="nav-sub" data-sub="msg">
                 <div class="nav-sub-item" data-tab="announce">📢 公告管理</div>
-                <div class="nav-sub-item" data-tab="points">📅 积分管理</div>
                 <div class="nav-sub-item" data-tab="forgot">📝 忘记密码</div>
+            </div>
+
+            <div class="nav-group" data-group="pointsGroup">
+                <span class="nav-text">📊 积分管理</span>
+                <span class="nav-arrow" data-arrow="pointsGroup">▾</span>
+            </div>
+            <div class="nav-sub" data-sub="pointsGroup">
+                <div class="nav-sub-item" data-tab="points">📅 每日签到管理</div>
+                <div class="nav-sub-item" data-tab="shop">🛍️ 积分商城</div>
+                <div class="nav-sub-item" data-tab="purchases">📋 兑换记录</div>
             </div>
 
             <div class="nav-group" data-group="users">
@@ -1838,10 +1740,6 @@
 
             <div class="nav-item" data-tab="server">
                 <span class="nav-text">📊 服务端信息</span>
-            </div>
-
-            <div class="nav-item" data-tab="shop">
-                <span class="nav-text">🛒 积分商城</span>
             </div>
 
             <div class="nav-item" data-tab="myCheckin">
@@ -2081,7 +1979,6 @@
                     </div>
                 </div>
 
-                <!-- 上架表单：标签在上、输入在下，按序号排 -->
                 <div class="shop-add-form">
                     <div class="form-row">
                         <div class="form-group">
@@ -2115,12 +2012,34 @@
                             <input type="text" id="addShopIcon" placeholder="如 🎁" value="🎁"/>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label>⑧ 每人限购</label>
+                        <div class="limit-row">
+                            <button type="button" class="limit-toggle" id="addLimitToggle" data-on="false">关闭（无限）</button>
+                            <input type="number" id="addShopLimit" min="1" value="1" disabled/>
+                            <span class="limit-unit">份</span>
+                        </div>
+                    </div>
                     <div class="form-submit">
                         <button class="btn-save" id="addShopBtn" style="padding: 0 24px; width: auto;">➕ 上架商品</button>
                     </div>
                 </div>
 
                 <div class="shop-grid" id="adminShopGrid">
+                    <div class="empty">加载中...</div>
+                </div>
+            </div>
+
+            <!-- 兑换记录（按用户折叠） -->
+            <div class="card" id="cardPurchases">
+                <div class="card-head">
+                    <h2>📋 用户兑换记录</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgePurchases">—</span>
+                        <button class="refresh-btn-mini" id="refreshPurchasesBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="purchase-users" id="purchaseUsersList">
                     <div class="empty">加载中...</div>
                 </div>
             </div>
@@ -2351,38 +2270,25 @@
         </div>
     </div>
 
-    <!-- 编辑商品弹窗（新增） -->
+    <!-- 编辑商品弹窗 -->
     <div class="mask" id="editShopModal" style="display:none;">
-        <div class="dialog edit-shop-dialog">
+        <div class="dialog" style="width: 480px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
             <h3>编辑商品信息</h3>
-            <div class="edit-shop-form">
+            <div class="announce-form" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
+                <div class="form-group"><label>① 商品名称</label><input type="text" id="editShopName"/></div>
+                <div class="form-group"><label>② 积分价格</label><input type="number" id="editShopPrice" min="0"/></div>
+                <div class="form-group"><label>③ 库存</label><input type="number" id="editShopStock" min="0"/></div>
+                <div class="form-group"><label>④ 商品描述</label><textarea id="editShopDesc" rows="2"></textarea></div>
+                <div class="form-group"><label>⑤ 商品详情</label><textarea id="editShopDetail" rows="3"></textarea></div>
+                <div class="form-group"><label>⑥ 商品图片展示链接</label><input type="text" id="editShopImage"/></div>
+                <div class="form-group"><label>⑦ 商品图标</label><input type="text" id="editShopIcon"/></div>
                 <div class="form-group">
-                    <label>① 商品名称</label>
-                    <input type="text" id="editShopName"/>
-                </div>
-                <div class="form-group">
-                    <label>② 积分价格</label>
-                    <input type="number" id="editShopPrice" min="0"/>
-                </div>
-                <div class="form-group">
-                    <label>③ 库存</label>
-                    <input type="number" id="editShopStock" min="0"/>
-                </div>
-                <div class="form-group">
-                    <label>④ 商品描述</label>
-                    <textarea id="editShopDesc" rows="2"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>⑤ 商品详情</label>
-                    <textarea id="editShopDetail" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>⑥ 商品图片展示链接</label>
-                    <input type="text" id="editShopImage"/>
-                </div>
-                <div class="form-group">
-                    <label>⑦ 商品图标</label>
-                    <input type="text" id="editShopIcon"/>
+                    <label>⑧ 每人限购</label>
+                    <div class="limit-row">
+                        <button type="button" class="limit-toggle" id="editLimitToggle" data-on="false">关闭（无限）</button>
+                        <input type="number" id="editShopLimit" min="1" value="1" disabled/>
+                        <span class="limit-unit">份</span>
+                    </div>
                 </div>
             </div>
             <div class="dialog-actions" style="margin-top: 16px;">
@@ -2621,6 +2527,7 @@ var CARDS = {
     manage:    'cardManage',
     server:    'cardServer',
     shop:      'cardShop',
+    purchases: 'cardPurchases',
     theme:     'cardTheme',
     sound:     'cardSound',
     myCheckin: 'cardMyCheckin',
@@ -2648,6 +2555,7 @@ function switchTab(tab) {
     if (tab === 'profiles')  loadProfiles();
     if (tab === 'server')    loadServerInfo();
     if (tab === 'shop')      loadAdminShop();
+    if (tab === 'purchases') loadPurchases();
     if (tab === 'myCheckin') { myRefreshCheckinUI(); myLoadCheckinCalendar(); }
     if (tab === 'myFriends') myLoadFriends();
 
@@ -3337,6 +3245,35 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
 /* ============================================================
  *  管理端积分商城
  * ============================================================ */
+
+/* 限购开关逻辑 */
+function bindLimitToggle(toggleId, inputId) {
+    var t = document.getElementById(toggleId);
+    var i = document.getElementById(inputId);
+    if (!t || !i) return;
+
+    function sync() {
+        var on = t.dataset.on === 'true';
+        i.disabled = !on;
+        t.textContent = on ? '开启（限购）' : '关闭（无限）';
+    }
+    t.addEventListener('click', function () {
+        t.dataset.on = (t.dataset.on === 'true') ? 'false' : 'true';
+        sync();
+    });
+    sync();
+}
+bindLimitToggle('addLimitToggle',  'addShopLimit');
+bindLimitToggle('editLimitToggle', 'editShopLimit');
+
+function readLimit(toggleId, inputId) {
+    var t = document.getElementById(toggleId);
+    if (!t || t.dataset.on !== 'true') return null;
+    var v = parseInt(document.getElementById(inputId).value, 10) || 1;
+    if (v < 1) v = 1;
+    return v;
+}
+
 function loadAdminShop() {
     var grid = document.getElementById('adminShopGrid');
     var badge = document.getElementById('badgeShop');
@@ -3363,12 +3300,18 @@ function loadAdminShop() {
             items.forEach(function (it) {
                 var stockText = (it.stock === 0) ? '已售罄' : ('库存: ' + (it.stock || 0));
                 var activeTag = it.is_active === false ? '（已下架）' : '';
+                var limitTag = '';
+                if (it.per_user_limit != null && it.per_user_limit > 0) {
+                    limitTag = '<div class="shop-item-limit">每人限购 ' + it.per_user_limit + ' 份</div>';
+                }
+
                 html +=
                     '<div class="shop-item">' +
                         '<div class="shop-item-icon">' + escapeHtml(it.icon || '🎁') + '</div>' +
                         '<div class="shop-item-name">' + escapeHtml(it.name) + activeTag + '</div>' +
                         '<div class="shop-item-price">' + (it.price || 0) + ' 积分</div>' +
                         '<div class="shop-item-stock">' + stockText + '</div>' +
+                        limitTag +
                         '<div class="shop-item-actions">' +
                             '<button class="btn-edit" data-id="' + it.id + '">编辑</button>' +
                             '<button class="btn-del" data-id="' + it.id + '">删除</button>' +
@@ -3407,6 +3350,21 @@ function loadAdminShop() {
                     document.getElementById('editShopImage').value  = it.image_url || '';
                     document.getElementById('editShopIcon').value   = it.icon || '🎁';
 
+                    // 限购回填
+                    var editToggle = document.getElementById('editLimitToggle');
+                    var editLimitInput = document.getElementById('editShopLimit');
+                    if (it.per_user_limit != null && it.per_user_limit > 0) {
+                        editToggle.dataset.on = 'true';
+                        editLimitInput.value = it.per_user_limit;
+                        editLimitInput.disabled = false;
+                        editToggle.textContent = '开启（限购）';
+                    } else {
+                        editToggle.dataset.on = 'false';
+                        editLimitInput.value = 1;
+                        editLimitInput.disabled = true;
+                        editToggle.textContent = '关闭（无限）';
+                    }
+
                     document.getElementById('editShopModal').style.display = 'flex';
                 });
             });
@@ -3430,6 +3388,7 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
     var detail = document.getElementById('addShopDetail').value.trim();
     var image  = document.getElementById('addShopImage').value.trim();
     var icon   = document.getElementById('addShopIcon').value.trim() || '🎁';
+    var limitVal = readLimit('addLimitToggle', 'addShopLimit');
 
     if (!name) { alert('请填写商品名称'); return; }
 
@@ -3445,6 +3404,7 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
         stock: stock,
         icon: icon,
         image_url: image,
+        per_user_limit: limitVal,
         is_active: true,
         sort_order: 0
     }]).then(function (res) {
@@ -3461,6 +3421,14 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
         });
         document.getElementById('addShopStock').value = '10';
         document.getElementById('addShopIcon').value  = '🎁';
+        // 重置限购
+        var addToggle = document.getElementById('addLimitToggle');
+        var addLimitInput = document.getElementById('addShopLimit');
+        addToggle.dataset.on = 'false';
+        addToggle.textContent = '关闭（无限）';
+        addLimitInput.value = 1;
+        addLimitInput.disabled = true;
+
         loadAdminShop();
     });
 });
@@ -3477,6 +3445,7 @@ document.getElementById('editShopSaveBtn').addEventListener('click', function ()
     var detail = document.getElementById('editShopDetail').value.trim();
     var image  = document.getElementById('editShopImage').value.trim();
     var icon   = document.getElementById('editShopIcon').value.trim() || '🎁';
+    var limitVal = readLimit('editLimitToggle', 'editShopLimit');
 
     if (!name) { alert('商品名称不能为空'); return; }
 
@@ -3491,7 +3460,8 @@ document.getElementById('editShopSaveBtn').addEventListener('click', function ()
         description: desc,
         detail: detail,
         image_url: image,
-        icon: icon
+        icon: icon,
+        per_user_limit: limitVal
     }).eq('id', id).then(function (r) {
         btn.disabled = false;
         btn.textContent = '保存修改';
@@ -3511,6 +3481,120 @@ document.getElementById('editShopModal').addEventListener('click', function (e) 
         this.style.display = 'none';
         currentEditShopId = null;
     }
+});
+
+/* ============================================================
+ *  兑换记录（按用户折叠）
+ * ============================================================ */
+function loadPurchases() {
+    var listEl = document.getElementById('purchaseUsersList');
+    var badge  = document.getElementById('badgePurchases');
+    if (!listEl) return;
+
+    listEl.innerHTML = '<div class="empty">加载中...</div>';
+
+    supabaseClient.from('user_purchases').select('*')
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                listEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var records = res.data || [];
+            if (records.length === 0) {
+                listEl.innerHTML = '<div class="empty">暂无兑换记录</div>';
+                badge.textContent = '0 人';
+                return;
+            }
+
+            /* 按用户分组 */
+            var groups = {};
+            records.forEach(function (r) {
+                var uid = r.user_id || 'unknown';
+                if (!groups[uid]) {
+                    groups[uid] = { user_id: uid, records: [] };
+                }
+                groups[uid].records.push(r);
+            });
+
+            var userIds = Object.keys(groups);
+
+            /* 查询这些用户的 profile */
+            supabaseClient.from('profiles')
+                .select('id, email, full_name, avatar_url')
+                .in('id', userIds)
+                .then(function (pRes) {
+                    var profiles = {};
+                    (pRes.data || []).forEach(function (p) { profiles[p.id] = p; });
+
+                    badge.textContent = userIds.length + ' 人';
+
+                    var html = '';
+                    userIds.forEach(function (uid) {
+                        var u = profiles[uid] || {};
+                        var recs = groups[uid].records;
+                        var lastTime = recs[0]
+                            ? new Date(recs[0].created_at).toLocaleString('zh-CN', { hour12: false })
+                            : '—';
+                        var name = u.full_name || u.email || '未知用户';
+                        var email = u.email || '';
+                        var avatar = u.avatar_url || DEFAULT_AVATAR;
+
+                        var recordsHtml = '';
+                        recs.forEach(function (r) {
+                            var t = new Date(r.created_at).toLocaleString('zh-CN', { hour12: false });
+                            recordsHtml +=
+                                '<div class="purchase-record">' +
+                                    '<span class="pr-icon">' + escapeHtml(r.item_icon || '🎁') + '</span>' +
+                                    '<div class="pr-info">' +
+                                        '<div class="pr-name">' + escapeHtml(r.item_name || '未知商品') + '</div>' +
+                                        '<div class="pr-time">' + t + '</div>' +
+                                    '</div>' +
+                                    '<span class="pr-price">-' + (r.price_paid || 0) + '</span>' +
+                                '</div>';
+                        });
+
+                        html +=
+                            '<div class="purchase-user" data-uid="' + uid + '">' +
+                                '<div class="purchase-user-head">' +
+                                    '<img class="pu-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
+                                    '<div class="pu-info">' +
+                                        '<div class="pu-name">' + escapeHtml(name) + '</div>' +
+                                        '<div class="pu-email">' + escapeHtml(email) + '</div>' +
+                                    '</div>' +
+                                    '<span class="pu-count">' + recs.length + ' 件</span>' +
+                                    '<span class="pu-last">最近：' + lastTime + '</span>' +
+                                    '<span class="pu-arrow">▾</span>' +
+                                '</div>' +
+                                '<div class="purchase-user-body">' + recordsHtml + '</div>' +
+                            '</div>';
+                    });
+
+                    listEl.innerHTML = html;
+
+                    /* 绑定折叠/展开：点击一个用户时，其他用户自动折叠 */
+                    listEl.querySelectorAll('.purchase-user-head').forEach(function (head) {
+                        head.addEventListener('click', function () {
+                            var card = this.parentElement;
+                            var wasOpen = card.classList.contains('open');
+
+                            listEl.querySelectorAll('.purchase-user').forEach(function (el) {
+                                el.classList.remove('open');
+                            });
+
+                            if (!wasOpen) card.classList.add('open');
+                        });
+                    });
+                });
+        });
+}
+
+document.getElementById('refreshPurchasesBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadPurchases();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
 
 /* 服务端信息 */
