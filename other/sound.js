@@ -21,10 +21,12 @@
         return sharedCtx;
     }
 
-    /* ⭐ 强化版 unlock：同步播放极短音效，激活音频通道 */
+    /* ⭐ 修复：已经 running 时直接返回，不再重复播放无声振荡器 */
     function unlock() {
         var ctx = getCtx();
         if (!ctx) return;
+
+        if (ctx.state === 'running') return;
 
         if (ctx.state === 'suspended') {
             ctx.resume().catch(function () {});

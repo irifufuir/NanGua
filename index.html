@@ -556,13 +556,14 @@
             showTipMsg('登录失败：' + msg, false);
         });
     }
-    loginBtn.addEventListener('click', doLogin);
+
+    /* ⭐ 修复：只绑定一次，先解锁音效再登录 */
     loginBtn.addEventListener('click', function () {
-          if (window.LoginSound && window.LoginSound.unlock) {
-        window.LoginSound.unlock();
-    }
-    doLogin();
-});
+        if (window.LoginSound && window.LoginSound.unlock) {
+            window.LoginSound.unlock();
+        }
+        doLogin();
+    });
 
     /* ========================================================
      *  八、注册逻辑

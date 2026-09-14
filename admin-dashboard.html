@@ -1078,93 +1078,593 @@
         .preview-hint { display: none; }
     }
 
+    /* ================================================================
+       ========== 移动端适配（重新优化） ==========
+       ================================================================ */
     @media (max-width: 768px) {
         body { flex-direction: column; }
+
+        /* ---------- 侧边栏：吸附顶部 ---------- */
         .sidebar {
-            width: 100%; padding: var(--space-5) 0 0;
-            border-right: none; border-bottom: 1px solid var(--theme-border-soft);
-            flex-direction: row; flex-wrap: wrap;
-            align-items: center; justify-content: space-between;
+            width: 100%;
+            padding: 6px 0 0;
+            border-right: none;
+            border-bottom: 1px solid var(--theme-border-soft);
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--theme-sidebar);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
+
         .user-profile {
-            flex-direction: row; padding: 0 var(--space-5);
-            margin-bottom: 0; gap: var(--space-3); flex: 1;
+            flex-direction: row;
+            padding: 4px 12px;
+            margin-bottom: 0;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
         }
-        .avatar-wrapper { width: 40px; height: 40px; }
-        .avatar-edit { width: 18px; height: 18px; font-size: 9px; }
+        .avatar-wrapper { width: 34px; height: 34px; }
+        .avatar-edit {
+            width: 15px; height: 15px;
+            font-size: 8px;
+            bottom: -1px; right: -1px;
+        }
+        .user-details { gap: 2px; }
+        .user-details .email { font-size: 0.84em; }
+        .user-bottom-row { gap: 6px; }
         .user-details .role { display: none; }
+        .logout-btn-mini {
+            font-size: 0.68em;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
 
+        /* ---------- 导航：横滚 + 垂直布局 ---------- */
         .nav-menu {
-            display: flex; order: 3; width: 100%;
-            overflow-x: auto; margin-top: var(--space-3);
-            padding: 0; flex-wrap: nowrap;
+            display: flex;
+            order: 3;
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 4px;
+            padding: 4px 6px 8px;
+            flex-wrap: nowrap;
+            gap: 4px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
         }
-        .nav-item, .nav-group {
-            padding: var(--space-3) var(--space-4);
-            white-space: nowrap; font-size: 0.85em;
-            flex-shrink: 0;
-        }
-        .nav-item.active, .nav-group.open { padding-left: var(--space-4); }
-        .nav-item::before, .nav-group::before {
-            top: auto; bottom: 0; left: 50%;
-            width: 60%; height: 2px;
-            border-radius: 2px 2px 0 0;
-            transform: translateX(-50%) scaleX(0);
-        }
-        .nav-item.active::before, .nav-group.open::before {
-            transform: translateX(-50%) scaleX(1);
-        }
+        .nav-menu::-webkit-scrollbar { display: none; }
 
+        .nav-item, .nav-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            padding: 8px 10px;
+            white-space: nowrap;
+            font-size: 0.72em;
+            flex-shrink: 0;
+            min-width: 62px;
+            border-radius: 10px;
+            line-height: 1.15;
+            text-align: center;
+            scroll-snap-align: start;
+            transition: all 0.25s ease;
+        }
+        .nav-item::before, .nav-group::before { display: none; }
+        .nav-item.active, .nav-group.open {
+            padding-left: 10px;
+            background: var(--theme-accent-soft);
+        }
+        .nav-text {
+            font-size: 1em;
+            text-align: center;
+            line-height: 1.2;
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .nav-arrow { display: none; }
+
+        /* nav-sub 内联到 nav-menu */
         .nav-sub {
             display: flex !important;
             max-height: none !important;
             opacity: 1 !important;
             flex-shrink: 0;
+            gap: 4px;
+            padding: 0;
         }
         .nav-sub-item {
-            padding: var(--space-3) var(--space-4);
-            white-space: nowrap; font-size: 0.8em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 10px;
+            white-space: nowrap;
+            font-size: 0.72em;
+            min-width: 62px;
+            border-radius: 10px;
+            text-align: center;
+            line-height: 1.15;
+            flex-shrink: 0;
+            scroll-snap-align: start;
         }
         .nav-sub-item::before { display: none; }
-
-        .main-content { padding: var(--space-5) var(--space-4); }
-        .card {
-            padding: var(--space-6) var(--space-5);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
+        .nav-sub-item.active {
+            background: var(--theme-accent-soft);
         }
-        .card-head { margin-bottom: var(--space-5); padding-bottom: var(--space-4); }
 
-        table { font-size: 0.86em; min-width: 700px; }
-        th, td { padding: var(--space-3) var(--space-2); }
-        .user-avatar { width: 28px; height: 28px; }
+        /* ---------- 主内容 ---------- */
+        .main-content {
+            padding: 12px;
+            scrollbar-width: none;
+        }
+        .main-content::-webkit-scrollbar { display: none; }
 
-        .form-actions { flex-direction: column; }
-        .btn-reset { width: 100%; }
-        .manage-preview { flex-direction: column; text-align: center; }
+        .card {
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,.06);
+        }
+        .card-head {
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            gap: 8px;
+        }
+        .card-head h2 { font-size: 1em; }
+        .card-head .badge {
+            font-size: 0.68em;
+            padding: 3px 10px;
+        }
+        .refresh-btn-mini {
+            width: 30px;
+            height: 30px;
+            font-size: 13px;
+        }
 
-        .config-grid { grid-template-columns: repeat(4, 1fr); }
+        /* ---------- 表格：横向滑动 ---------- */
+        .table-wrap {
+            border-radius: 8px;
+            position: relative;
+        }
+        table {
+            font-size: 0.8em;
+            min-width: 640px;
+        }
+        th, td {
+            padding: 8px 10px;
+        }
+        th { font-size: 0.78em; }
+        .user-avatar { width: 26px; height: 26px; }
+        .user-cell { gap: 6px; }
 
-        .stat-grid, .health-grid { grid-template-columns: 1fr 1fr; }
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 0.76em;
+            margin-right: 3px;
+        }
+        .status-tag {
+            font-size: 0.72em;
+            padding: 2px 8px;
+        }
+        .remaining-tag {
+            font-size: 0.68em;
+            padding: 2px 6px;
+            margin-left: 2px;
+        }
+
+        /* ---------- 公告表单 ---------- */
+        .announce-form {
+            padding: 12px;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .announce-form input[type="text"] {
+            height: 42px;
+            font-size: 16px;
+        }
+        .announce-form textarea {
+            font-size: 16px;
+            min-height: 80px;
+        }
+        .announce-form-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .announce-form-row label {
+            font-size: 0.84em;
+        }
+        .announce-form-row .btn-save {
+            width: 100% !important;
+            height: 42px;
+        }
+
+        .announce-list { gap: 10px; }
+        .announce-item { padding: 12px; }
+        .announce-item .announce-title { font-size: 0.92em; }
+        .announce-item .announce-content { font-size: 0.84em; line-height: 1.7; }
+        .announce-item .announce-time { font-size: 0.7em; }
+        .announce-actions .action-btn { padding: 4px 10px; }
+
+        /* ---------- 积分配置 ---------- */
+        .config-section { margin-bottom: 18px; }
+        .config-title {
+            font-size: 0.76em;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+        }
+        .config-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .config-field label { font-size: 0.7em; }
+        .config-field input {
+            height: 40px;
+            font-size: 16px;
+            padding: 0 4px;
+        }
+        .config-actions {
+            padding-top: 12px;
+        }
+        .config-actions .btn-save {
+            width: 100%;
+            padding: 0 12px;
+        }
+
+        /* ---------- 用户管理 ---------- */
+        .manage-layout {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        .manage-preview {
+            position: static;
+            flex-direction: row;
+            text-align: left;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+        }
+        .preview-avatar {
+            width: 56px;
+            height: 56px;
+            border-width: 1px;
+            box-shadow: 0 0 0 2px var(--theme-accent-soft);
+        }
+        .preview-name {
+            font-size: 0.95em;
+            text-align: left;
+        }
+        .preview-email {
+            font-size: 0.76em;
+            text-align: left;
+        }
+        .preview-divider { display: none; }
+        .preview-hint { display: none; }
+
+        .manage-form { gap: 14px; max-width: 100%; }
+        .form-section-title {
+            font-size: 0.72em;
+            padding-bottom: 8px;
+        }
+        .form-group label { font-size: 0.8em; }
+        .form-group input,
+        .form-group select {
+            height: 44px;
+            font-size: 16px;
+            padding: 0 12px;
+        }
+        .form-actions {
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 14px;
+            margin-top: 0;
+        }
+        .btn-save,
+        .btn-reset {
+            width: 100%;
+            height: 44px;
+            font-size: 0.95em;
+        }
+
+        /* ---------- 服务端信息 ---------- */
+        .info-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .info-toolbar .last-update {
+            font-size: 0.76em;
+            text-align: center;
+        }
+        .refresh-btn {
+            width: 100%;
+            height: 40px;
+            font-size: 0.9em;
+        }
+        .stat-section-title {
+            font-size: 0.76em;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+        }
+        .health-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .health-card {
+            padding: 10px 12px;
+            gap: 8px;
+        }
+        .health-info .name { font-size: 0.8em; }
+        .health-info .status { font-size: 0.68em; }
+
+        .stat-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .stat-box {
+            padding: 12px;
+            gap: 4px;
+        }
+        .stat-box .label { font-size: 0.72em; }
         .stat-box .value { font-size: 1.3em; }
 
-        .theme-switcher { padding: var(--space-4); gap: var(--space-3); }
-        .theme-dot { width: 28px; height: 28px; }
-        .setting-btn { padding: var(--space-3); font-size: 0.88em; }
-        .setting-group { margin-bottom: var(--space-6); }
+        .project-info {
+            padding: 12px;
+        }
+        .info-row {
+            padding: 8px 0;
+            gap: 8px;
+        }
+        .info-row .key { font-size: 0.78em; }
+        .info-row .val {
+            font-size: 0.78em;
+            word-break: break-all;
+        }
 
-        .dialog { padding: var(--space-7) var(--space-6); }
-        .dialog .dialog-inputs { grid-template-columns: 1fr 1fr 1fr; gap: var(--space-2); }
-        .dialog .field input { height: 40px; font-size: 0.95em; }
-        .dialog .dialog-actions button { height: 40px; font-size: 0.9em; }
+        /* ---------- 签到 ---------- */
+        .checkin-hero {
+            padding: 14px 0;
+            gap: 14px;
+        }
+        .checkin-points .num { font-size: 2.4em; }
+        .checkin-points .lbl { font-size: 0.72em; }
+        .checkin-btn {
+            padding: 12px 30px;
+            font-size: 0.95em;
+        }
+        .checkin-calendar {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            max-width: 100%;
+            margin-top: 12px;
+        }
+        .checkin-day {
+            padding: 6px 3px;
+            border-radius: 8px;
+            gap: 1px;
+        }
+        .checkin-day .day-name { font-size: 0.62em; }
+        .checkin-day .day-date { font-size: 0.84em; }
+        .checkin-day .day-points { font-size: 0.62em; }
 
-        .checkin-calendar { grid-template-columns: repeat(4, 1fr); max-width: 100%; }
-        .chat-box { width: 100%; max-width: 100%; height: 90vh; max-height: 90vh; }
-        .chat-mask { padding: 0; }
+        .checkin-stats {
+            grid-template-columns: 1fr 1fr 1fr !important;
+            max-width: 100% !important;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .checkin-stat { padding: 8px 4px; }
+        .checkin-stat .v { font-size: 1.1em; }
+        .checkin-stat .k { font-size: 0.66em; }
+
+        /* ---------- 好友 ---------- */
+        .add-friend-box {
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .add-friend-box input,
+        .add-friend-box button {
+            width: 100%;
+            height: 44px;
+            font-size: 16px;
+        }
+        .friend-section { margin-bottom: 18px; }
+        .friend-section-title {
+            font-size: 0.74em;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+        }
+        .friend-item {
+            padding: 10px 12px;
+            gap: 10px;
+        }
+        .friend-item img { width: 38px; height: 38px; }
+        .friend-item .friend-name { font-size: 0.88em; }
+        .friend-item .friend-email { font-size: 0.72em; }
+        .friend-item.pending .friend-actions {
+            flex-direction: column;
+            gap: 4px;
+        }
+        .friend-item.pending .friend-actions button {
+            padding: 4px 10px;
+            font-size: 0.74em;
+        }
+
+        /* ---------- 主题 / 音效 ---------- */
+        .theme-section-hint {
+            font-size: 0.82em;
+            margin-bottom: 16px;
+        }
+        .theme-switcher {
+            padding: 12px;
+            gap: 8px;
+        }
+        .theme-dot { width: 30px; height: 30px; }
+        .theme-switcher-label {
+            font-size: 0.78em;
+            margin-bottom: 0;
+        }
+        .setting-group { margin-bottom: 18px; }
+        .setting-label { margin-bottom: 10px; }
+        .setting-title { font-size: 0.9em; }
+        .setting-desc { font-size: 0.78em; }
+        .setting-options { gap: 6px; }
+        .setting-btn {
+            min-width: 0;
+            padding: 10px 8px;
+            font-size: 0.84em;
+        }
+        .setting-reset-row {
+            margin-top: 18px;
+            padding-top: 14px;
+        }
+        .setting-reset-btn {
+            width: 100%;
+            padding: 10px 16px;
+            font-size: 0.84em;
+        }
+
+        .toggle-row {
+            padding: 12px 14px;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .toggle-label .title { font-size: 0.88em; }
+        .toggle-label .desc { font-size: 0.72em; }
+        .toggle-switch {
+            width: 48px;
+            height: 28px;
+        }
+        .toggle-switch::after {
+            width: 22px;
+            height: 22px;
+        }
+        .toggle-switch.active::after {
+            transform: translateX(20px);
+        }
+
+        /* ---------- 弹窗：底部弹出 ---------- */
+        .mask {
+            padding: 0;
+            align-items: flex-end;
+        }
+        .dialog {
+            width: 100%;
+            max-width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+        }
+        .dialog h3 { font-size: 1em; }
+        .dialog .dialog-hint { font-size: 0.78em; }
+        .dialog .dialog-inputs {
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .dialog .field label { font-size: 0.74em; }
+        .dialog .field input {
+            height: 42px;
+            font-size: 16px;
+        }
+        .dialog .dialog-preview {
+            font-size: 0.82em;
+            min-height: 40px;
+        }
+        .dialog .dialog-actions button {
+            height: 42px;
+            font-size: 0.9em;
+        }
+        .dialog .field-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* ---------- 聊天弹窗：底部弹出 ---------- */
+        .chat-mask {
+            padding: 0;
+            align-items: flex-end;
+        }
+        .chat-box {
+            width: 100%;
+            max-width: 100%;
+            height: 90vh;
+            max-height: 90vh;
+            border-radius: 20px 20px 0 0;
+            border-bottom: none;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .chat-header { padding: 12px 14px; }
+        .chat-header img { width: 34px; height: 34px; }
+        .chat-header .chat-name { font-size: 0.9em; }
+        .chat-close-btn { width: 28px; height: 28px; }
+        .chat-body { padding: 12px; gap: 8px; }
+        .chat-msg {
+            max-width: 82%;
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+        .chat-input-box {
+            padding: 10px 12px;
+            gap: 8px;
+        }
+        .chat-input-box input {
+            height: 40px;
+            font-size: 16px;
+            padding: 0 12px;
+        }
+        .chat-input-box button {
+            height: 40px;
+            padding: 0 16px;
+            font-size: 0.9em;
+        }
     }
 
-    @media (max-width: 480px) {
-        .stat-grid, .health-grid { grid-template-columns: 1fr; }
+    /* ========== 超小屏（≤ 380px）：进一步收紧 ========== */
+    @media (max-width: 380px) {
+        .sidebar { padding-top: 4px; }
+        .user-profile { padding: 4px 10px; gap: 6px; }
+        .avatar-wrapper { width: 30px; height: 30px; }
+        .user-details .email { font-size: 0.78em; }
+        .logout-btn-mini { font-size: 0.64em; padding: 2px 6px; }
+
+        .nav-item, .nav-group,
+        .nav-sub-item {
+            min-width: 56px;
+            padding: 6px 8px;
+            font-size: 0.68em;
+        }
+        .nav-text { max-width: 62px; }
+
+        .main-content { padding: 10px; }
+        .card { padding: 14px; }
+
+        table { min-width: 560px; font-size: 0.75em; }
+        th, td { padding: 6px 8px; }
+
+        .config-grid { grid-template-columns: repeat(3, 1fr); }
+        .health-grid { grid-template-columns: 1fr; }
+        .stat-grid { grid-template-columns: 1fr; }
+
+        .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
+        .checkin-stat { padding: 8px 3px; }
+
+        .theme-dot { width: 26px; height: 26px; }
+        .setting-btn { font-size: 0.8em; padding: 8px 6px; }
     }
     </style>
 </head>
@@ -2219,7 +2719,10 @@ document.getElementById('refreshProfilesBtn').addEventListener('click', function
 });
 
 function bindProfileActions() {
-    document.querySelectorAll('.action-btn.del[data-id]').forEach(function (btn) {
+    var body = document.getElementById('profilesBody');
+    if (!body) return;
+
+    body.querySelectorAll('.action-btn.del[data-id]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
             if (!confirm('⚠️ 确定要彻底删除该用户吗？\n此操作不可恢复！')) return;
@@ -2233,7 +2736,7 @@ function bindProfileActions() {
         });
     });
 
-    document.querySelectorAll('.action-btn.block').forEach(function (btn) {
+    body.querySelectorAll('.action-btn.block').forEach(function (btn) {
         btn.addEventListener('click', function () {
             currentBanUserId = this.getAttribute('data-id');
             document.getElementById('banDays').value = '0';
@@ -2244,7 +2747,7 @@ function bindProfileActions() {
         });
     });
 
-    document.querySelectorAll('.action-btn.unblock').forEach(function (btn) {
+    body.querySelectorAll('.action-btn.unblock').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
             if (!confirm('确定要解除拉黑吗？')) return;
@@ -2612,12 +3115,10 @@ function myRefreshCheckinUI() {
             document.getElementById('myTodayReward').textContent = '—';
         }
 
-        /* 加载积分排名 */
         myLoadRank(currentAdmin.id);
     });
 }
 
-/* 加载当前管理员的积分排名 */
 function myLoadRank(userId) {
     supabaseClient.from('profiles')
         .select('points')
@@ -2870,7 +3371,7 @@ var myLastMsgTs = null;
 
 function myOpenChat(friend) {
     myCurrentChatFriend = friend;
-    myLastMsgTs = null;   /* 重置，避免重新打开时误报新消息 */
+    myLastMsgTs = null;
     document.getElementById('myChatFriendName').textContent = friend.full_name || friend.email;
     document.getElementById('myChatFriendAvatar').src = friend.avatar_url || DEFAULT_AVATAR;
     document.getElementById('myChatModal').style.display = 'flex';
@@ -2909,7 +3410,6 @@ function myLoadMessages() {
                 return;
             }
 
-            /* 检测对方新消息 → 播放提示音 */
             var latestFromFriend = null;
             data.forEach(function (m) {
                 if (m.from_user !== currentAdmin.id) {

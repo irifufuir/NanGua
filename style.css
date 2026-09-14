@@ -970,7 +970,7 @@ body {
 }
 
 /* ============================================================
-   📱 移动端适配（480px 及以下）
+   📱 移动端适配（重新优化）
    ============================================================ */
 @media (max-width: 480px) {
 
@@ -981,107 +981,249 @@ body {
         overflow-x: hidden;
         overflow-y: auto;
         justify-content: flex-start;
-        padding: 84px var(--s-4) var(--s-7);
+        padding: 68px 14px 24px;
     }
 
+    /* ---------- 主卡片 ---------- */
     .box {
         width: 100%;
         max-width: 400px;
         min-height: 0;
-        padding: var(--s-7) var(--s-6);
-        border-radius: var(--r-lg);
+        padding: 26px 22px;
+        border-radius: 16px;
         margin: auto 0;
         box-shadow: var(--shadow-md);
     }
 
     .box > h2 {
-        font-size: 22px;
-        margin-bottom: var(--s-6);
+        font-size: 20px;
+        margin-bottom: 22px;
     }
 
     .box .input-box {
-        margin-bottom: var(--s-4);
+        margin-bottom: 12px;
+    }
+
+    .box .input-box > label {
+        font-size: 11px;
+        margin-bottom: 6px;
     }
 
     .box .input-box input {
         height: 46px;
-        font-size: 15px;
+        font-size: 16px;      /* 防 iOS 自动缩放 */
+        padding: 0 14px;
+    }
+
+    .box .btn-box > a {
+        font-size: 12.5px;
+        margin-bottom: 14px;
+    }
+
+    .box .btn-box > div {
+        gap: 10px;
     }
 
     .box .btn-box > div > button {
         height: 46px;
-        font-size: 14px;
-        padding: 0 var(--s-3);
+        font-size: 15px;
+        padding: 0 12px;
     }
 
+    .box .tip {
+        font-size: 12px;
+        margin-top: 10px;
+    }
+
+    /* ---------- 右上角控制区：更紧凑 ---------- */
     .top-right-controls {
-        top: var(--s-4);
-        right: var(--s-4);
-        gap: var(--s-2);
+        top: 12px;
+        right: 12px;
+        gap: 8px;
     }
 
     .lang-btn,
     .bg-btn {
-        width: 104px;
-        height: 34px;
-        font-size: 12.5px;
+        width: 92px;
+        height: 32px;
+        font-size: 12px;
+        border-radius: 8px;
     }
 
     .lang-dropdown,
     .bg-dropdown {
-        min-width: 118px;
+        min-width: 110px;
+        margin-top: 6px;
     }
 
-    .lang-dropdown a    { padding: var(--s-3) var(--s-4); font-size: 13px; }
-    .bg-cat-title       { padding: var(--s-3) var(--s-4); font-size: 13px; }
-    .bg-items a         { padding: var(--s-3) var(--s-4) var(--s-3) var(--s-6); font-size: 12.5px; }
+    .lang-dropdown a {
+        padding: 10px 14px;
+        font-size: 12.5px;
+    }
+    .bg-cat-title {
+        padding: 10px 14px;
+        font-size: 12.5px;
+    }
+    .bg-items a {
+        padding: 10px 14px 10px 22px;
+        font-size: 12px;
+    }
 
+    /* ---------- 弹窗：底部弹出 ---------- */
     .modal-mask {
-        padding: var(--s-4);
-        align-items: flex-start;
+        padding: 0;
+        align-items: flex-end;
+        overflow: hidden;
     }
 
     .modal-box,
     .ban-modal-box {
         width: 100%;
-        max-width: 400px;
-        padding: var(--s-7) var(--s-6);
-        border-radius: var(--r-lg);
-        margin: auto 0;
+        max-width: 100%;
+        padding: 26px 20px calc(26px + env(safe-area-inset-bottom));
+        border-radius: 22px 22px 0 0;
+        border-bottom: none;
+        margin: 0;
+        max-height: 92vh;
+        overflow-y: auto;
     }
 
-    .modal-box > h3 { font-size: 17px; margin-bottom: var(--s-5); }
-    .modal-box .input-box input,
-    .modal-box .input-box textarea { font-size: 15px; }
-    .modal-box .input-box input { height: 46px; }
-    .modal-box .btn-box > div > button { height: 46px; font-size: 14px; padding: 0 var(--s-3); }
+    .modal-box > h3 {
+        font-size: 17px;
+        margin-bottom: 20px;
+    }
 
-    .ban-icon-wrap { width: 64px; height: 64px; }
-    .ban-icon      { font-size: 26px; }
-    .ban-title     { font-size: 18px; }
-    .ban-time-value { font-size: 12.5px; }
+    .modal-box .input-box {
+        margin-bottom: 12px;
+    }
+
+    .modal-box .input-box > label {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .modal-box .input-box input {
+        height: 46px;
+        font-size: 16px;      /* 防 iOS 自动缩放 */
+    }
+
+    .modal-box .input-box textarea {
+        font-size: 16px;
+        min-height: 76px;
+        padding: 12px 14px;
+    }
+
+    .modal-box .btn-box {
+        margin-top: 16px;
+    }
+
+    .modal-box .btn-box > div {
+        gap: 10px;
+    }
+
+    .modal-box .btn-box > div > button {
+        height: 46px;
+        font-size: 15px;
+        padding: 0 12px;
+    }
+
+    /* ---------- 封禁弹窗 ---------- */
+    .ban-icon-wrap {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 16px;
+    }
+    .ban-icon {
+        font-size: 24px;
+    }
+    .ban-title {
+        font-size: 17px;
+    }
+    .ban-desc {
+        font-size: 12.5px;
+        margin-bottom: 20px;
+    }
+    .ban-time-box {
+        padding: 14px 16px;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .ban-time-label {
+        font-size: 11.5px;
+    }
+    .ban-time-value {
+        font-size: 12px;
+    }
+    .ban-close-btn {
+        height: 46px;
+        font-size: 15px;
+    }
 }
 
 /* ============================================================
-   📱 超小屏（360px 以下）
+   📱 超小屏（≤ 380px）：进一步收紧
    ============================================================ */
-@media (max-width: 360px) {
-    body { padding: 78px var(--s-3) var(--s-6); }
-
-    .box {
-        padding: var(--s-6) var(--s-5);
+@media (max-width: 380px) {
+    body {
+        padding: 64px 12px 20px;
     }
 
-    .box .input-box input,
+    .box {
+        padding: 22px 18px;
+        border-radius: 14px;
+    }
+
+    .box > h2 {
+        font-size: 19px;
+        margin-bottom: 20px;
+    }
+
+    .box .input-box input {
+        height: 44px;
+        font-size: 16px;
+        padding: 0 12px;
+    }
+
+    .box .btn-box > div {
+        gap: 8px;
+    }
+
     .box .btn-box > div > button {
         height: 44px;
+        font-size: 14.5px;
+        padding: 0 10px;
+    }
+
+    .top-right-controls {
+        top: 10px;
+        right: 10px;
     }
 
     .lang-btn,
     .bg-btn {
-        width: 96px;
-        height: 32px;
-        font-size: 12px;
+        width: 84px;
+        height: 30px;
+        font-size: 11.5px;
+    }
+
+    .modal-box,
+    .ban-modal-box {
+        padding: 22px 16px calc(22px + env(safe-area-inset-bottom));
+        border-radius: 18px 18px 0 0;
+    }
+
+    .modal-box > h3 {
+        font-size: 16px;
+        margin-bottom: 16px;
+    }
+
+    .modal-box .input-box input {
+        height: 44px;
+    }
+
+    .modal-box .btn-box > div > button {
+        height: 44px;
+        font-size: 14.5px;
     }
 }
 
@@ -1128,12 +1270,13 @@ body {
         min-height: 100dvh;
         overflow-y: auto;
         justify-content: flex-start;
-        padding: 78px var(--s-4) var(--s-6);
+        padding: 72px 14px 20px;
     }
     .box {
         margin: 0 auto;
     }
 }
+
 /* ============================================================
    可拖动元素样式
    ============================================================ */

@@ -36,8 +36,8 @@
         // 是否禁用右键菜单
         blockContextMenu: true,
 
-        // 窗口内外尺寸差值阈值：超过该值判定为开发者工具停靠打开
-        sizeThreshold: 160,
+        // ⭐ 修复：放宽到 220，避免非最大化窗口被误判
+        sizeThreshold: 220,
 
         // 遮罩提示文字
         warnText: '检测到调试工具或插件，请关闭后刷新页面'
