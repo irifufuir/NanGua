@@ -7,7 +7,6 @@
     <title>齿轮盛宴 · 个人账户</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
 
-    <!-- 设备识别：自动区分手机/电脑 -->
     <script>
     (function () {
         var root = document.documentElement;
@@ -54,7 +53,6 @@
         -webkit-tap-highlight-color: transparent;
     }
 
-    /* ========== 侧边栏 ========== */
     .sidebar {
         width: 268px;
         background: var(--theme-sidebar);
@@ -183,7 +181,6 @@
         box-shadow: 0 0 0 3px var(--theme-accent-soft);
     }
 
-    /* ========== 主区 ========== */
     .main-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
     .main-content {
         flex: 1; padding: var(--space-9) var(--space-8);
@@ -230,7 +227,6 @@
         padding: 4px 12px; border-radius: var(--radius-full);
     }
 
-    /* ========== 欢迎区 ========== */
     .welcome-card {
         display: flex; flex-direction: column; align-items: center;
         justify-content: center; text-align: center;
@@ -246,7 +242,6 @@
     .welcome-email { font-size: 0.92em; color: var(--theme-text-dim); word-break: break-all; }
     .welcome-hint { font-size: 0.86em; color: var(--theme-text-faint); margin-top: var(--space-2); }
 
-    /* ========== 我的资料 ========== */
     .profile-panel {
         max-height: 0; overflow: hidden; opacity: 0; margin-top: 0;
         transition: max-height .55s cubic-bezier(.22,1,.36,1),
@@ -273,7 +268,6 @@
     .info-box .label { font-size: 0.78em; font-weight: 500; color: var(--theme-text-faint); }
     .info-box .value { font-size: 0.98em; font-weight: 500; color: var(--theme-text); word-break: break-all; }
 
-    /* ========== 公告栏 ========== */
     .announce-list { display: flex; flex-direction: column; gap: var(--space-4); }
     .announce-item {
         background: var(--theme-info-box);
@@ -298,7 +292,6 @@
         line-height: 1.75; white-space: pre-wrap; word-break: break-word;
     }
 
-    /* ========== 每日签到 ========== */
     .checkin-hero {
         display: flex; flex-direction: column; align-items: center;
         text-align: center; padding: var(--space-6) var(--space-5);
@@ -375,7 +368,6 @@
     .checkin-stat .v { font-size: 1.4em; font-weight: 600; color: var(--theme-text); }
     .checkin-stat .k { font-size: 0.76em; color: var(--theme-text-faint); }
 
-    /* ========== 好友系统 ========== */
     .add-friend-box {
         display: flex; gap: var(--space-3);
         margin-bottom: var(--space-7);
@@ -476,7 +468,6 @@
         padding: var(--space-6) 0; font-size: 0.9em;
     }
 
-    /* ========== 聊天弹窗 ========== */
     .chat-mask {
         position: fixed; inset: 0;
         background: rgba(10,11,14,.55);
@@ -600,7 +591,6 @@
     }
     .chat-input-box button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* ========== 外观设置 ========== */
     .theme-section-hint {
         font-size: 0.88em; color: var(--theme-text-dim);
         line-height: 1.7; margin-bottom: var(--space-7); max-width: 520px;
@@ -608,9 +598,9 @@
 
     /* ============================================================
      *  手机端适配（≤768px）
-     *  · 顶部第1行：用户信息（小）
-     *  · 顶部第2行：所有导航横向滚动，子菜单紧跟其后
-     *  · 整体只占顶部约 100px
+     *  · 顶部第1行：用户信息（小条）
+     *  · 顶部第2行：主菜单横滚
+     *  · 点击分组 → 子菜单在下面单独再开一行
      * ============================================================ */
     @media (max-width: 900px) {
         .main-content { padding: var(--space-7) var(--space-6); }
@@ -618,19 +608,15 @@
     }
 
     @media (max-width: 768px) {
-
         body { flex-direction: column; }
 
-        /* ---------- 侧边栏：变成顶部两行容器 ---------- */
         .sidebar {
             width: 100%;
             padding: 0;
             border-right: none;
             border-bottom: 1px solid var(--theme-border-soft);
-
             flex-direction: column;
             align-items: stretch;
-
             position: sticky;
             top: 0;
             z-index: 50;
@@ -639,7 +625,7 @@
             -webkit-backdrop-filter: blur(12px);
         }
 
-        /* ---------- 第1行：用户信息（小条） ---------- */
+        /* 第1行：用户信息 */
         .user-profile {
             padding: 6px 12px 4px;
             margin-bottom: 0;
@@ -661,124 +647,139 @@
             border-radius: 8px;
         }
 
-        /* ---------- 第2行：导航横滚条 ---------- */
+        /* 第2行：导航容器 */
         .nav-menu {
             flex: none;
+            width: 100%;
+            padding: 0;
+            display: block;
+            overflow: visible;
+        }
+
+        /* 主菜单横滚行 */
+        .nav-main-row {
             display: flex;
             flex-direction: row;
             flex-wrap: nowrap;
             align-items: center;
             gap: 4px;
-            width: 100%;
-            padding: 2px 8px 8px;
+            padding: 2px 8px 6px;
             overflow-x: auto;
             overflow-y: hidden;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
             scroll-snap-type: x proximity;
         }
-        .nav-menu::-webkit-scrollbar { display: none; }
+        .nav-main-row::-webkit-scrollbar { display: none; }
 
-        /* 主菜单项 */
-        .nav-menu > .nav-item,
-        .nav-menu > .nav-group {
+        .nav-main-row .nav-item,
+        .nav-main-row .nav-group {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 2px;
-
             padding: 6px 12px;
-            min-width: 62px;
+            min-width: 66px;
             flex-shrink: 0;
-
             font-size: 0.72em;
             line-height: 1.15;
             text-align: center;
             white-space: nowrap;
-
             border-radius: 10px;
             scroll-snap-align: start;
             color: var(--theme-text-dim);
             background: transparent;
-            position: relative;
             transition: background 0.2s ease, color 0.2s ease;
+            cursor: pointer;
         }
-        .nav-menu > .nav-item::before,
-        .nav-menu > .nav-group::before { display: none; }
-
-        .nav-menu > .nav-item:hover,
-        .nav-menu > .nav-group:hover {
+        .nav-main-row .nav-item::before,
+        .nav-main-row .nav-group::before { display: none; }
+        .nav-main-row .nav-item:hover,
+        .nav-main-row .nav-group:hover {
             padding-left: 12px;
             background: var(--theme-hover);
         }
-        .nav-menu > .nav-item.active,
-        .nav-menu > .nav-group.open {
+        .nav-main-row .nav-item.active,
+        .nav-main-row .nav-group.open {
             padding-left: 12px;
             background: var(--theme-accent-soft);
             color: var(--theme-accent);
         }
-
-        .nav-menu .nav-text {
+        .nav-main-row .nav-text {
             font-size: 1em;
-            max-width: 72px;
+            max-width: 78px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             text-align: center;
             flex: none;
         }
-        .nav-menu .nav-arrow { display: none; }
+        .nav-main-row .nav-arrow { display: none; }
 
-        /* 子菜单：跟在主菜单后面，横向排列 */
-        .nav-menu > .nav-sub {
+        /* 子菜单行：单独一行，可收起可展开 */
+        .nav-sub-row {
             display: none;
             flex-direction: row;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px 8px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x proximity;
+            border-top: 1px solid var(--theme-border-soft);
+        }
+        .nav-sub-row::-webkit-scrollbar { display: none; }
+        .nav-sub-row.show { display: flex; }
+
+        .nav-sub-row .nav-sub {
+            display: none !important;
+            flex-direction: row;
             flex-shrink: 0;
-            gap: 4px;
+            gap: 6px;
             padding: 0;
             max-height: none;
             overflow: visible;
             opacity: 1;
             transition: none;
+            background: transparent;
+            border: none;
         }
-        .nav-menu > .nav-sub.open { display: flex; }
+        .nav-sub-row .nav-sub.show { display: flex !important; }
 
-        .nav-menu > .nav-sub .nav-sub-item {
+        .nav-sub-row .nav-sub-item {
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-
-            padding: 7px 12px;
+            padding: 8px 14px;
             flex-shrink: 0;
             scroll-snap-align: start;
-
-            font-size: 0.76em;
+            font-size: 0.78em;
             line-height: 1.15;
             white-space: nowrap;
-
             border-radius: 999px;
             background: var(--theme-info-box);
             border: 1px solid var(--theme-border-soft);
             color: var(--theme-text-dim);
-
+            cursor: pointer;
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
-        .nav-menu > .nav-sub .nav-sub-item::before { display: none; }
-
-        .nav-menu > .nav-sub .nav-sub-item:hover {
+        .nav-sub-row .nav-sub-item::before { display: none; }
+        .nav-sub-row .nav-sub-item:hover {
             background: var(--theme-hover);
             color: var(--theme-text);
         }
-        .nav-menu > .nav-sub .nav-sub-item.active {
+        .nav-sub-row .nav-sub-item.active {
             background: var(--theme-accent-soft);
             border-color: var(--theme-accent-border);
             color: var(--theme-accent);
             font-weight: 500;
         }
 
-        /* ---------- 主内容 ---------- */
         .main-content {
             padding: 12px;
             scrollbar-width: none;
@@ -801,26 +802,17 @@
             padding: 3px 10px;
         }
 
-        /* ---------- 欢迎区 ---------- */
-        .welcome-card {
-            padding: 20px 16px;
-            gap: 12px;
-        }
+        .welcome-card { padding: 20px 16px; gap: 12px; }
         .welcome-avatar { width: 76px; height: 76px; }
         .welcome-title { font-size: 1.2em; }
         .welcome-email { font-size: 0.85em; }
         .welcome-hint { font-size: 0.78em; }
 
-        /* ---------- 资料 ---------- */
-        .info-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
+        .info-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
         .info-box { padding: 10px 12px; }
         .info-box .label { font-size: 0.72em; }
         .info-box .value { font-size: 0.9em; }
 
-        /* ---------- 签到 ---------- */
         .checkin-hero { padding: 14px 0; gap: 14px; }
         .checkin-points .num { font-size: 2.4em; }
         .checkin-points .lbl { font-size: 0.72em; }
@@ -846,7 +838,6 @@
         .checkin-stat .v { font-size: 1.1em; }
         .checkin-stat .k { font-size: 0.66em; }
 
-        /* ---------- 好友 ---------- */
         .add-friend-box { flex-direction: column; gap: 8px; margin-bottom: 18px; }
         .add-friend-box input,
         .add-friend-box button { width: 100%; height: 44px; font-size: 16px; }
@@ -866,14 +857,12 @@
             font-size: 0.74em;
         }
 
-        /* ---------- 公告 ---------- */
         .announce-list { gap: 10px; }
         .announce-item { padding: 12px; }
         .announce-item .announce-title { font-size: 0.92em; }
         .announce-item .announce-content { font-size: 0.84em; line-height: 1.7; }
         .announce-item .announce-time { font-size: 0.7em; }
 
-        /* ---------- 主题 / 音效 ---------- */
         .theme-section-hint { font-size: 0.82em; margin-bottom: 16px; }
         .theme-switcher { padding: 12px; gap: 8px; }
         .theme-dot { width: 30px; height: 30px; }
@@ -887,7 +876,6 @@
         .setting-reset-row { margin-top: 18px; padding-top: 14px; }
         .setting-reset-btn { width: 100%; padding: 10px 16px; font-size: 0.84em; }
 
-        /* ---------- 聊天弹窗：底部弹出 ---------- */
         .chat-mask { padding: 0; align-items: flex-end; }
         .chat-box {
             width: 100%;
@@ -917,22 +905,21 @@
         }
     }
 
-    /* ========== 超小屏（≤380px） ========== */
     @media (max-width: 380px) {
         .user-profile { padding: 4px 10px 2px; gap: 6px; }
         .avatar-wrapper { width: 26px; height: 26px; }
         .user-details .email { font-size: 0.76em; }
         .logout-btn-mini { font-size: 0.62em; padding: 2px 6px; }
 
-        .nav-menu > .nav-item,
-        .nav-menu > .nav-group {
-            min-width: 56px;
+        .nav-main-row .nav-item,
+        .nav-main-row .nav-group {
+            min-width: 58px;
             padding: 6px 10px;
             font-size: 0.68em;
         }
-        .nav-menu .nav-text { max-width: 64px; }
+        .nav-main-row .nav-text { max-width: 66px; }
 
-        .nav-menu > .nav-sub .nav-sub-item {
+        .nav-sub-row .nav-sub-item {
             padding: 6px 10px;
             font-size: 0.72em;
         }
@@ -995,7 +982,6 @@
     <div class="main-wrapper">
         <main class="main-content">
 
-            <!-- 我的主页 -->
             <div class="card active" id="cardHome">
                 <div class="welcome-card">
                     <img id="welcomeAvatar" class="welcome-avatar"
@@ -1030,7 +1016,6 @@
                 </div>
             </div>
 
-            <!-- 公告栏 -->
             <div class="card" id="cardAnnounce">
                 <div class="card-head">
                     <h2>📢 公告栏</h2>
@@ -1041,7 +1026,6 @@
                 </div>
             </div>
 
-            <!-- 每日签到 -->
             <div class="card" id="cardCheckin">
                 <div class="card-head">
                     <h2>📅 每日签到</h2>
@@ -1071,7 +1055,6 @@
                 </div>
             </div>
 
-            <!-- 我的好友 -->
             <div class="card" id="cardFriends">
                 <div class="card-head">
                     <h2>👥 我的好友</h2>
@@ -1095,7 +1078,6 @@
                 </div>
             </div>
 
-            <!-- 外观设置 -->
             <div class="card" id="cardTheme">
                 <div class="card-head">
                     <h2>🎨 外观设置</h2>
@@ -1154,7 +1136,6 @@
         </main>
     </div>
 
-    <!-- 聊天弹窗 -->
     <div class="chat-mask" id="chatModal" style="display:none;">
         <div class="chat-box">
             <div class="chat-header">
@@ -1173,6 +1154,144 @@
     </div>
 
 <script>
+/* ============================================================
+ *  移动端导航分组：主菜单一行 + 子菜单一行（下面单独弹出）
+ * ============================================================ */
+(function setupMobileNav() {
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+
+    function build() {
+        var navMenu = document.querySelector('.nav-menu');
+        if (!navMenu) return;
+
+        if (!isMobile()) {
+            if (navMenu.dataset.mobileGrouped === '1') {
+                var mRow = navMenu.querySelector('.nav-main-row');
+                var sRow = navMenu.querySelector('.nav-sub-row');
+                if (mRow) {
+                    Array.prototype.slice.call(mRow.children).forEach(function (el) {
+                        navMenu.appendChild(el);
+                    });
+                }
+                if (sRow) {
+                    sRow.querySelectorAll('.nav-sub').forEach(function (sub) {
+                        sub.classList.remove('show');
+                        navMenu.appendChild(sub);
+                    });
+                }
+                if (mRow) mRow.remove();
+                if (sRow) sRow.remove();
+                navMenu.dataset.mobileGrouped = '0';
+            }
+            return;
+        }
+
+        if (navMenu.dataset.mobileGrouped === '1') {
+            if (window.syncMobileSubRow) window.syncMobileSubRow();
+            return;
+        }
+
+        var mainRow = document.createElement('div');
+        mainRow.className = 'nav-main-row';
+        var subRow = document.createElement('div');
+        subRow.className = 'nav-sub-row';
+
+        Array.prototype.slice.call(navMenu.children).forEach(function (el) {
+            if (el.classList && el.classList.contains('nav-sub')) {
+                subRow.appendChild(el);
+            } else {
+                mainRow.appendChild(el);
+            }
+        });
+
+        navMenu.innerHTML = '';
+        navMenu.appendChild(mainRow);
+        navMenu.appendChild(subRow);
+        navMenu.dataset.mobileGrouped = '1';
+
+        function syncSubRow() {
+            var allSubs = subRow.querySelectorAll('.nav-sub');
+            if (allSubs.length === 0) return;
+
+            var activeSub = null;
+            allSubs.forEach(function (sub) {
+                if (sub.classList.contains('open')) activeSub = sub;
+            });
+            if (!activeSub) {
+                allSubs.forEach(function (sub) {
+                    if (sub.querySelector('.nav-sub-item.active')) activeSub = sub;
+                });
+            }
+            if (!activeSub) {
+                subRow.classList.remove('show');
+                return;
+            }
+            allSubs.forEach(function (sub) {
+                sub.classList.toggle('show', sub === activeSub);
+            });
+            subRow.classList.add('show');
+        }
+        window.syncMobileSubRow = syncSubRow;
+
+        mainRow.querySelectorAll('.nav-item, .nav-group').forEach(function (el) {
+            el.addEventListener('click', function () {
+                setTimeout(function () {
+                    if (el.classList.contains('nav-group')) {
+                        var key = el.getAttribute('data-group');
+                        var sub = subRow.querySelector('.nav-sub[data-sub="' + key + '"]');
+                        if (sub) {
+                            subRow.querySelectorAll('.nav-sub').forEach(function (s) {
+                                s.classList.toggle('show', s === sub);
+                            });
+                            subRow.classList.add('show');
+                        } else {
+                            subRow.classList.remove('show');
+                        }
+                    } else {
+                        subRow.classList.remove('show');
+                    }
+                }, 0);
+            });
+        });
+
+        subRow.querySelectorAll('.nav-sub-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                setTimeout(function () {
+                    subRow.classList.add('show');
+                }, 0);
+            });
+        });
+
+        syncSubRow();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', build);
+    } else {
+        build();
+    }
+
+    var t = null;
+    var lastMode = isMobile();
+    window.addEventListener('resize', function () {
+        clearTimeout(t);
+        t = setTimeout(function () {
+            var now = isMobile();
+            if (now !== lastMode) {
+                lastMode = now;
+                build();
+            } else if (now && window.syncMobileSubRow) {
+                window.syncMobileSubRow();
+            }
+        }, 150);
+    });
+})();
+
+/* ============================================================
+ *  以下为页面原有逻辑（未改动）
+ * ============================================================ */
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
 var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1193,7 +1312,6 @@ var infoName       = document.getElementById('infoName');
 var infoPhone      = document.getElementById('infoPhone');
 var infoCreated    = document.getElementById('infoCreated');
 
-/* 自动登录 */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
     if (!session) { location.href = 'index.html'; return; }
@@ -1203,7 +1321,6 @@ supabaseClient.auth.onAuthStateChange(function (event, session) {
     if (event === 'SIGNED_OUT' || !session) location.href = 'index.html';
 });
 
-/* 启动 */
 function bootUser(user) {
     currentUser = user;
     var role = user.app_metadata && user.app_metadata.role;
@@ -1218,7 +1335,9 @@ function bootUser(user) {
             entry.addEventListener('click', function () {
                 location.href = 'admin-dashboard.html';
             });
-            navMenu.appendChild(entry);
+            /* 加到主菜单行 */
+            var mainRow = navMenu.querySelector('.nav-main-row') || navMenu;
+            mainRow.appendChild(entry);
         }
         var roleBadge = document.querySelector('.user-details .role');
         if (roleBadge) roleBadge.textContent = '管理员';
@@ -1270,7 +1389,6 @@ function bootUser(user) {
         });
 }
 
-/* 我的资料折叠 */
 var profilePanel = document.getElementById('profilePanel');
 var profileArrow = document.getElementById('profileArrow');
 document.getElementById('homeNavItem').addEventListener('click', function () {
@@ -1279,7 +1397,6 @@ document.getElementById('homeNavItem').addEventListener('click', function () {
     profileArrow.classList.toggle('open', profilePanel.classList.contains('open'));
 });
 
-/* 消息通知分组 */
 var msgGroup = document.getElementById('msgGroup');
 var msgArrow = document.getElementById('msgArrow');
 var msgSub   = document.getElementById('msgSub');
@@ -1289,7 +1406,6 @@ msgGroup.addEventListener('click', function () {
     msgGroup.classList.toggle('open', msgSub.classList.contains('open'));
 });
 
-/* 视图切换 */
 var CARDS = {
     home:     'cardHome',
     announce: 'cardAnnounce',
@@ -1318,6 +1434,11 @@ function switchTab(tab) {
     if (tab === 'announce') loadAnnouncements();
     if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); }
     if (tab === 'friends')  loadFriends();
+
+    /* 通知移动端同步子菜单行 */
+    if (window.syncMobileSubRow) {
+        setTimeout(window.syncMobileSubRow, 0);
+    }
 }
 
 document.querySelectorAll('.nav-item[data-tab]').forEach(function (el) {
@@ -1333,7 +1454,6 @@ document.querySelectorAll('.nav-sub-item[data-tab]').forEach(function (el) {
     });
 });
 
-/* 签到日历 */
 function toDateStr(d) {
     var y = d.getFullYear();
     var m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1400,7 +1520,6 @@ function renderCalendar(monday, cfg, checked) {
     document.getElementById('checkinCalendar').innerHTML = html;
 }
 
-/* 公告栏 */
 function loadAnnouncements() {
     var listEl = document.getElementById('announceList');
     var badge  = document.getElementById('badgeAnnounce');
@@ -1436,7 +1555,6 @@ function loadAnnouncements() {
         });
 }
 
-/* 每日签到 */
 function refreshCheckinUI() {
     if (!currentUser) return;
     var today = toDateStr(new Date());
@@ -1532,9 +1650,6 @@ document.getElementById('checkinBtn').addEventListener('click', function () {
     });
 });
 
-/* ============================================================
- * 好友系统
- * ============================================================ */
 var friendsCache = [];
 var currentChatFriend = null;
 var chatPollTimer = null;
@@ -1830,7 +1945,6 @@ document.getElementById('chatInput').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') sendMessage();
 });
 
-/* 头像上传 */
 avatarInput.addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
@@ -1878,13 +1992,11 @@ avatarInput.addEventListener('change', function (e) {
     });
 });
 
-/* 退出登录 */
 logoutBtn.addEventListener('click', function () {
     if (chatPollTimer) clearInterval(chatPollTimer);
     supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
 });
 
-/* 工具 */
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
