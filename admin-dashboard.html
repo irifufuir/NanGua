@@ -2315,7 +2315,6 @@
             </div>
         </div>
     </div>
-
 <script>
 /* ============================================================
  *  移动端导航分组：主菜单一行 + 子菜单一行（下面单独弹出）
@@ -3083,30 +3082,34 @@ document.getElementById('banDurationModal').addEventListener('click', function (
 
 document.getElementById('banConfirmBtn').addEventListener('click', function () {
     if (!currentBanUserId) return;
-    var d = parseInt(document.getElementById('banDays').value) || 0;
-    var h = parseInt(document.getElementById('banHours').value) || 0;
+    var d = parseInt(document.getElementById('banDays').value)    || 0;
+    var h = parseInt(document.getElementById('banHours').value)   || 0;
     var m = parseInt(document.getElementById('banMinutes').value) || 0;
 
-    var totalHours;
-    if (d === 0 && h === 0 && m === 0) totalHours = 876000;
-    else totalHours = Math.max(1, Math.ceil(d * 24 + h + m / 60));
+    /* 精确到秒。全填 0 = 永久封禁（传 0） */
+    var totalSeconds = 0;
+    if (d !== 0 || h !== 0 || m !== 0) {
+        totalSeconds = d * 86400 + h * 3600 + m * 60;
+    }
 
     var btn = this;
     btn.disabled = true;
     btn.textContent = '处理中...';
 
-    callRPC('admin_ban_user', { target_user_id: currentBanUserId, ban_hours: totalHours })
-        .then(function (res) {
-            btn.disabled = false;
-            btn.textContent = '确定封禁';
-            if (res.error || (res.data && res.data.error)) {
-                alert('拉黑失败：' + (res.error ? res.error.message : res.data.error));
-                return;
-            }
-            document.getElementById('banDurationModal').style.display = 'none';
-            currentBanUserId = null;
-            loadProfiles();
-        });
+    callRPC('admin_ban_user', {
+        target_user_id: currentBanUserId,
+        ban_seconds: totalSeconds
+    }).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '确定封禁';
+        if (res.error || (res.data && res.data.error)) {
+            alert('拉黑失败：' + (res.error ? res.error.message : res.data.error));
+            return;
+        }
+        document.getElementById('banDurationModal').style.display = 'none';
+        currentBanUserId = null;
+        loadProfiles();
+    });
 });
 
 /* 用户管理 */

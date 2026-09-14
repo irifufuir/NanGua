@@ -39,7 +39,6 @@
         </div>
     </div>
 
-    <!-- 👇 唯一改动 ①：加 data-draggable -->
     <div class="box" data-draggable data-drag-id="loginBox">
         <h2 id="title">Nan Gua</h2>
 
@@ -118,7 +117,6 @@
         </div>
     </div>
 
-    <!-- ⭐ 账号封禁弹窗 -->
     <div class="modal-mask" id="banModal" style="display:none;">
         <div class="ban-modal-box">
             <div class="ban-icon-wrap">
@@ -209,7 +207,6 @@
     var forgotSubmitBtn  = document.getElementById('forgotSubmitBtn');
     var forgotCancelBtn  = document.getElementById('forgotCancelBtn');
 
-    /* 封禁弹窗 */
     var banModal      = document.getElementById('banModal');
     var banUntilDate  = document.getElementById('banUntilDate');
     var banRemaining  = document.getElementById('banRemaining');
@@ -224,31 +221,20 @@
     /* ========================================================
      *  四、工具函数
      * ======================================================== */
-        var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
+    var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
     var PHONE_RE = /^[\d\s\-+()]{6,20}$/;
     var ALLOWED_DOMAINS = [
-        // 腾讯系
         '@qq.com', '@foxmail.com', '@vip.qq.com',
-        // 网易系
         '@163.com', '@126.com', '@yeah.net', '@vip.163.com', '@vip.126.com',
-        // 新浪
         '@sina.com', '@sina.cn', '@vip.sina.com',
-        // 搜狐
         '@sohu.com', '@vip.sohu.com',
-        // 微软
         '@hotmail.com', '@outlook.com', '@live.com', '@live.cn', '@msn.com',
-        // 谷歌
         '@gmail.com', '@googlemail.com',
-        // 苹果
         '@icloud.com', '@me.com', '@mac.com',
-        // 阿里
         '@aliyun.com', '@aliyun.cn', '@taobao.com', '@tmall.com',
-        // 雅虎
         '@yahoo.com', '@yahoo.com.cn', '@yahoo.cn',
-        // 其它国内常见
         '@139.com', '@189.cn', '@21cn.com', '@tom.com', '@21cn.net',
         '@chinaren.com', '@vip.21cn.com', '@wo.cn', '@cmcc.com',
-        // 国外常见
         '@protonmail.com', '@proton.me', '@zoho.com', '@yandex.com', '@gmx.com'
     ];
     var PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -261,18 +247,51 @@
         });
     }
 
+    /* ⭐ 邮箱存在性查询 —— 调 RPC + 5 秒内存缓存 */
+    var __emailExistsCache = {};
+    var __EMAIL_CACHE_TTL = 5000;
+
+    function checkEmailExists(email) {
+        if (!email) return Promise.resolve(null);
+        var key = String(email).trim().toLowerCase();
+        var now = Date.now();
+
+        var cached = __emailExistsCache[key];
+        if (cached && (now - cached.t) < __EMAIL_CACHE_TTL) {
+            return Promise.resolve(cached.v);
+        }
+
+        return supabaseClient
+            .rpc('check_email_exists', { p_email: key })
+            .then(function (res) {
+                if (res.error) {
+                    console.warn('[checkEmailExists] RPC 失败：', res.error.message);
+                    return null;
+                }
+                var exists = (res.data === true);
+                __emailExistsCache[key] = { v: exists, t: now };
+                return exists;
+            })
+            .catch(function (e) {
+                console.warn('[checkEmailExists] 异常：', e);
+                return null;
+            });
+    }
+
+    function clearEmailCache() {
+        __emailExistsCache = {};
+    }
+
     function fileNameFromPath(path) {
         var parts = String(path).split('/');
         var name  = parts[parts.length - 1];
         return name.replace(/\.[^.]+$/, '');
     }
 
-    /* ⭐ 把 Supabase 的英文错误翻译成中文 */
     function translateAuthError(msg) {
         if (!msg) return '未知错误';
         var m = String(msg).toLowerCase();
 
-        /* 登录相关 */
         if (m.indexOf('invalid login credentials') !== -1)  return '邮箱或密码错误';
         if (m.indexOf('email not confirmed') !== -1)        return '邮箱未验证，请先到邮箱点击确认链接';
         if (m.indexOf('user is banned') !== -1)             return '该账号已被封禁';
@@ -280,7 +299,6 @@
         if (m.indexOf('email rate limit exceeded') !== -1)  return '操作过于频繁，请稍后再试';
         if (m.indexOf('for security purposes') !== -1)      return '出于安全考虑，请稍后再试';
 
-        /* 注册相关 */
         if (m.indexOf('user already registered') !== -1)    return '该邮箱已被注册，请直接登录';
         if (m.indexOf('password should be at least') !== -1) {
             var match = msg.match(/at least (\d+)/);
@@ -292,28 +310,23 @@
         if (m.indexOf('email address not authorized') !== -1) return '该邮箱不被允许注册';
         if (m.indexOf('user not found') !== -1)             return '该用户不存在';
 
-        /* 网络 */
         if (m.indexOf('failed to fetch') !== -1)            return '网络错误，请检查网络连接';
         if (m.indexOf('network') !== -1)                    return '网络错误，请稍后再试';
         if (m.indexOf('timeout') !== -1)                    return '请求超时，请稍后再试';
 
-        /* 未知错误，返回原文 */
         return msg;
     }
 
-    /* ⭐ 显示封禁弹窗 */
     function showBanModal(email, bannedUntil) {
         banModal.style.display = 'flex';
         banUntilDate.textContent = '查询中...';
         banRemaining.textContent = '查询中...';
 
-        /* 如果已经有 bannedUntil，直接用 */
         if (bannedUntil) {
             renderBanTime(bannedUntil);
             return;
         }
 
-        /* 否则调 Edge Function 查 */
         supabaseClient.functions.invoke('dynamic-handler', {
             body: { action: 'get_ban_info', email: email }
         }).then(function (res) {
@@ -355,7 +368,6 @@
         banRemaining.textContent = parts.join(' ') || '不到 1 分钟';
     }
 
-    /* 关闭封禁弹窗 */
     function closeBanModal() {
         banModal.style.display = 'none';
     }
@@ -477,15 +489,65 @@
     });
 
     /* ========================================================
-     *  六、邮箱失焦检测
+     *  六、邮箱失焦检测 —— 后缀白名单 + 是否已注册
+     *  ① 不在白名单 → 红字「邮箱后缀异常」
+     *  ② 在白名单   → 绿字「✓ 邮箱后缀正常」
+     *  ③ 再查是否已注册 → 各自提示
      * ======================================================== */
     loginEmail.addEventListener('blur', function () {
         var email = this.value.trim();
-        if (email && !isValidEmail(email)) showTip('tipEmailFormat', false);
+        if (!email) return;
+
+        /* ① 后缀白名单 */
+        if (!isValidEmail(email)) {
+            showTipMsg('邮箱后缀异常', false);
+            return;
+        }
+        showTipMsg('✓ 邮箱后缀正常', true);
+
+        /* ② 是否已注册 */
+        tipEl.textContent = '检查邮箱中...';
+        tipEl.style.color = 'rgba(255,255,255,0.55)';
+        tipEl.classList.add('show');
+        clearTimeout(tipTimer);
+
+        checkEmailExists(email).then(function (exists) {
+            if (exists === false) {
+                showTipMsg('该邮箱尚未注册，请先注册账号', false);
+            } else if (exists === true) {
+                showTipMsg('✓ 邮箱后缀正常', true);
+            } else {
+                tipEl.classList.remove('show');
+            }
+        });
     });
+
     regEmail.addEventListener('blur', function () {
         var email = this.value.trim();
-        if (email && !isValidEmail(email)) showTip('tipEmailFormat', false);
+        if (!email) return;
+
+        /* ① 后缀白名单 */
+        if (!isValidEmail(email)) {
+            showTipMsg('邮箱后缀异常', false);
+            return;
+        }
+        showTipMsg('✓ 邮箱后缀正常', true);
+
+        /* ② 是否已注册 */
+        tipEl.textContent = '检查邮箱中...';
+        tipEl.style.color = 'rgba(255,255,255,0.55)';
+        tipEl.classList.add('show');
+        clearTimeout(tipTimer);
+
+        checkEmailExists(email).then(function (exists) {
+            if (exists === true) {
+                showTipMsg('该邮箱已被注册，请直接登录或更换邮箱', false);
+            } else if (exists === false) {
+                showTipMsg('✓ 邮箱后缀正常，可以注册', true);
+            } else {
+                showTipMsg('✓ 邮箱后缀正常', true);
+            }
+        });
     });
 
     /* ========================================================
@@ -496,12 +558,31 @@
         var pwd   = loginPwd.value;
 
         if (!isValidEmail(email)) {
-            showTip('tipEmailFormat', false); loginEmail.focus(); return;
+            showTipMsg('邮箱后缀异常，请检查邮箱地址', false);
+            loginEmail.focus();
+            return;
         }
         if (!pwd) {
             showTipMsg('请输入密码', false); loginPwd.focus(); return;
         }
 
+        loginBtn.disabled = true;
+        loginBtn.textContent = '检查中...';
+
+        checkEmailExists(email).then(function (exists) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = i18n[currentLang].loginBtn;
+
+            if (exists === false) {
+                showTipMsg('该邮箱尚未注册，请先注册账号', false);
+                loginEmail.focus();
+                return;
+            }
+            actuallyLogin(email, pwd);
+        });
+    }
+
+    function actuallyLogin(email, pwd) {
         loginBtn.disabled = true;
         loginBtn.textContent = '登录中...';
 
@@ -514,7 +595,6 @@
             if (res.error) {
                 var errMsg = (res.error.message || '').toLowerCase();
 
-                /* ⭐ 如果是账号被封禁 */
                 if (errMsg.indexOf('banned') !== -1) {
                     showBanModal(email);
                     var be = new Error('__BANNED__');
@@ -522,7 +602,6 @@
                     throw be;
                 }
 
-                /* 普通错误 */
                 var e = new Error(res.error.message);
                 e.__translated = false;
                 throw e;
@@ -540,7 +619,6 @@
                 console.warn('查询拉黑状态失败：', profileRes.error.message);
             }
 
-            /* ⭐ 二次检查 profiles 表的封禁状态 */
             if (profileRes.data && profileRes.data.is_blocked === true) {
                 showBanModal(email, profileRes.data.banned_until);
                 return supabaseClient.auth.signOut().then(function () {
@@ -552,6 +630,7 @@
 
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
+            clearEmailCache();
             showTip('tipLoginSuccess', true);
             console.log('[登录成功]', currentUser);
             clearRegisterForm();
@@ -569,7 +648,6 @@
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
 
-            /* 封禁弹窗已经显示，不显示普通错误 */
             if (err && err.__isBanned) return;
 
             var raw = (err && err.message) ? err.message : String(err);
@@ -578,7 +656,6 @@
         });
     }
 
-    /* ⭐ 修复：只绑定一次，先解锁音效再登录 */
     loginBtn.addEventListener('click', function () {
         if (window.LoginSound && window.LoginSound.unlock) {
             window.LoginSound.unlock();
@@ -597,7 +674,9 @@
         var pwd2  = regPwd2.value;
 
         if (!isValidEmail(email)) {
-            showTip('tipEmailFormat', false); regEmail.focus(); return;
+            showTipMsg('邮箱后缀异常，请检查邮箱地址', false);
+            regEmail.focus();
+            return;
         }
         if (name.length < 2) {
             showTip('tipNameLength', false); regName.focus(); return;
@@ -612,6 +691,22 @@
             showTip('tipPwdMatch', false); regPwd2.focus(); return;
         }
 
+        registerBtn.disabled = true;
+        registerBtn.textContent = '检查邮箱中...';
+
+        checkEmailExists(email).then(function (exists) {
+            if (exists === true) {
+                registerBtn.disabled = false;
+                registerBtn.textContent = i18n[currentLang].registerBtn;
+                showTipMsg('该邮箱已被注册，请直接登录', false);
+                regEmail.focus();
+                return;
+            }
+            actuallyRegister(email, name, phone, pwd);
+        });
+    }
+
+    function actuallyRegister(email, name, phone, pwd) {
         registerBtn.disabled = true;
         registerBtn.textContent = '注册中...';
 
@@ -640,7 +735,7 @@
                 .from('profiles')
                 .insert([{
                     id: newUserId,
-                    email: email,
+                    email: email.toLowerCase(),
                     full_name: name,
                     phone: phone
                 }])
@@ -654,6 +749,8 @@
             if (result.profileRes && result.profileRes.error) {
                 console.warn('profiles 写入失败：', result.profileRes.error.message);
             }
+
+            clearEmailCache();
 
             if (result.session) {
                 showTip('tipLoginSuccess', true);
@@ -901,7 +998,6 @@
 
 </script>
 
-<!-- 👇 唯一改动 ②：引入拖拽模块 -->
 <script type="text/javascript" src="other/draggable.js"></script>
 <script type="text/javascript" src="other/protect.js"></script>
 </body>
