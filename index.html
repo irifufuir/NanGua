@@ -9,9 +9,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
     <link rel="stylesheet" href="style.css">
 
-    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 多语言字典 -->
     <script src="other/i18n.js"></script>
 </head>
 <body>
@@ -40,6 +38,7 @@
     </div>
 
     <div class="box" data-draggable data-drag-id="loginBox">
+        <button type="button" class="box-toggle" id="boxToggle" title="收起 / 展开">−</button>
         <h2 id="title">Nan Gua</h2>
 
         <div id="loginView" class="view">
@@ -61,28 +60,36 @@
         </div>
 
         <div id="registerView" class="view" style="display:none;">
-            <div class="input-box">
-                <label>邮箱</label>
-                <input type="email" id="regEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
-            </div>
-            <div class="input-box">
-                <label>昵称</label>
-                <input type="text" id="regName" placeholder="请输入您的昵称" autocomplete="nickname"/>
-            </div>
-            <div class="input-box">
-                <label>手机号</label>
-                <input type="tel" id="regPhone" placeholder="请输入手机号" autocomplete="tel"/>
-            </div>
-            <div class="input-box">
-                <label>设置密码</label>
-                <input type="password" id="regPwd" placeholder="至少 8 位，含大小写字母和数字" autocomplete="new-password"/>
-            </div>
-            <div class="input-box">
-                <label>确认密码</label>
-                <input type="password" id="regPwd2" placeholder="再次输入密码" autocomplete="new-password"/>
+            <div class="reg-grid">
+                <div class="input-box reg-full">
+                    <label>邮箱</label>
+                    <div class="reg-email-row">
+                        <input type="email" id="regEmail" placeholder="请输入邮箱地址......" autocomplete="off"/>
+                        <span class="email-suffix-tag" id="regEmailSuffixTag"></span>
+                    </div>
+                </div>
+                <div class="input-box">
+                    <label>昵称</label>
+                    <input type="text" id="regName" placeholder="请输入您的昵称" autocomplete="nickname"/>
+                </div>
+                <div class="input-box">
+                    <label>手机号</label>
+                    <input type="tel" id="regPhone" placeholder="请输入手机号" autocomplete="tel"/>
+                </div>
+                <div class="input-box">
+                    <label>设置密码</label>
+                    <input type="password" id="regPwd" placeholder="至少 8 位，含大小写字母和数字" autocomplete="new-password"/>
+                </div>
+                <div class="input-box">
+                    <label>确认密码</label>
+                    <input type="password" id="regPwd2" placeholder="再次输入密码" autocomplete="new-password"/>
+                </div>
             </div>
             <div class="btn-box">
-                <a href="#" id="backLoginLink">已有账号？返回登录</a>
+                <div class="reg-bottom-row">
+                    <span class="reg-exists-tag" id="regExistsTag">用户已注册</span>
+                    <a href="#" id="backLoginLink">已有账号？返回登录</a>
+                </div>
                 <div>
                     <button type="button" id="registerBtn" class="single-btn">注册</button>
                 </div>
@@ -142,16 +149,10 @@
 
 <script type="text/javascript">
 
-    /* ========================================================
-     *  0. Supabase 初始化
-     * ======================================================== */
     var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
     var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
     var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    /* ========================================================
-     *  一、背景分类多语言标题
-     * ======================================================== */
     var CATEGORY_LABELS_I18N = {
         zh: { video: '📹 视频', image: '🖼️ 图片' },
         en: { video: '📹 Video', image: '🖼️ Image' },
@@ -166,9 +167,6 @@
         ko: '🎨 배경', fr: '🎨 Fond', es: '🎨 Fondo'
     };
 
-    /* ========================================================
-     *  二、元素引用
-     * ======================================================== */
     var bgImage        = document.getElementById('bgImage');
     var bgVideo        = document.getElementById('bgVideo');
     var bgDropdown     = document.getElementById('bgDropdown');
@@ -176,6 +174,8 @@
     var langDropdown   = document.getElementById('langDropdown');
     var langBtn        = document.getElementById('langBtn');
 
+    var boxEl          = document.querySelector('.box');
+    var boxToggle      = document.getElementById('boxToggle');
     var titleEl        = document.getElementById('title');
     var loginView      = document.getElementById('loginView');
     var registerView   = document.getElementById('registerView');
@@ -195,6 +195,9 @@
     var registerBtn    = document.getElementById('registerBtn');
     var backLoginLink  = document.getElementById('backLoginLink');
 
+    var regEmailSuffixTag = document.getElementById('regEmailSuffixTag');
+    var regExistsTag      = document.getElementById('regExistsTag');
+
     var forgotModal      = document.getElementById('forgotModal');
     var forgotTitle      = document.getElementById('forgotTitle');
     var forgotEmailLabel = document.getElementById('forgotEmailLabel');
@@ -212,15 +215,9 @@
     var banRemaining  = document.getElementById('banRemaining');
     var banCloseBtn   = document.getElementById('banCloseBtn');
 
-    /* ========================================================
-     *  三、多语言字典
-     * ======================================================== */
     var i18n = window.I18N;
     var currentLang = 'zh';
 
-    /* ========================================================
-     *  四、工具函数
-     * ======================================================== */
     var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
     var PHONE_RE = /^[\d\s\-+()]{6,20}$/;
     var ALLOWED_DOMAINS = [
@@ -247,7 +244,6 @@
         });
     }
 
-    /* ⭐ 邮箱存在性查询 —— 调 RPC + 5 秒内存缓存 */
     var __emailExistsCache = {};
     var __EMAIL_CACHE_TTL = 5000;
 
@@ -412,11 +408,11 @@
         regPhone.value  = '';
         regPwd.value    = '';
         regPwd2.value   = '';
+        regEmailSuffixTag.classList.remove('show', 'ok', 'bad');
+        regEmailSuffixTag.textContent = '';
+        regExistsTag.classList.remove('show');
     }
 
-    /* ========================================================
-     *  五、视图切换 & 语言应用
-     * ======================================================== */
     function applyLanguage(lang) {
         var dict = i18n[lang];
         if (!dict) return;
@@ -439,16 +435,18 @@
         loginBtn.textContent = dict.loginBtn;
         toRegisterBtn.textContent = dict.registerBtn;
 
-        document.querySelector('#registerView .input-box:nth-child(1) label').textContent = dict.emailLabel;
+        var regBoxes = document.querySelectorAll('#registerView .input-box');
+        if (regBoxes[0]) regBoxes[0].querySelector('label').textContent = dict.emailLabel;
         regEmail.placeholder = dict.emailPlaceholder;
-        document.querySelector('#registerView .input-box:nth-child(2) label').textContent = dict.nameLabel;
+        if (regBoxes[1]) regBoxes[1].querySelector('label').textContent = dict.nameLabel;
         regName.placeholder = dict.namePlaceholder;
-        document.querySelector('#registerView .input-box:nth-child(3) label').textContent = dict.phoneLabel;
+        if (regBoxes[2]) regBoxes[2].querySelector('label').textContent = dict.phoneLabel;
         regPhone.placeholder = dict.phonePlaceholder;
-        document.querySelector('#registerView .input-box:nth-child(4) label').textContent = dict.pwdLabelReg;
+        if (regBoxes[3]) regBoxes[3].querySelector('label').textContent = dict.pwdLabelReg;
         regPwd.placeholder = dict.pwdPlaceholderReg;
-        document.querySelector('#registerView .input-box:nth-child(5) label').textContent = dict.confirmPwdLabel;
+        if (regBoxes[4]) regBoxes[4].querySelector('label').textContent = dict.confirmPwdLabel;
         regPwd2.placeholder = dict.confirmPwdPlaceholder;
+
         backLoginLink.textContent = dict.backLogin;
         registerBtn.textContent = dict.registerBtn;
 
@@ -469,6 +467,7 @@
         titleEl.textContent = i18n[currentLang].loginTitle;
         loginView.style.display = '';
         registerView.style.display = 'none';
+        boxEl.classList.remove('box-wide');
         tipEl.classList.remove('show');
         clearRegisterForm();
         loginEmail.focus();
@@ -478,6 +477,7 @@
         titleEl.textContent = i18n[currentLang].registerTitle;
         loginView.style.display = 'none';
         registerView.style.display = '';
+        boxEl.classList.add('box-wide');
         tipEl.classList.remove('show');
         regEmail.focus();
     }
@@ -488,24 +488,50 @@
         showLoginView();
     });
 
-    /* ========================================================
-     *  六、邮箱失焦检测 —— 后缀白名单 + 是否已注册
-     *  ① 不在白名单 → 红字「邮箱后缀异常」
-     *  ② 在白名单   → 绿字「✓ 邮箱后缀正常」
-     *  ③ 再查是否已注册 → 各自提示
-     * ======================================================== */
+    function bindBoxToggle() {
+    if (!boxToggle || !boxEl) return;
+    boxToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        playBoxClose(); 
+    });
+}
+
+/* ---------- 卡片打开动画 ---------- */
+function playBoxOpen() {
+    if (!boxEl) return;
+    boxEl.classList.add('is-opening');
+    boxEl.addEventListener('animationend', function onOpenEnd(e) {
+        if (e.animationName !== 'cardOpen') return;
+        boxEl.classList.remove('is-opening');
+        boxEl.removeEventListener('animationend', onOpenEnd);
+    });
+}
+
+/* ---------- 卡片关闭动画（结束后移除 DOM） ---------- */
+function playBoxClose() {
+    if (!boxEl || boxEl.classList.contains('is-closing')) return;
+    boxEl.classList.remove('is-opening');
+    // 强制重排，确保移除 is-opening 后立即应用 is-closing
+    void boxEl.offsetWidth;
+    boxEl.classList.add('is-closing');
+
+    boxEl.addEventListener('animationend', function onCloseEnd(e) {
+        if (e.animationName !== 'cardClose') return;
+        boxEl.removeEventListener('animationend', onCloseEnd);
+        if (boxEl.parentNode) boxEl.parentNode.removeChild(boxEl);
+    });
+}
+
     loginEmail.addEventListener('blur', function () {
         var email = this.value.trim();
         if (!email) return;
 
-        /* ① 后缀白名单 */
         if (!isValidEmail(email)) {
-            showTipMsg('邮箱后缀异常', false);
+            showTipMsg('邮箱异常', false);
             return;
         }
-        showTipMsg('✓ 邮箱后缀正常', true);
+        showTipMsg('✓ 邮箱正常', true);
 
-        /* ② 是否已注册 */
         tipEl.textContent = '检查邮箱中...';
         tipEl.style.color = 'rgba(255,255,255,0.55)';
         tipEl.classList.add('show');
@@ -522,37 +548,54 @@
         });
     });
 
-    regEmail.addEventListener('blur', function () {
-        var email = this.value.trim();
-        if (!email) return;
+    function updateRegEmailSuffixTag() {
+        var email = regEmail.value.trim();
 
-        /* ① 后缀白名单 */
-        if (!isValidEmail(email)) {
-            showTipMsg('邮箱后缀异常', false);
+        if (!email) {
+            regEmailSuffixTag.classList.remove('show', 'ok', 'bad');
+            regEmailSuffixTag.textContent = '';
             return;
         }
-        showTipMsg('✓ 邮箱后缀正常', true);
 
-        /* ② 是否已注册 */
-        tipEl.textContent = '检查邮箱中...';
-        tipEl.style.color = 'rgba(255,255,255,0.55)';
-        tipEl.classList.add('show');
-        clearTimeout(tipTimer);
+        var ok = isValidEmail(email);
+        regEmailSuffixTag.textContent = ok ? '邮箱后缀可用' : '邮箱后缀不可用';
+        regEmailSuffixTag.classList.toggle('ok',  ok);
+        regEmailSuffixTag.classList.toggle('bad', !ok);
+        regEmailSuffixTag.classList.add('show');
+    }
+    
+    function hideRegExistsTag() { regExistsTag.classList.remove('show'); }
+    function showRegExistsTag() { regExistsTag.classList.add('show'); }
 
-        checkEmailExists(email).then(function (exists) {
-            if (exists === true) {
-                showTipMsg('该邮箱已被注册，请直接登录或更换邮箱', false);
-            } else if (exists === false) {
-                showTipMsg('✓ 邮箱后缀正常，可以注册', true);
-            } else {
-                showTipMsg('✓ 邮箱后缀正常', true);
-            }
-        });
-    });
+        /* ---------- 注册页"用户已注册"标签 ----------
+       输入时防抖检测：停打 400ms 就查，比失焦才查快很多
+    */
+    function hideRegExistsTag() { regExistsTag.classList.remove('show'); }
+    function showRegExistsTag() { regExistsTag.classList.add('show'); }
 
-    /* ========================================================
-     *  七、登录逻辑
-     * ======================================================== */
+    var regCheckTimer = null;
+
+    function scheduleRegExistsCheck() {
+        hideRegExistsTag();
+        clearTimeout(regCheckTimer);
+
+        var email = regEmail.value.trim();
+        if (!email) return;
+        if (!isValidEmail(email)) return;
+
+        regCheckTimer = setTimeout(function () {
+            checkEmailExists(email).then(function (exists) {
+                /* 二次确认：用户还在这个邮箱上才显示 */
+                if (regEmail.value.trim() !== email) return;
+                if (exists === true) showRegExistsTag();
+                else                 hideRegExistsTag();
+            });
+        }, 300);
+    }
+
+    regEmail.addEventListener('input', scheduleRegExistsCheck);
+    regEmail.addEventListener('blur',  scheduleRegExistsCheck);
+
     function doLogin() {
         var email = loginEmail.value.trim();
         var pwd   = loginPwd.value;
@@ -574,7 +617,7 @@
             loginBtn.textContent = i18n[currentLang].loginBtn;
 
             if (exists === false) {
-                showTipMsg('该邮箱尚未注册，请先注册账号', false);
+                showTipMsg('该邮箱未注册，请先注册账号', false);
                 loginEmail.focus();
                 return;
             }
@@ -663,9 +706,6 @@
         doLogin();
     });
 
-    /* ========================================================
-     *  八、注册逻辑
-     * ======================================================== */
     function doRegister() {
         var email = regEmail.value.trim();
         var name  = regName.value.trim();
@@ -698,7 +738,7 @@
             if (exists === true) {
                 registerBtn.disabled = false;
                 registerBtn.textContent = i18n[currentLang].registerBtn;
-                showTipMsg('该邮箱已被注册，请直接登录', false);
+                showRegExistsTag();
                 regEmail.focus();
                 return;
             }
@@ -789,9 +829,6 @@
         if (e.key === 'Enter') doRegister();
     });
 
-    /* ========================================================
-     *  九、忘记密码弹窗
-     * ======================================================== */
     function openForgotModal() {
         forgotModal.style.display = 'flex';
         forgotEmail.value   = '';
@@ -859,9 +896,6 @@
         if (e.key === 'Enter') forgotReason.focus();
     });
 
-    /* ========================================================
-     *  十、语言切换
-     * ======================================================== */
     langBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         var willShow = !langDropdown.classList.contains('show');
@@ -879,9 +913,6 @@
         });
     });
 
-    /* ========================================================
-     *  十一、背景切换
-     * ======================================================== */
     var BACKGROUND_CONFIG = window.BACKGROUND_CONFIG || {};
 
     function buildBgMenu() {
@@ -989,12 +1020,11 @@
         bgDropdown.classList.remove('show');
     });
 
-    /* ========================================================
-     *  十二、初始化
-     * ======================================================== */
     buildBgMenu();
     applyLanguage('zh');
     showLoginView();
+    bindBoxToggle();
+    playBoxOpen();
 
 </script>
 

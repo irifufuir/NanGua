@@ -12,6 +12,8 @@
  *   - 双击自动复位
  *   - 支持鼠标 + 触屏
  *   - 拖动位置自动记忆到 localStorage，刷新后仍在原位
+ *   - ⭐ 通过 CSS 变量 --drag-x / --drag-y 传递位移，
+ *     让打开/关闭动画也能感知拖动位置（避免跳变）
  * ============================================================ */
 
 (function () {
@@ -48,7 +50,9 @@
             if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
                 offsetX = saved.x;
                 offsetY = saved.y;
-                el.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px)';
+                // ⭐ 改动 1：改用 CSS 变量，让动画可以读取该位移
+                el.style.setProperty('--drag-x', offsetX + 'px');
+                el.style.setProperty('--drag-y', offsetY + 'px');
             }
         } catch (e) {}
 
@@ -73,7 +77,9 @@
             var pt = getPoint(e);
             offsetX = pt.x - startX;
             offsetY = pt.y - startY;
-            el.style.transform = 'translate(' + offsetX + 'px, ' + offsetY + 'px)';
+            // ⭐ 改动 2：改用 CSS 变量，动画期间也能保持位置
+            el.style.setProperty('--drag-x', offsetX + 'px');
+            el.style.setProperty('--drag-y', offsetY + 'px');
             e.preventDefault();
         }
 
@@ -103,7 +109,9 @@
             if (e.target.closest && e.target.closest(EXCLUDE)) return;
             offsetX = 0;
             offsetY = 0;
-            el.style.transform = '';
+            // ⭐ 改动 3：复位也走 CSS 变量
+            el.style.setProperty('--drag-x', '0px');
+            el.style.setProperty('--drag-y', '0px');
             try { localStorage.removeItem(key); } catch (err) {}
         });
     }

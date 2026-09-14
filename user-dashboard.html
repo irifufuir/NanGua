@@ -2510,6 +2510,7 @@ function closeChat() {
     document.getElementById('chatModal').style.display = 'none';
     if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
     currentChatFriend = null;
+    lastMsgTs = null;
 }
 
 document.getElementById('chatCloseBtn').addEventListener('click', closeChat);
@@ -2607,24 +2608,29 @@ document.getElementById('avatarChangeBtn').addEventListener('click', function ()
 avatarInput.addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
+    var inputEl = this;
 
-    var lastUpload = localStorage.getItem('last_avatar_upload');
-    if (lastUpload) {
-        var elapsed = Date.now() - parseInt(lastUpload, 10);
-        var oneHour = 60 * 60 * 1000;
-        if (elapsed < oneHour) {
-            var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
-            alert('头像修改过于频繁\n请 ' + (remainingMin >= 60 ? Math.floor(remainingMin/60)+' 小时 '+(remainingMin%60)+' 分钟' : remainingMin+' 分钟') + ' 后再试');
-            this.value = '';
-            return;
-        }
-    }
-    if (file.size > 5 * 1024 * 1024) { alert('头像文件大小不能超过 5 MB！'); this.value = ''; return; }
-    if (!file.type.startsWith('image/')) { alert('请上传图片文件！'); this.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { alert('头像文件大小不能超过 5 MB！'); inputEl.value = ''; return; }
+    if (!file.type.startsWith('image/')) { alert('请上传图片文件！'); inputEl.value = ''; return; }
 
     supabaseClient.auth.getUser().then(function (userRes) {
         if (userRes.error || !userRes.data.user) { alert('获取用户信息失败'); return; }
         var userId = userRes.data.user.id;
+
+        // ⭐ 限流键按用户区分，避免换账号后还受上一个账号的冷却限制
+        var storageKey = 'last_avatar_upload_' + userId;
+        var lastUpload = localStorage.getItem(storageKey);
+        if (lastUpload) {
+            var elapsed = Date.now() - parseInt(lastUpload, 10);
+            var oneHour = 60 * 60 * 1000;
+            if (elapsed < oneHour) {
+                var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
+                alert('头像修改过于频繁\n请 ' + (remainingMin >= 60 ? Math.floor(remainingMin/60)+' 小时 '+(remainingMin%60)+' 分钟' : remainingMin+' 分钟') + ' 后再试');
+                inputEl.value = '';
+                return;
+            }
+        }
+
         var fileExt = file.name.split('.').pop();
         var filePath = userId + '/' + Date.now() + '.' + fileExt;
 
@@ -2632,7 +2638,7 @@ avatarInput.addEventListener('change', function (e) {
             .upload(filePath, file, { upsert: true })
             .then(function (uploadRes) {
                 if (uploadRes.error) { alert('头像上传失败：' + uploadRes.error.message); return; }
-                return supabaseClient.storage.from('avatars').createSignedUrl(filePath, 60*60*24*365);
+                return supabaseClient.storage.from('avatars').createSignedUrl(filePath, 60*60*24*365*10);
             })
             .then(function (signRes) {
                 if (!signRes || signRes.error) return;
@@ -2642,7 +2648,7 @@ avatarInput.addEventListener('change', function (e) {
                         return supabaseClient.from('profiles').update({ avatar_url: signedUrl }).eq('id', userId);
                     })
                     .then(function () {
-                        localStorage.setItem('last_avatar_upload', Date.now().toString());
+                        localStorage.setItem(storageKey, Date.now().toString());
                         avatarImg.src = signedUrl;
                         welcomeAvatar.src = signedUrl;
                         alert('头像更新成功！\n下次修改需等待 1 小时');

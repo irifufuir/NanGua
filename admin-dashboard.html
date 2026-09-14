@@ -2617,24 +2617,28 @@ document.getElementById('avatarChangeBtn').addEventListener('click', function ()
 document.getElementById('avatarInput').addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
+    var inputEl = this;
 
-    var lastUpload = localStorage.getItem('last_avatar_upload');
-    if (lastUpload) {
-        var elapsed = Date.now() - parseInt(lastUpload, 10);
-        var oneHour = 60 * 60 * 1000;
-        if (elapsed < oneHour) {
-            var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
-            alert('头像修改过于频繁\n请 ' + (remainingMin >= 60 ? Math.floor(remainingMin/60)+' 小时 '+(remainingMin%60)+' 分钟' : remainingMin+' 分钟') + ' 后再试');
-            this.value = '';
-            return;
-        }
-    }
-    if (file.size > 5 * 1024 * 1024) { alert('头像文件大小不能超过 5 MB！'); this.value = ''; return; }
-    if (!file.type.startsWith('image/')) { alert('请上传图片文件！'); this.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { alert('头像文件大小不能超过 5 MB！'); inputEl.value = ''; return; }
+    if (!file.type.startsWith('image/')) { alert('请上传图片文件！'); inputEl.value = ''; return; }
 
     supabaseClient.auth.getUser().then(function (userRes) {
         if (userRes.error || !userRes.data.user) { alert('获取用户信息失败'); return; }
         var userId = userRes.data.user.id;
+
+        var storageKey = 'last_avatar_upload_' + userId;
+        var lastUpload = localStorage.getItem(storageKey);
+        if (lastUpload) {
+            var elapsed = Date.now() - parseInt(lastUpload, 10);
+            var oneHour = 60 * 60 * 1000;
+            if (elapsed < oneHour) {
+                var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
+                alert('头像修改过于频繁\n请 ' + (remainingMin >= 60 ? Math.floor(remainingMin/60)+' 小时 '+(remainingMin%60)+' 分钟' : remainingMin+' 分钟') + ' 后再试');
+                inputEl.value = '';
+                return;
+            }
+        }
+
         var fileExt = file.name.split('.').pop();
         var filePath = userId + '/' + Date.now() + '.' + fileExt;
 
@@ -2642,7 +2646,7 @@ document.getElementById('avatarInput').addEventListener('change', function (e) {
             .upload(filePath, file, { upsert: true })
             .then(function (uploadRes) {
                 if (uploadRes.error) { alert('头像上传失败：' + uploadRes.error.message); return; }
-                return supabaseClient.storage.from('avatars').createSignedUrl(filePath, 60*60*24*365);
+                return supabaseClient.storage.from('avatars').createSignedUrl(filePath, 60*60*24*365*10);
             })
             .then(function (signRes) {
                 if (!signRes || signRes.error) return;
@@ -2652,20 +2656,18 @@ document.getElementById('avatarInput').addEventListener('change', function (e) {
                         return supabaseClient.from('profiles').update({ avatar_url: signedUrl }).eq('id', userId);
                     })
                     .then(function () {
-                        localStorage.setItem('last_avatar_upload', Date.now().toString());
+                        localStorage.setItem(storageKey, Date.now().toString());
                         document.getElementById('avatarImg').src = signedUrl;
                         alert('头像更新成功！');
                     });
             });
     });
 });
-
 /* 退出登录 */
 document.getElementById('logoutBtn').addEventListener('click', function () {
     if (myChatPollTimer) clearInterval(myChatPollTimer);
     supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
 });
-
 /* 公告管理 */
 function loadAnnouncements() {
     var listEl = document.getElementById('announceList');
@@ -2712,7 +2714,6 @@ function loadAnnouncements() {
             });
         });
 }
-
 document.getElementById('refreshAnnounceBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
@@ -2720,7 +2721,6 @@ document.getElementById('refreshAnnounceBtn').addEventListener('click', function
     loadAnnouncements();
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
-
 document.getElementById('createAnnounceBtn').addEventListener('click', function () {
     var title = document.getElementById('announceTitle').value.trim();
     var content = document.getElementById('announceContent').value.trim();
@@ -2731,7 +2731,6 @@ document.getElementById('createAnnounceBtn').addEventListener('click', function 
     var btn = this;
     btn.disabled = true;
     btn.textContent = '发布中...';
-
     supabaseClient.from('announcements').insert([{
         title: title, content: content, is_pinned: pinned
     }]).then(function (res) {
@@ -2744,7 +2743,6 @@ document.getElementById('createAnnounceBtn').addEventListener('click', function 
         loadAnnouncements();
     });
 });
-
 /* 每日签到积分管理 */
 function loadPointsConfig() {
     supabaseClient.from('checkin_config').select('*').eq('id', 1).maybeSingle()
@@ -2760,12 +2758,10 @@ function loadPointsConfig() {
             document.getElementById('cfgSunday').value    = c.sunday    != null ? c.sunday    : 5;
         });
 }
-
 document.getElementById('saveConfigBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
     btn.textContent = '保存中...';
-
     var data = {
         id: 1,
         monday:    parseInt(document.getElementById('cfgMonday').value)    || 0,
@@ -2786,7 +2782,6 @@ document.getElementById('saveConfigBtn').addEventListener('click', function () {
             alert('配置已保存！');
         });
 });
-
 function loadPoints() {
     loadPointsConfig();
 
@@ -2826,7 +2821,6 @@ function loadPoints() {
                 '</tr>';
             });
             body.innerHTML = html;
-
             body.querySelectorAll('.action-btn.edit').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     currentPointsUserId = this.getAttribute('data-id');
@@ -2841,7 +2835,6 @@ function loadPoints() {
             });
         });
 }
-
 document.getElementById('refreshPointsBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
@@ -2849,12 +2842,10 @@ document.getElementById('refreshPointsBtn').addEventListener('click', function (
     loadPoints();
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
-
 document.getElementById('pointsCancelBtn').addEventListener('click', function () {
     document.getElementById('pointsModal').style.display = 'none';
     currentPointsUserId = null;
 });
-
 document.getElementById('pointsConfirmBtn').addEventListener('click', function () {
     if (!currentPointsUserId) return;
 
@@ -2862,22 +2853,18 @@ document.getElementById('pointsConfirmBtn').addEventListener('click', function (
     var streakVal = parseInt(document.getElementById('streakNewValue').value, 10);
     if (isNaN(pointsVal) || pointsVal < 0) { alert('请输入有效的积分值（≥0）'); return; }
     if (isNaN(streakVal) || streakVal < 0) { alert('请输入有效的连续天数（≥0）'); return; }
-
     var btn = this;
     btn.disabled = true;
     btn.textContent = '保存中...';
-
     Promise.all([
         supabaseClient.from('profiles').update({ points: pointsVal }).eq('id', currentPointsUserId),
         supabaseClient.rpc('admin_update_streak', { target_user_id: currentPointsUserId, new_streak: streakVal })
     ]).then(function (results) {
         btn.disabled = false;
         btn.textContent = '保存';
-
         var pErr = results[0].error;
         var sRes = results[1];
         var sErr = sRes.error || (sRes.data && sRes.data.error);
-
         if (pErr || sErr) {
             alert('保存失败：\n' + (pErr ? '积分：' + pErr.message + '\n' : '') + (sErr ? '连续天数：' + (sErr.message || sErr) : ''));
             return;
@@ -2887,13 +2874,11 @@ document.getElementById('pointsConfirmBtn').addEventListener('click', function (
         loadPoints();
     });
 });
-
 /* 忘记密码申请 */
 function loadForgotRequests() {
     var body = document.getElementById('forgotBody');
     var badge = document.getElementById('badgeForgot');
     body.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
-
     supabaseClient.from('forgot_requests').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
@@ -2931,7 +2916,6 @@ function loadForgotRequests() {
             });
         });
 }
-
 document.getElementById('refreshForgotBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
@@ -2939,13 +2923,11 @@ document.getElementById('refreshForgotBtn').addEventListener('click', function (
     loadForgotRequests();
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
-
 /* 注册用户列表 */
 function loadProfiles() {
     var body = document.getElementById('profilesBody');
     var badge = document.getElementById('badgeProfiles');
     body.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
-
     supabaseClient.from('profiles').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
@@ -2957,7 +2939,6 @@ function loadProfiles() {
             allProfiles = data;
             badge.textContent = data.length + ' 人';
             updateManageSelect();
-
             if (data.length === 0) {
                 body.innerHTML = '<tr><td colspan="6" class="empty">暂无用户</td></tr>';
                 return;
@@ -2996,7 +2977,6 @@ function loadProfiles() {
             bindProfileActions();
         });
 }
-
 document.getElementById('refreshProfilesBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
@@ -3004,11 +2984,9 @@ document.getElementById('refreshProfilesBtn').addEventListener('click', function
     loadProfiles();
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
-
 function bindProfileActions() {
     var body = document.getElementById('profilesBody');
     if (!body) return;
-
     body.querySelectorAll('.action-btn.del[data-id]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
@@ -3022,7 +3000,6 @@ function bindProfileActions() {
             });
         });
     });
-
     body.querySelectorAll('.action-btn.block').forEach(function (btn) {
         btn.addEventListener('click', function () {
             currentBanUserId = this.getAttribute('data-id');
@@ -3033,7 +3010,6 @@ function bindProfileActions() {
             document.getElementById('banDurationModal').style.display = 'flex';
         });
     });
-
     body.querySelectorAll('.action-btn.unblock').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
@@ -3048,7 +3024,6 @@ function bindProfileActions() {
         });
     });
 }
-
 /* 封禁弹窗 */
 function updateBanPreview() {
     var d = parseInt(document.getElementById('banDays').value) || 0;
@@ -3062,7 +3037,7 @@ function updateBanPreview() {
     if (d > 0) parts.push(d + ' 天');
     if (h > 0) parts.push(h + ' 小时');
     if (m > 0) parts.push(m + ' 分钟');
-    document.getElementById('banPreview').textContent = '封禁时长：' + parts.join(' ');
+    document.getElementById('banPreview').textContent = '总封禁时长：' + parts.join(' ');
 }
 
 document.getElementById('banDays').addEventListener('input', updateBanPreview);
@@ -3079,7 +3054,6 @@ document.getElementById('banDurationModal').addEventListener('click', function (
         currentBanUserId = null;
     }
 });
-
 document.getElementById('banConfirmBtn').addEventListener('click', function () {
     if (!currentBanUserId) return;
     var d = parseInt(document.getElementById('banDays').value)    || 0;
@@ -3111,7 +3085,6 @@ document.getElementById('banConfirmBtn').addEventListener('click', function () {
         loadProfiles();
     });
 });
-
 /* 用户管理 */
 function updateManageSelect() {
     var sel = document.getElementById('manageUserSelect');
@@ -3123,7 +3096,6 @@ function updateManageSelect() {
     sel.innerHTML = html;
     if (cur) sel.value = cur;
 }
-
 document.getElementById('manageUserSelect').addEventListener('change', function () {
     var id = this.value;
     if (!id) { clearManageForm(); updatePreview(null); return; }
@@ -3258,7 +3230,7 @@ function bindLimitToggle(toggleId, inputId) {
     function sync() {
         var on = t.dataset.on === 'true';
         i.disabled = !on;
-        t.textContent = on ? '开启（限购）' : '关闭（无限）';
+        t.textContent = on ? '开启限购' : '关闭无限';
     }
     t.addEventListener('click', function () {
         t.dataset.on = (t.dataset.on === 'true') ? 'false' : 'true';
@@ -4029,6 +4001,7 @@ function myCloseChat() {
     document.getElementById('myChatModal').style.display = 'none';
     if (myChatPollTimer) { clearInterval(myChatPollTimer); myChatPollTimer = null; }
     myCurrentChatFriend = null;
+    myLastMsgTs = null;
 }
 
 document.getElementById('myChatCloseBtn').addEventListener('click', myCloseChat);

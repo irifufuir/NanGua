@@ -4,49 +4,41 @@
    设计令牌 · Design Tokens
    ============================================================ */
 :root {
-    /* 背景层（低饱和冷色深底） */
     --bg-base:        #131519;
     --bg-top:         #15181d;
     --bg-bottom:      #101216;
 
-    /* 卡片层 */
     --card-bg:        rgba(24, 27, 32, 0.62);
     --card-bg-solid:  rgba(26, 29, 34, 0.92);
     --card-border:    rgba(255, 255, 255, 0.06);
     --card-border-hi: rgba(255, 255, 255, 0.10);
 
-    /* 输入层 */
     --input-bg:           rgba(255, 255, 255, 0.035);
     --input-border:       rgba(255, 255, 255, 0.08);
     --input-border-hover: rgba(255, 255, 255, 0.14);
     --input-border-focus: rgba(124, 174, 224, 0.55);
     --input-focus-glow:   rgba(124, 174, 224, 0.14);
 
-    /* 主色（柔和淡蓝） */
     --accent:          #7caee0;
     --accent-hover:    #96bfe9;
     --accent-soft:     rgba(124, 174, 224, 0.12);
     --accent-border:   rgba(124, 174, 224, 0.32);
 
-    /* 文字层（中性灰） */
     --text:            #e9ebef;
     --text-dim:        #8b9099;
     --text-faint:      #5c616b;
     --text-mute:       #43474f;
 
-    /* 危险色 */
     --danger:          #d68b8b;
     --danger-soft:     rgba(214, 139, 139, 0.10);
     --danger-border:   rgba(214, 139, 139, 0.30);
 
-    /* 圆角 */
     --r-sm:  6px;
     --r-md:  10px;
     --r-lg:  18px;
     --r-xl:  22px;
     --r-full: 999px;
 
-    /* 多层柔和阴影（越往外越淡） */
     --shadow-xs:
         0 1px 2px rgba(0, 0, 0, 0.20);
     --shadow-sm:
@@ -62,7 +54,6 @@
         0 24px 64px rgba(0, 0, 0, 0.32),
         0 48px 120px rgba(0, 0, 0, 0.20);
 
-    /* 间距（4px 基准） */
     --s-1: 4px;
     --s-2: 8px;
     --s-3: 12px;
@@ -73,7 +64,6 @@
     --s-8: 40px;
     --s-9: 56px;
 
-    /* 过渡（缓慢、柔和） */
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
     --dur-fast: 0.18s;
     --dur-base: 0.30s;
@@ -117,7 +107,7 @@ body {
 }
 
 /* ============================================================
-   背景层（图片 / 视频 + 渐变遮罩）
+   背景层
    ============================================================ */
 .bg-container {
     position: fixed;
@@ -154,7 +144,6 @@ body {
     background: #000;
 }
 
-/* 渐变遮罩：给卡片提供稳定的对比度 */
 .bg-container::after {
     content: '';
     position: absolute;
@@ -184,8 +173,8 @@ body {
     align-items: center;
 
     width: 380px;
-    min-height: 400px;
-    padding: var(--s-8) var(--s-8);
+    min-height: 0;
+    padding: var(--s-5) var(--s-6);
 
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -198,10 +187,10 @@ body {
 
     transition:
         border-color var(--dur-slow) var(--ease),
-        box-shadow var(--dur-slow) var(--ease);
+        box-shadow var(--dur-slow) var(--ease),
+        padding var(--dur-base) var(--ease);
 }
 
-/* 顶部细高光 —— 极简的“玻璃边缘” */
 .box::before {
     content: '';
     position: absolute;
@@ -217,6 +206,81 @@ body {
     pointer-events: none;
 }
 
+/* ============================================================
+   卡片收起 / 展开按钮
+   ============================================================ */
+.box-toggle {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: var(--r-md);
+
+    color: var(--text-dim);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    outline: none;
+
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease),
+        transform var(--dur-base) var(--ease);
+}
+
+.box-toggle:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent-border);
+    color: var(--accent);
+    transform: scale(1.06);
+}
+
+.box-toggle:active {
+    transform: scale(0.94);
+}
+
+/* ============================================================
+   卡片收起状态 —— 缩成 46×46 小方块
+   ============================================================ */
+.box.collapsed {
+    padding: 0;
+    min-height: 46px;
+    width: 46px !important;
+    max-width: 46px !important;
+}
+
+.box.collapsed > h2,
+.box.collapsed > .view,
+.box.collapsed > .tip {
+    display: none;
+}
+
+.box.collapsed .box-toggle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+}
+.box.collapsed .box-toggle:hover {
+    transform: translate(-50%, -50%) scale(1.06);
+}
+
+.box.collapsed .box-toggle:active {
+    transform: translate(-50%, -50%) scale(0.94);
+}
+
 .box > h2 {
     color: var(--text);
     font-size: 24px;
@@ -224,6 +288,169 @@ body {
     letter-spacing: 0.02em;
     margin-bottom: var(--s-7);
     text-align: center;
+}
+
+/* ============================================================
+   视图容器
+   ============================================================ */
+.box .view {
+    width: 100%;
+}
+
+/* ============================================================
+   注册视图 · 桌面端两列布局
+   ============================================================ */
+.box.box-wide {
+    width: 600px;
+    max-width: calc(100vw - 32px);
+    overflow: hidden;
+}
+
+.reg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-4);
+    width: 100%;
+}
+
+.reg-grid .input-box {
+    margin-bottom: 0;
+}
+
+.reg-grid .input-box.reg-full {
+    grid-column: 1 / -1;
+}
+
+/* ============================================================
+   注册 · 邮箱行（输入框 + 后缀可用性标签）
+   ============================================================ */
+.reg-email-row {
+    position: relative;
+    width: 100%;
+}
+
+.reg-email-row input {
+    width: 100%;
+    padding-right: 130px;
+}
+
+.email-suffix-tag {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%) translateX(6px);
+
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    background: rgba(19, 21, 25, 0.85);
+    color: var(--text-dim);
+
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity var(--dur-base) var(--ease),
+        transform var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        background-color var(--dur-base) var(--ease);
+}
+
+.email-suffix-tag.show {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+.email-suffix-tag.ok {
+    color: rgba(130, 225, 160, 0.95);
+    background: rgba(20, 40, 28, 0.92);
+    border-color: rgba(130, 225, 160, 0.45);
+}
+
+.email-suffix-tag.bad {
+    color: rgba(248, 108, 76, 0.95);
+    background: rgba(42, 20, 16, 0.92);
+    border-color: rgba(248, 108, 76, 0.45);
+}
+
+/* ============================================================
+   注册 · 底部行
+   ============================================================ */
+.reg-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: var(--s-3);
+    width: 100%;
+    min-width: 0;
+
+    margin-top: var(--s-1);
+    margin-bottom: var(--s-3);
+    min-height: 22px;
+}
+
+.reg-inline-tip {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    color: var(--text-dim);
+
+    opacity: 0;
+    transform: translateX(-4px);
+    transition:
+        opacity var(--dur-base) var(--ease),
+        transform var(--dur-base) var(--ease);
+}
+.reg-inline-tip.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reg-exists-tag {
+    flex-shrink: 0;
+    padding: 2px 9px;
+    line-height: 1.5;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    border-radius: var(--r-full);
+    border: 1px solid rgba(248, 108, 76, 0.30);
+    background: rgba(248, 108, 76, 0.10);
+    color: rgba(248, 108, 76, 0.95);
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+    transition:
+        opacity var(--dur-base) var(--ease),
+        transform var(--dur-base) var(--ease);
+}
+.reg-exists-tag.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.reg-bottom-link {
+    flex-shrink: 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-dim);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dur-base) var(--ease);
+}
+.reg-bottom-link:hover {
+    color: var(--accent);
 }
 
 /* ============================================================
@@ -270,13 +497,11 @@ body {
     color: var(--text-mute);
 }
 
-/* 输入框 hover：细微边框变化 */
 .box .input-box input:hover {
     border-color: var(--input-border-hover);
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* 输入框 focus：柔和淡蓝光圈 */
 .box .input-box input:focus {
     border-color: var(--input-border-focus);
     background: rgba(124, 174, 224, 0.04);
@@ -295,7 +520,6 @@ body {
     margin-top: var(--s-3);
 }
 
-/* 「忘记密码?」 链接 */
 .box .btn-box > a {
     align-self: flex-end;
     font-size: 13px;
@@ -310,7 +534,6 @@ body {
     color: var(--accent);
 }
 
-/* 按钮容器 */
 .box .btn-box > div {
     display: flex;
     flex-direction: row;
@@ -320,7 +543,6 @@ body {
     width: 100%;
 }
 
-/* 通用按钮 */
 .box .btn-box > div > button {
     flex: 1;
     height: 44px;
@@ -330,7 +552,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.02em;
-    white-space: nowrap;    /* 👈 不换行 */
+    white-space: nowrap;
 
     border-radius: var(--r-md);
     border: 1px solid transparent;
@@ -345,7 +567,6 @@ body {
         transform var(--dur-fast) var(--ease);
 }
 
-/* 主按钮 —— 登录（柔和淡蓝） */
 .box .btn-box > div > button:nth-of-type(1) {
     background: var(--accent-soft);
     border-color: var(--accent-border);
@@ -359,7 +580,6 @@ body {
     box-shadow: 0 8px 24px rgba(124, 174, 224, 0.12);
 }
 
-/* 次按钮 —— 注册（幽灵） */
 .box .btn-box > div > button:nth-of-type(2) {
     background: transparent;
     border-color: var(--input-border);
@@ -372,7 +592,6 @@ body {
     color: var(--text);
 }
 
-/* 单按钮（注册视图） */
 .box .btn-box > div > button:only-child {
     width: 100%;
     background: var(--accent-soft);
@@ -415,7 +634,7 @@ body {
 }
 
 /* ============================================================
-   右上角控制区（语言 + 背景）
+   右上角控制区
    ============================================================ */
 .top-right-controls {
     position: fixed;
@@ -782,7 +1001,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.02em;
-    white-space: nowrap;    /* 👈 不换行 */
+    white-space: nowrap;
 
     border-radius: var(--r-md);
     border: 1px solid transparent;
@@ -797,7 +1016,6 @@ body {
         transform var(--dur-fast) var(--ease);
 }
 
-/* 提交（主） */
 .modal-box .btn-box > div > button:nth-of-type(1) {
     background: var(--accent-soft);
     border-color: var(--accent-border);
@@ -811,7 +1029,6 @@ body {
     box-shadow: 0 8px 24px rgba(124, 174, 224, 0.12);
 }
 
-/* 取消（幽灵） */
 .modal-box .btn-box > div > button:nth-of-type(2) {
     background: transparent;
     border-color: var(--input-border);
@@ -970,7 +1187,40 @@ body {
 }
 
 /* ============================================================
-   📱 移动端适配（重新优化）
+   📱 注册卡片：中小屏收窄为单列
+   ============================================================ */
+@media (max-width: 660px) {
+    .box.box-wide {
+        width: 100%;
+        max-width: 420px;
+    }
+    .reg-grid {
+        grid-template-columns: 1fr;
+        gap: var(--s-3);
+    }
+    .reg-email-row input {
+        padding-right: 110px;
+    }
+    .email-suffix-tag {
+        padding: 3px 8px;
+        font-size: 11px;
+    }
+    .reg-bottom-row {
+        gap: var(--s-2);
+        margin-top: 0;
+        margin-bottom: var(--s-2);
+        flex-wrap: wrap;
+    }
+    .reg-inline-tip { font-size: 11.5px; }
+    .reg-exists-tag {
+        padding: 2px 8px;
+        font-size: 11.5px;
+    }
+    .reg-bottom-link { font-size: 12.5px; }
+}
+
+/* ============================================================
+   📱 移动端适配
    ============================================================ */
 @media (max-width: 480px) {
 
@@ -984,7 +1234,6 @@ body {
         padding: 68px 14px 24px;
     }
 
-    /* ---------- 主卡片 ---------- */
     .box {
         width: 100%;
         max-width: 400px;
@@ -1011,7 +1260,7 @@ body {
 
     .box .input-box input {
         height: 46px;
-        font-size: 16px;      /* 防 iOS 自动缩放 */
+        font-size: 16px;
         padding: 0 14px;
     }
 
@@ -1035,7 +1284,6 @@ body {
         margin-top: 10px;
     }
 
-    /* ---------- 右上角控制区：更紧凑 ---------- */
     .top-right-controls {
         top: 12px;
         right: 12px;
@@ -1069,7 +1317,6 @@ body {
         font-size: 12px;
     }
 
-    /* ---------- 弹窗：底部弹出 ---------- */
     .modal-mask {
         padding: 0;
         align-items: flex-end;
@@ -1104,7 +1351,7 @@ body {
 
     .modal-box .input-box input {
         height: 46px;
-        font-size: 16px;      /* 防 iOS 自动缩放 */
+        font-size: 16px;
     }
 
     .modal-box .input-box textarea {
@@ -1127,7 +1374,6 @@ body {
         padding: 0 12px;
     }
 
-    /* ---------- 封禁弹窗 ---------- */
     .ban-icon-wrap {
         width: 60px;
         height: 60px;
@@ -1161,7 +1407,7 @@ body {
 }
 
 /* ============================================================
-   📱 超小屏（≤ 380px）：进一步收紧
+   📱 超小屏（≤ 380px）
    ============================================================ */
 @media (max-width: 380px) {
     body {
@@ -1225,6 +1471,16 @@ body {
         height: 44px;
         font-size: 14.5px;
     }
+
+    .reg-bottom-row {
+        gap: 6px;
+    }
+    .reg-inline-tip { font-size: 11px; }
+    .reg-exists-tag {
+        font-size: 11px;
+        padding: 1px 7px;
+    }
+    .reg-bottom-link { font-size: 12px; }
 }
 
 /* ============================================================
@@ -1289,17 +1545,14 @@ body {
 
 [data-draggable].is-dragging {
     cursor: grabbing;
-    /* 拖动时禁掉 box 的背景/边框过渡，跟手更利索 */
     transition: box-shadow var(--dur-base) var(--ease) !important;
 }
 
-/* 拖动期间整个页面不选中文字 */
 body.dragging-active * {
     user-select: none !important;
     -webkit-user-select: none !important;
 }
 
-/* 内部输入框、按钮的鼠标样式保持原样 */
 [data-draggable] input,
 [data-draggable] textarea {
     cursor: text;
@@ -1307,4 +1560,50 @@ body.dragging-active * {
 [data-draggable] button,
 [data-draggable] a {
     cursor: pointer;
+}
+/* ============================================================
+   卡片弹出 / 收缩动画
+   ============================================================ */
+:root {
+    /* 拖动位移变量，默认 0，draggable.js 会动态覆盖 */
+    --drag-x: 0px;
+    --drag-y: 0px;
+}
+
+.box {
+    /* 独立属性：translate 负责拖动位置，scale/opacity 交给动画 */
+    translate: var(--drag-x) var(--drag-y);
+    transform-origin: bottom right;
+
+    /* 合成层优化，60fps */
+    will-change: scale, opacity, translate;
+    backface-visibility: hidden;
+}
+
+/* ---------- 打开动画（spring 弹簧曲线，320ms） ---------- */
+.box.is-opening {
+    animation: cardOpen 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes cardOpen {
+    from { opacity: 0; scale: 0.92; }
+    to   { opacity: 1; scale: 1;    }
+}
+
+/* ---------- 关闭动画（ease-in，240ms，向左上收缩） ---------- */
+.box.is-closing {
+    transform-origin: top left;
+    animation: cardClose 240ms cubic-bezier(0.4, 0, 1, 1) both;
+    pointer-events: none;
+}
+
+@keyframes cardClose {
+    from { opacity: 1; scale: 1;    }
+    to   { opacity: 0; scale: 0.88; }
+}
+
+/* ---------- 动画期间禁用拖动 ---------- */
+.box.is-closing,
+.box.is-opening {
+    user-select: none;
 }
