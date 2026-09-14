@@ -224,11 +224,32 @@
     /* ========================================================
      *  四、工具函数
      * ======================================================== */
-    var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
+        var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
     var PHONE_RE = /^[\d\s\-+()]{6,20}$/;
     var ALLOWED_DOMAINS = [
-        '@163.com', '@qq.com', '@sina.com', '@hotmail.com',
-        '@sina.cn', '@live.cn', '@gmail.com', '@sohu.com'
+        // 腾讯系
+        '@qq.com', '@foxmail.com', '@vip.qq.com',
+        // 网易系
+        '@163.com', '@126.com', '@yeah.net', '@vip.163.com', '@vip.126.com',
+        // 新浪
+        '@sina.com', '@sina.cn', '@vip.sina.com',
+        // 搜狐
+        '@sohu.com', '@vip.sohu.com',
+        // 微软
+        '@hotmail.com', '@outlook.com', '@live.com', '@live.cn', '@msn.com',
+        // 谷歌
+        '@gmail.com', '@googlemail.com',
+        // 苹果
+        '@icloud.com', '@me.com', '@mac.com',
+        // 阿里
+        '@aliyun.com', '@aliyun.cn', '@taobao.com', '@tmall.com',
+        // 雅虎
+        '@yahoo.com', '@yahoo.com.cn', '@yahoo.cn',
+        // 其它国内常见
+        '@139.com', '@189.cn', '@21cn.com', '@tom.com', '@21cn.net',
+        '@chinaren.com', '@vip.21cn.com', '@wo.cn', '@cmcc.com',
+        // 国外常见
+        '@protonmail.com', '@proton.me', '@zoho.com', '@yandex.com', '@gmx.com'
     ];
     var PWD_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
