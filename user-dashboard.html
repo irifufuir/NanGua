@@ -1374,6 +1374,10 @@
             <div class="nav-item" data-tab="theme">
                 <span class="nav-text">🎨 外观设置</span>
             </div>
+
+            <div class="nav-item" data-tab="feedback">
+                <span class="nav-text">📝 我要反馈</span>
+            </div>
         </nav>
     </aside>
 
@@ -1549,6 +1553,30 @@
                     <button class="setting-reset-btn" id="resetAppearanceBtn">
                         ↺ 恢复默认设置
                     </button>
+                </div>
+            </div>
+
+            <!-- ========== 我要反馈 ========== -->
+            <div class="card" id="cardFeedback">
+                <div class="card-head">
+                    <h2>📝 我要反馈</h2>
+                    <button class="refresh-btn" id="refreshFeedbackBtn" title="刷新">🔄</button>
+                </div>
+
+                <div class="feedback-form">
+                    <textarea id="feedbackContent" placeholder="请描述你遇到的问题或建议..." rows="4"></textarea>
+                    <div class="feedback-form-row">
+                        <button class="primary-btn" id="submitFeedbackBtn">提交反馈</button>
+                        <span class="feedback-hint">提交后管理员会尽快处理</span>
+                    </div>
+                </div>
+
+                <div class="card-head" style="margin-top:24px;">
+                    <h3>我的反馈记录</h3>
+                    <span class="badge" id="badgeFeedback">—</span>
+                </div>
+                <div class="feedback-list" id="myFeedbackList">
+                    <div class="empty-state">加载中...</div>
                 </div>
             </div>
 
@@ -1870,7 +1898,8 @@ var CARDS = {
     checkin:  'cardCheckin',
     shop:     'cardShop',
     friends:  'cardFriends',
-    theme:    'cardTheme'
+    theme:    'cardTheme',
+    feedback: 'cardFeedback'
 };
 
 function switchTab(tab) {
@@ -1891,6 +1920,7 @@ function switchTab(tab) {
     });
 
     if (tab === 'announce') loadAnnouncements();
+    if (tab === 'feedback') loadMyFeedbacks();
     if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); }
     if (tab === 'shop')     loadShop();
     if (tab === 'friends')  loadFriends();
@@ -2019,6 +2049,72 @@ function loadAnnouncements() {
             listEl.innerHTML = html;
         });
 }
+
+/* ========== 我要反馈 ========== */
+function loadMyFeedbacks() {
+    var listEl = document.getElementById('myFeedbackList');
+    var badge  = document.getElementById('badgeFeedback');
+    if (!listEl || !currentUser) return;
+    listEl.innerHTML = '<div class="empty-state">加载中...</div>';
+
+    supabaseClient.from('feedbacks')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                listEl.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var data = res.data || [];
+            badge.textContent = data.length + ' 条';
+            if (data.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">暂无反馈记录</div>';
+                return;
+            }
+            var statusMap = { pending: '⏳ 待处理', processing: '🔄 处理中', resolved: '✅ 已解决' };
+            var html = '';
+            data.forEach(function (item) {
+                var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
+                html += '<div class="feedback-item">' +
+                    '<div class="feedback-head">' +
+                        '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
+                        '<span class="feedback-time">' + time + '</span>' +
+                    '</div>' +
+                    '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
+                    (item.reply ? '<div class="feedback-reply"><b>管理员回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
+                '</div>';
+            });
+            listEl.innerHTML = html;
+        });
+}
+
+document.getElementById('submitFeedbackBtn').addEventListener('click', function () {
+    var content = document.getElementById('feedbackContent').value.trim();
+    if (!content) { alert('请填写反馈内容'); return; }
+    if (!currentUser) { alert('请先登录'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '提交中...';
+
+    supabaseClient.from('feedbacks').insert([{
+        user_id: currentUser.id,
+        user_email: currentUser.email,
+        content: content
+    }]).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '提交反馈';
+        if (res.error) { alert('提交失败：' + res.error.message); return; }
+        document.getElementById('feedbackContent').value = '';
+        alert('反馈提交成功，感谢你的反馈！');
+        loadMyFeedbacks();
+    });
+});
+
+document.getElementById('refreshFeedbackBtn').addEventListener('click', function () {
+    loadMyFeedbacks();
+});
 
 function refreshCheckinUI() {
     if (!currentUser) return;

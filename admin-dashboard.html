@@ -1717,6 +1717,7 @@
             <div class="nav-sub" data-sub="msg">
                 <div class="nav-sub-item" data-tab="announce">📢 公告管理</div>
                 <div class="nav-sub-item" data-tab="forgot">📝 忘记密码</div>
+                <div class="nav-sub-item" data-tab="feedback">💬 反馈信息</div>
             </div>
 
             <div class="nav-group" data-group="pointsGroup">
@@ -2227,6 +2228,25 @@
                 </div>
             </div>
 
+            <!-- ========== 反馈信息 ========== -->
+            <div class="card" id="cardFeedback">
+                <div class="card-head">
+                    <h2>💬 用户反馈</h2>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <select id="feedbackFilter" style="padding:6px 10px;border-radius:8px;background:var(--theme-bg-soft);color:var(--theme-text);border:1px solid var(--theme-border);">
+                            <option value="all">全部</option>
+                            <option value="pending">待处理</option>
+                            <option value="processing">处理中</option>
+                            <option value="resolved">已解决</option>
+                        </select>
+                        <button class="refresh-btn" id="refreshFeedbackBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="feedback-list" id="adminFeedbackList">
+                    <div class="empty">加载中...</div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -2530,7 +2550,8 @@ var CARDS = {
     theme:     'cardTheme',
     sound:     'cardSound',
     myCheckin: 'cardMyCheckin',
-    myFriends: 'cardMyFriends'
+    myFriends: 'cardMyFriends',
+    feedback:  'cardFeedback'
 };
 
 function switchTab(tab) {
@@ -2555,6 +2576,7 @@ function switchTab(tab) {
     if (tab === 'server')    loadServerInfo();
     if (tab === 'shop')      loadAdminShop();
     if (tab === 'purchases') loadPurchases();
+    if (tab === 'feedback')  loadAllFeedbacks();
     if (tab === 'myCheckin') { myRefreshCheckinUI(); myLoadCheckinCalendar(); }
     if (tab === 'myFriends') myLoadFriends();
 
@@ -2743,6 +2765,102 @@ document.getElementById('createAnnounceBtn').addEventListener('click', function 
         loadAnnouncements();
     });
 });
+
+/* ========== 用户反馈管理 ========== */
+function loadAllFeedbacks() {
+    var listEl = document.getElementById('adminFeedbackList');
+    var filter = document.getElementById('feedbackFilter').value;
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="empty">加载中...</div>';
+
+    var query = supabaseClient.from('feedbacks').select('*').order('created_at', { ascending: false });
+    if (filter !== 'all') query = query.eq('status', filter);
+
+    query.then(function (res) {
+        if (res.error) {
+            listEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+            return;
+        }
+        var data = res.data || [];
+        if (data.length === 0) { listEl.innerHTML = '<div class="empty">暂无反馈</div>'; return; }
+
+        var statusMap = { pending: '⏳ 待处理', processing: '🔄 处理中', resolved: '✅ 已解决' };
+        var html = '';
+        data.forEach(function (item) {
+            var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
+            html += '<div class="feedback-item" data-id="' + item.id + '">' +
+                '<div class="feedback-head">' +
+                    '<span class="feedback-email">' + escapeHtml(item.user_email || '匿名用户') + '</span>' +
+                    '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
+                    '<span class="feedback-time">' + time + '</span>' +
+                '</div>' +
+                '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
+                (item.reply ? '<div class="feedback-reply"><b>已回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
+                '<div class="feedback-actions">' +
+                    '<select class="status-select" data-id="' + item.id + '">' +
+                        '<option value="pending"' + (item.status==='pending'?' selected':'') + '>待处理</option>' +
+                        '<option value="processing"' + (item.status==='processing'?' selected':'') + '>处理中</option>' +
+                        '<option value="resolved"' + (item.status==='resolved'?' selected':'') + '>已解决</option>' +
+                    '</select>' +
+                    '<button class="action-btn reply-btn" data-id="' + item.id + '">' + (item.reply ? '修改回复' : '回复') + '</button>' +
+                '</div>' +
+                '<div class="reply-box" id="replyBox_' + item.id + '" style="display:none;margin-top:10px;">' +
+                    '<textarea class="reply-input" placeholder="输入回复内容..." rows="2" style="width:100%;padding:8px;border-radius:8px;background:var(--theme-bg-soft);color:var(--theme-text);border:1px solid var(--theme-border);resize:vertical;">' + (item.reply || '') + '</textarea>' +
+                    '<div style="margin-top:6px;display:flex;gap:8px;">' +
+                        '<button class="action-btn save-reply-btn" data-id="' + item.id + '">保存回复</button>' +
+                        '<button class="action-btn cancel-reply-btn" data-id="' + item.id + '">取消</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        });
+        listEl.innerHTML = html;
+
+        // 状态切换
+        listEl.querySelectorAll('.status-select').forEach(function (sel) {
+            sel.addEventListener('change', function () {
+                var id = this.getAttribute('data-id');
+                var status = this.value;
+                supabaseClient.from('feedbacks').update({ status: status, updated_at: new Date().toISOString() }).eq('id', id).then(function (r) {
+                    if (r.error) { alert('更新失败：' + r.error.message); return; }
+                });
+            });
+        });
+
+        // 回复按钮
+        listEl.querySelectorAll('.reply-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var box = document.getElementById('replyBox_' + id);
+                box.style.display = box.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+
+        // 保存回复
+        listEl.querySelectorAll('.save-reply-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var reply = document.querySelector('#replyBox_' + id + ' .reply-input').value.trim();
+                supabaseClient.from('feedbacks').update({ reply: reply, updated_at: new Date().toISOString() }).eq('id', id).then(function (r) {
+                    if (r.error) { alert('保存失败：' + r.error.message); return; }
+                    alert('回复已保存');
+                    loadAllFeedbacks();
+                });
+            });
+        });
+
+        // 取消回复
+        listEl.querySelectorAll('.cancel-reply-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                document.getElementById('replyBox_' + id).style.display = 'none';
+            });
+        });
+    });
+}
+
+document.getElementById('refreshFeedbackBtn').addEventListener('click', function () { loadAllFeedbacks(); });
+document.getElementById('feedbackFilter').addEventListener('change', function () { loadAllFeedbacks(); });
+
 /* 每日签到积分管理 */
 function loadPointsConfig() {
     supabaseClient.from('checkin_config').select('*').eq('id', 1).maybeSingle()

@@ -146,3 +146,69 @@
         font-size: 13px;
     }
 }
+/* ============================================================
+   反馈功能 · Feedback
+   ============================================================ */
+.feedback-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.feedback-item {
+    background: var(--theme-bg-soft);
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+.feedback-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.feedback-email { font-size: 13px; font-weight: 600; color: var(--theme-text); }
+.feedback-time { font-size: 12px; color: var(--theme-text-dim); margin-left: auto; }
+.feedback-status {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+.feedback-status.pending    { background: rgba(248,200,80,0.15); color: #f8c850; }
+.feedback-status.processing { background: rgba(124,174,224,0.15); color: #7caee0; }
+.feedback-status.resolved   { background: rgba(130,225,160,0.15); color: #82e1a0; }
+.feedback-content { font-size: 14px; color: var(--theme-text); line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.feedback-reply {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: rgba(124,174,224,0.06);
+    border-left: 3px solid var(--theme-accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--theme-text-dim);
+    line-height: 1.6;
+}
+.feedback-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+.feedback-actions .action-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text-dim);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .2s;
+}
+.feedback-actions .action-btn:hover { background: var(--theme-accent-soft); color: var(--theme-accent); }
+.feedback-actions .status-select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text);
+    font-size: 12px;
+    cursor: pointer;
+}
+/* （注：内容由AI生成） */

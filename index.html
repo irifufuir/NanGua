@@ -563,7 +563,7 @@ function expandBox() {
     function updateRegEmailSuffixTag() {
         var email = regEmail.value.trim();
 
-        if (!email) {
+            if (!email || email.indexOf('@') === -1) {
             regEmailSuffixTag.classList.remove('show', 'ok', 'bad');
             regEmailSuffixTag.textContent = '';
             return;
