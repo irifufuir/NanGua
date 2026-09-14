@@ -931,7 +931,20 @@
         .user-name-row { gap: 6px; }
         .user-name-row .email { font-size: 0.82em; }
         .user-name-row .role { display: none; }
-        .user-action-row { gap: 6px; }
+
+        /* ⭐ 修复：按钮不再拉满整行 */
+        .user-action-row {
+            gap: 6px;
+            width: auto;
+            flex-wrap: nowrap;
+        }
+        .user-action-row .avatar-change-btn,
+        .user-action-row .logout-btn-mini {
+            flex: 0 0 auto;
+            width: auto;
+            text-align: center;
+            justify-content: center;
+        }
         .logout-btn-mini,
         .avatar-change-btn {
             font-size: 0.66em;
@@ -1219,6 +1232,18 @@
         .user-profile { padding: 4px 10px 2px; gap: 6px; }
         .avatar-wrapper { width: 26px; height: 26px; }
         .user-name-row .email { font-size: 0.76em; }
+
+        /* ⭐ 小屏也保持短按钮 */
+        .user-action-row {
+            gap: 6px;
+            width: auto;
+            flex-wrap: nowrap;
+        }
+        .user-action-row .avatar-change-btn,
+        .user-action-row .logout-btn-mini {
+            flex: 0 0 auto;
+            width: auto;
+        }
         .logout-btn-mini,
         .avatar-change-btn { font-size: 0.62em; padding: 2px 6px; }
 
@@ -1255,6 +1280,18 @@
             width: 12px; height: 12px; font-size: 6px;
         }
         .user-name-row .email { font-size: 0.76em; }
+
+        /* ⭐ 横屏也保持短按钮 */
+        .user-action-row {
+            gap: 6px;
+            width: auto;
+            flex-wrap: nowrap;
+        }
+        .user-action-row .avatar-change-btn,
+        .user-action-row .logout-btn-mini {
+            flex: 0 0 auto;
+            width: auto;
+        }
         .logout-btn-mini,
         .avatar-change-btn {
             font-size: 0.62em;
@@ -1306,7 +1343,8 @@
                 <span class="nav-arrow" id="profileArrow" title="展开 / 收起资料">▾</span>
             </div>
 
-            <div class="nav-group" id="msgGroup">
+            <!-- ⭐ 修复：加上 data-group="msg" 让移动端能展开 -->
+            <div class="nav-group" id="msgGroup" data-group="msg">
                 <span class="nav-text">📬 消息通知</span>
                 <span class="nav-arrow" id="msgArrow">▾</span>
             </div>
