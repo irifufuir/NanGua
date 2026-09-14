@@ -598,16 +598,15 @@
 
     /* ============================================================
      *  手机端适配（≤768px）
-     *  · 顶部第1行：用户信息（小条）
-     *  · 顶部第2行：主菜单横滚
-     *  · 点击分组 → 子菜单在下面单独再开一行
      * ============================================================ */
     @media (max-width: 900px) {
         .main-content { padding: var(--space-7) var(--space-6); }
         .card { padding: var(--space-7) var(--space-6); }
     }
 
-    @media (max-width: 768px) {
+    /* ⭐ 修改：加触屏横屏条件（解决横屏按钮点不了） */
+    @media (max-width: 768px),
+           (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         body { flex-direction: column; }
 
         .sidebar {
@@ -625,7 +624,6 @@
             -webkit-backdrop-filter: blur(12px);
         }
 
-        /* 第1行：用户信息 */
         .user-profile {
             padding: 6px 12px 4px;
             margin-bottom: 0;
@@ -647,7 +645,6 @@
             border-radius: 8px;
         }
 
-        /* 第2行：导航容器 */
         .nav-menu {
             flex: none;
             width: 100%;
@@ -656,7 +653,6 @@
             overflow: visible;
         }
 
-        /* 主菜单横滚行 */
         .nav-main-row {
             display: flex;
             flex-direction: row;
@@ -717,7 +713,6 @@
         }
         .nav-main-row .nav-arrow { display: none; }
 
-        /* 子菜单行：单独一行，可收起可展开 */
         .nav-sub-row {
             display: none;
             flex-direction: row;
@@ -931,7 +926,42 @@
         .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
         .checkin-stat { padding: 8px 3px; }
     }
+
+    /* ⭐ 新增：横屏矮屏压缩顶部，避免按钮被挤掉 */
+    @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+        .user-profile {
+            padding: 2px 10px 1px;
+            gap: 6px;
+        }
+        .avatar-wrapper { width: 26px; height: 26px; }
+        .avatar-edit {
+            width: 12px; height: 12px; font-size: 6px;
+        }
+        .user-details .email { font-size: 0.76em; }
+        .logout-btn-mini {
+            font-size: 0.62em;
+            padding: 1px 6px;
+        }
+        .nav-main-row {
+            padding: 1px 8px 4px;
+        }
+        .nav-main-row .nav-item,
+        .nav-main-row .nav-group {
+            padding: 4px 10px;
+            min-width: 58px;
+            font-size: 0.68em;
+        }
+        .nav-main-row .nav-text { max-width: 68px; }
+        .nav-sub-row {
+            padding: 4px 8px 6px;
+        }
+        .nav-sub-row .nav-sub-item {
+            padding: 6px 12px;
+            font-size: 0.74em;
+        }
+    }
     </style>
+</head>
 </head>
 <body>
 
@@ -1335,7 +1365,6 @@ function bootUser(user) {
             entry.addEventListener('click', function () {
                 location.href = 'admin-dashboard.html';
             });
-            /* 加到主菜单行 */
             var mainRow = navMenu.querySelector('.nav-main-row') || navMenu;
             mainRow.appendChild(entry);
         }
@@ -1435,7 +1464,6 @@ function switchTab(tab) {
     if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); }
     if (tab === 'friends')  loadFriends();
 
-    /* 通知移动端同步子菜单行 */
     if (window.syncMobileSubRow) {
         setTimeout(window.syncMobileSubRow, 0);
     }

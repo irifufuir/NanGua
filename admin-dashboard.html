@@ -1086,7 +1086,7 @@
     }
 
     /* ============================================================
-     *  手机端适配（≤768px）
+     *  手机端适配
      * ============================================================ */
     @media (max-width: 900px) {
         .main-content { padding: var(--space-7) var(--space-6); }
@@ -1101,7 +1101,9 @@
         .preview-hint { display: none; }
     }
 
-    @media (max-width: 768px) {
+    /* ⭐ 修改：加触屏横屏条件（解决横屏按钮点不了） */
+    @media (max-width: 768px),
+           (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         body { flex-direction: column; }
 
         .sidebar {
@@ -1119,7 +1121,6 @@
             -webkit-backdrop-filter: blur(12px);
         }
 
-        /* 第1行：用户信息 */
         .user-profile {
             padding: 6px 12px 4px;
             margin-bottom: 0;
@@ -1141,7 +1142,6 @@
             border-radius: 8px;
         }
 
-        /* 第2行：导航容器 */
         .nav-menu {
             flex: none;
             width: 100%;
@@ -1545,6 +1545,40 @@
         .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
         .checkin-stat { padding: 8px 3px; }
     }
+
+    /* ⭐ 新增：横屏矮屏压缩顶部，避免按钮被挤掉 */
+    @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+        .user-profile {
+            padding: 2px 10px 1px;
+            gap: 6px;
+        }
+        .avatar-wrapper { width: 26px; height: 26px; }
+        .avatar-edit {
+            width: 12px; height: 12px; font-size: 6px;
+        }
+        .user-details .email { font-size: 0.76em; }
+        .logout-btn-mini {
+            font-size: 0.62em;
+            padding: 1px 6px;
+        }
+        .nav-main-row {
+            padding: 1px 8px 4px;
+        }
+        .nav-main-row .nav-item,
+        .nav-main-row .nav-group {
+            padding: 4px 10px;
+            min-width: 58px;
+            font-size: 0.68em;
+        }
+        .nav-main-row .nav-text { max-width: 68px; }
+        .nav-sub-row {
+            padding: 4px 8px 6px;
+        }
+        .nav-sub-row .nav-sub-item {
+            padding: 6px 12px;
+            font-size: 0.74em;
+        }
+    }
     </style>
 </head>
 <body>
@@ -1622,9 +1656,12 @@
                         <button class="refresh-btn-mini" id="refreshAnnounceBtn" title="刷新">🔄</button>
                     </div>
                 </div>
-                <div class="announce-form">
-                    <input type="text" id="announceTitle" placeholder="公告标题"/>
-                    <textarea id="announceContent" rows="3" placeholder="公告内容……"></textarea>
+                <!-- ⭐ 修改：用 form 包裹 + 反自动填充 -->
+                <form class="announce-form" autocomplete="off" onsubmit="return false;">
+                    <input type="text" id="announceTitle" name="notice_title_field"
+                           placeholder="公告标题" autocomplete="off" autocorrect="off" spellcheck="false"/>
+                    <textarea id="announceContent" name="notice_content_field" rows="3"
+                              placeholder="公告内容……" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
                     <div class="announce-form-row">
                         <label>
                             <input type="checkbox" id="announcePinned"/>
@@ -1634,7 +1671,7 @@
                             ✚ 发布公告
                         </button>
                     </div>
-                </div>
+                </form>
                 <div class="announce-list" id="announceList">
                     <div class="empty">加载中...</div>
                 </div>
