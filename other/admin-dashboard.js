@@ -1,0 +1,2217 @@
+/* ============================================================
+ *  admin-dashboard.html 主逻辑
+ * ============================================================ */
+
+/* ============================================================
+ *  移动端导航分组
+ * ============================================================ */
+(function setupMobileNav() {
+    function isMobile() { return window.innerWidth <= 768; }
+
+    function build() {
+        var navMenu = document.querySelector('.nav-menu');
+        if (!navMenu) return;
+
+        if (!isMobile()) {
+            if (navMenu.dataset.mobileGrouped === '1') {
+                var mRow = navMenu.querySelector('.nav-main-row');
+                var sRow = navMenu.querySelector('.nav-sub-row');
+                if (mRow) {
+                    Array.prototype.slice.call(mRow.children).forEach(function (el) {
+                        navMenu.appendChild(el);
+                    });
+                }
+                if (sRow) {
+                    sRow.querySelectorAll('.nav-sub').forEach(function (sub) {
+                        sub.classList.remove('show');
+                        navMenu.appendChild(sub);
+                    });
+                }
+                if (mRow) mRow.remove();
+                if (sRow) sRow.remove();
+                navMenu.dataset.mobileGrouped = '0';
+            }
+            return;
+        }
+
+        if (navMenu.dataset.mobileGrouped === '1') {
+            if (window.syncMobileSubRow) window.syncMobileSubRow();
+            return;
+        }
+
+        var mainRow = document.createElement('div');
+        mainRow.className = 'nav-main-row';
+        var subRow = document.createElement('div');
+        subRow.className = 'nav-sub-row';
+
+        Array.prototype.slice.call(navMenu.children).forEach(function (el) {
+            if (el.classList && el.classList.contains('nav-sub')) {
+                subRow.appendChild(el);
+            } else {
+                mainRow.appendChild(el);
+            }
+        });
+
+        navMenu.innerHTML = '';
+        navMenu.appendChild(mainRow);
+        navMenu.appendChild(subRow);
+        navMenu.dataset.mobileGrouped = '1';
+
+        function syncSubRow() {
+            var allSubs = subRow.querySelectorAll('.nav-sub');
+            if (allSubs.length === 0) return;
+            var activeSub = null;
+            allSubs.forEach(function (sub) {
+                if (sub.classList.contains('open')) activeSub = sub;
+            });
+            if (!activeSub) {
+                allSubs.forEach(function (sub) {
+                    if (sub.querySelector('.nav-sub-item.active')) activeSub = sub;
+                });
+            }
+            if (!activeSub) {
+                subRow.classList.remove('show');
+                return;
+            }
+            allSubs.forEach(function (sub) {
+                sub.classList.toggle('show', sub === activeSub);
+            });
+            subRow.classList.add('show');
+        }
+        window.syncMobileSubRow = syncSubRow;
+
+        mainRow.querySelectorAll('.nav-item, .nav-group').forEach(function (el) {
+            el.addEventListener('click', function () {
+                setTimeout(function () {
+                    if (el.classList.contains('nav-group')) {
+                        var key = el.getAttribute('data-group');
+                        var sub = subRow.querySelector('.nav-sub[data-sub="' + key + '"]');
+                        if (sub) {
+                            subRow.querySelectorAll('.nav-sub').forEach(function (s) {
+                                s.classList.toggle('show', s === sub);
+                            });
+                            subRow.classList.add('show');
+                        } else {
+                            subRow.classList.remove('show');
+                        }
+                    } else {
+                        subRow.classList.remove('show');
+                    }
+                }, 0);
+            });
+        });
+
+        subRow.querySelectorAll('.nav-sub-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                setTimeout(function () { subRow.classList.add('show'); }, 0);
+            });
+        });
+
+        syncSubRow();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', build);
+    } else { build(); }
+
+    var t = null;
+    var lastMode = isMobile();
+    window.addEventListener('resize', function () {
+        clearTimeout(t);
+        t = setTimeout(function () {
+            var now = isMobile();
+            if (now !== lastMode) { lastMode = now; build(); }
+            else if (now && window.syncMobileSubRow) { window.syncMobileSubRow(); }
+        }, 150);
+    });
+})();
+
+/* ============================================================ */
+var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
+var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+var DEFAULT_AVATAR = 'image/default-avatar.png';
+var allProfiles = [];
+var currentAdmin = null;
+var currentBanUserId = null;
+var currentPointsUserId = null;
+var currentEditShopId = null;
+
+var myFriendsCache = [];
+var myCurrentChatFriend = null;
+var myChatPollTimer = null;
+var myLastMsgTs = null;
+
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function formatTime(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleString('zh-CN', { hour12: false }); }
+    catch (e) { return iso; }
+}
+function formatDate(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleDateString('zh-CN'); }
+    catch (e) { return iso; }
+}
+function getRemainingTime(bannedUntil) {
+    if (!bannedUntil) return null;
+    var diff = new Date(bannedUntil).getTime() - Date.now();
+    if (diff <= 0) return '即将解封';
+    var totalMinutes = Math.floor(diff / 60000);
+    var days = Math.floor(totalMinutes / 1440);
+    var hours = Math.floor((totalMinutes % 1440) / 60);
+    var minutes = totalMinutes % 60;
+    var parts = [];
+    if (days > 0) parts.push(days + '天');
+    if (hours > 0) parts.push(hours + '小时');
+    if (days === 0 && minutes > 0) parts.push(minutes + '分钟');
+    return parts.join(' ') || '不到 1 分钟';
+}
+
+/* 侧边栏分组展开 */
+document.querySelectorAll('.nav-group').forEach(function (group) {
+    group.addEventListener('click', function () {
+        var key = this.getAttribute('data-group');
+        var sub = document.querySelector('.nav-sub[data-sub="' + key + '"]');
+        var arrow = this.querySelector('.nav-arrow');
+        if (!sub) return;
+
+        var willOpen = !sub.classList.contains('open');
+        document.querySelectorAll('.nav-sub').forEach(function (el) { el.classList.remove('open'); });
+        document.querySelectorAll('.nav-group .nav-arrow').forEach(function (el) { el.classList.remove('open'); });
+        document.querySelectorAll('.nav-group').forEach(function (el) { el.classList.remove('open'); });
+
+        if (willOpen) {
+            sub.classList.add('open');
+            arrow.classList.add('open');
+            this.classList.add('open');
+        }
+    });
+});
+
+/* 视图切换 */
+var CARDS = {
+    announce:  'cardAnnounce',
+    points:    'cardPoints',
+    forgot:    'cardForgot',
+    profiles:  'cardProfiles',
+    manage:    'cardManage',
+    server:    'cardServer',
+    shop:      'cardShop',
+    purchases: 'cardPurchases',
+    theme:     'cardTheme',
+    sound:     'cardSound',
+    myCheckin: 'cardMyCheckin',
+    myFriends: 'cardMyFriends',
+    feedback:  'cardFeedback'
+};
+
+function switchTab(tab) {
+    document.querySelectorAll('.nav-item, .nav-sub-item').forEach(function (el) {
+        el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+    });
+    Object.keys(CARDS).forEach(function (k) {
+        var el = document.getElementById(CARDS[k]);
+        if (!el) return;
+        if (k === tab) {
+            el.classList.remove('active');
+            void el.offsetWidth;
+            el.classList.add('active');
+        } else {
+            el.classList.remove('active');
+        }
+    });
+    if (tab === 'announce')  loadAnnouncements();
+    if (tab === 'points')    loadPoints();
+    if (tab === 'forgot')    loadForgotRequests();
+    if (tab === 'profiles')  loadProfiles();
+    if (tab === 'server')    loadServerInfo();
+    if (tab === 'shop')      loadAdminShop();
+    if (tab === 'purchases') loadPurchases();
+    if (tab === 'feedback')  loadAllFeedbacks();
+    if (tab === 'myCheckin') { myRefreshCheckinUI(); myLoadCheckinCalendar(); }
+    if (tab === 'myFriends') myLoadFriends();
+
+    if (window.syncMobileSubRow) {
+        setTimeout(window.syncMobileSubRow, 0);
+    }
+}
+
+document.querySelectorAll('.nav-item[data-tab]').forEach(function (el) {
+    el.addEventListener('click', function () {
+        switchTab(this.getAttribute('data-tab'));
+    });
+});
+document.querySelectorAll('.nav-sub-item[data-tab]').forEach(function (el) {
+    el.addEventListener('click', function () {
+        switchTab(this.getAttribute('data-tab'));
+    });
+});
+
+function callRPC(funcName, params) {
+    return supabaseClient.rpc(funcName, params).then(function (res) {
+        return res.error ? { error: res.error, data: null } : { error: null, data: res.data };
+    });
+}
+function callEdgeFunction(action, userId, banDuration, newValue, metadata) {
+    return supabaseClient.functions.invoke('dynamic-handler', {
+        body: { action: action, userId: userId, banDuration: banDuration, newValue: newValue, metadata: metadata }
+    });
+}
+
+/* 权限守卫 */
+supabaseClient.auth.getSession().then(function (res) {
+    var session = res.data && res.data.session;
+    if (!session) { location.href = 'index.html'; return; }
+    var user = session.user;
+    var role = user.app_metadata && user.app_metadata.role;
+    if (role !== 'admin') {
+        supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
+        return;
+    }
+    currentAdmin = user;
+    document.getElementById('adminEmail').textContent = user.email;
+    if (user.user_metadata && user.user_metadata.avatar_url) {
+        document.getElementById('avatarImg').src = user.user_metadata.avatar_url;
+    }
+    switchTab('announce');
+    var firstGroup = document.querySelector('.nav-group[data-group="msg"]');
+    if (firstGroup) firstGroup.click();
+});
+supabaseClient.auth.onAuthStateChange(function (event, session) {
+    if (event === 'SIGNED_OUT' || !session) location.href = 'index.html';
+});
+
+document.getElementById('avatarChangeBtn').addEventListener('click', function () {
+    document.getElementById('avatarInput').click();
+});
+
+document.getElementById('avatarInput').addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var inputEl = this;
+
+    if (file.size > 5 * 1024 * 1024) { alert('头像文件大小不能超过 5 MB！'); inputEl.value = ''; return; }
+    if (!file.type.startsWith('image/')) { alert('请上传图片文件！'); inputEl.value = ''; return; }
+
+    supabaseClient.auth.getUser().then(function (userRes) {
+        if (userRes.error || !userRes.data.user) { alert('获取用户信息失败'); return; }
+        var userId = userRes.data.user.id;
+
+        var storageKey = 'last_avatar_upload_' + userId;
+        var lastUpload = localStorage.getItem(storageKey);
+        if (lastUpload) {
+            var elapsed = Date.now() - parseInt(lastUpload, 10);
+            var oneHour = 60 * 60 * 1000;
+            if (elapsed < oneHour) {
+                var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
+                alert('头像修改过于频繁\n请 ' + (remainingMin >= 60 ? Math.floor(remainingMin/60)+' 小时 '+(remainingMin%60)+' 分钟' : remainingMin+' 分钟') + ' 后再试');
+                inputEl.value = '';
+                return;
+            }
+        }
+
+        var fileExt = file.name.split('.').pop();
+        var filePath = userId + '/' + Date.now() + '.' + fileExt;
+
+        supabaseClient.storage.from('avatars')
+            .upload(filePath, file, { upsert: true })
+            .then(function (uploadRes) {
+                if (uploadRes.error) { alert('头像上传失败：' + uploadRes.error.message); return; }
+                return supabaseClient.storage.from('avatars').createSignedUrl(filePath, 60*60*24*365*10);
+            })
+            .then(function (signRes) {
+                if (!signRes || signRes.error) return;
+                var signedUrl = signRes.data.signedUrl;
+                return supabaseClient.auth.updateUser({ data: { avatar_url: signedUrl } })
+                    .then(function () {
+                        return supabaseClient.from('profiles').update({ avatar_url: signedUrl }).eq('id', userId);
+                    })
+                    .then(function () {
+                        localStorage.setItem(storageKey, Date.now().toString());
+                        document.getElementById('avatarImg').src = signedUrl;
+                        alert('头像更新成功！');
+                    });
+            });
+    });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', function () {
+    if (myChatPollTimer) clearInterval(myChatPollTimer);
+    supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
+});
+
+/* 公告管理 */
+function loadAnnouncements() {
+    var listEl = document.getElementById('announceList');
+    var badge = document.getElementById('badgeAnnounce');
+    listEl.innerHTML = '<div class="empty">加载中...</div>';
+
+    supabaseClient.from('announcements').select('*')
+        .order('is_pinned', { ascending: false })
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                listEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var data = res.data || [];
+            badge.textContent = data.length + ' 条';
+            if (data.length === 0) { listEl.innerHTML = '<div class="empty">暂无公告</div>'; return; }
+
+            var html = '';
+            data.forEach(function (item) {
+                html += '<div class="announce-item">' +
+                    '<div class="announce-head">' +
+                        (item.is_pinned ? '<span class="announce-pinned">📌 置顶</span>' : '') +
+                        '<span class="announce-title">' + escapeHtml(item.title) + '</span>' +
+                        '<span class="announce-time">' + formatTime(item.created_at) + '</span>' +
+                    '</div>' +
+                    '<div class="announce-content">' + escapeHtml(item.content) + '</div>' +
+                    '<div class="announce-actions">' +
+                        '<button class="action-btn del" data-id="' + item.id + '">删除</button>' +
+                    '</div>' +
+                '</div>';
+            });
+            listEl.innerHTML = html;
+
+            listEl.querySelectorAll('.action-btn.del').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    if (!confirm('确定删除这条公告吗？')) return;
+                    supabaseClient.from('announcements').delete().eq('id', id).then(function (r) {
+                        if (r.error) { alert('删除失败：' + r.error.message); return; }
+                        loadAnnouncements();
+                    });
+                });
+            });
+        });
+}
+document.getElementById('refreshAnnounceBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadAnnouncements();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
+});
+document.getElementById('createAnnounceBtn').addEventListener('click', function () {
+    var title = document.getElementById('announceTitle').value.trim();
+    var content = document.getElementById('announceContent').value.trim();
+    var pinned = document.getElementById('announcePinned').checked;
+    if (!title) { alert('请填写公告标题'); return; }
+    if (!content) { alert('请填写公告内容'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '发布中...';
+    supabaseClient.from('announcements').insert([{
+        title: title, content: content, is_pinned: pinned
+    }]).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '✚ 发布公告';
+        if (res.error) { alert('发布失败：' + res.error.message); return; }
+        document.getElementById('announceTitle').value = '';
+        document.getElementById('announceContent').value = '';
+        document.getElementById('announcePinned').checked = false;
+        loadAnnouncements();
+    });
+});
+
+/* ========== 用户反馈管理 ========== */
+function loadAllFeedbacks() {
+    var listEl = document.getElementById('adminFeedbackList');
+    var filter = document.getElementById('feedbackFilter').value;
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="empty-state">加载中...</div>';
+
+        var query = supabaseClient.from('feedbacks').select('*');
+    if (filter !== 'all') query = query.eq('status', filter);
+
+    query.then(function (res) {
+        if (res.error) {
+            listEl.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+            return;
+        }
+        var data = res.data || [];
+
+        /* ★ 自定义排序：待处理 → 处理中 → 已解决；同状态内按时间倒序 */
+        var STATUS_ORDER = { pending: 0, processing: 1, resolved: 2 };
+        data.sort(function (a, b) {
+            var sa = (STATUS_ORDER[a.status] != null) ? STATUS_ORDER[a.status] : 99;
+            var sb = (STATUS_ORDER[b.status] != null) ? STATUS_ORDER[b.status] : 99;
+            if (sa !== sb) return sa - sb;
+            return new Date(b.created_at) - new Date(a.created_at);
+        });
+
+        document.getElementById('badgeFeedback').textContent = data.length + ' 条';
+        if (data.length === 0) {
+            listEl.innerHTML = '<div class="empty-state">📭 ' + (filter === 'all' ? '暂无反馈' : '该状态下暂无反馈') + '</div>';
+            resetAdminFbSelection();
+            return;
+        }
+
+        var statusMap = { pending: '⏳ 待处理', processing: '🔄 处理中', resolved: '✅ 已解决' };
+        var html = '';
+        data.forEach(function (item) {
+            var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
+            var initial = (item.user_email || '匿').charAt(0).toUpperCase();
+            html += '<div class="feedback-item">' +
+                '<label class="fb-check" title="选择这条反馈"><input type="checkbox" class="fb-item-check" data-id="' + item.id + '"></label>' +
+                '<div class="fb-main">' +
+                    '<div class="feedback-head">' +
+                        '<span class="fb-avatar">' + escapeHtml(initial) + '</span>' +
+                        '<span class="feedback-email">' + escapeHtml(item.user_email || '匿名用户') + '</span>' +
+                        '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
+                        ((item.reward_points && item.reward_points > 0)
+                            ? '<span class="feedback-reward-tag">+' + item.reward_points + ' 积分</span>'
+                            : '') +
+                        '<span class="feedback-time">' + time + '</span>' +
+                    '</div>' +
+                    '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
+                    (item.reply ? '<div class="feedback-reply">💬 <b>已回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
+                                        '<div class="feedback-actions">' +
+                        '<select class="status-select" data-id="' + item.id + '" data-old-status="' + item.status + '">' +
+                            '<option value="pending"' + (item.status==='pending'?' selected':'') + '>待处理</option>' +
+                            '<option value="processing"' + (item.status==='processing'?' selected':'') + '>处理中</option>' +
+                            '<option value="resolved"' + (item.status==='resolved'?' selected':'') + '>已解决</option>' +
+                        '</select>' +
+                        '<button class="action-btn edit reply-btn" data-id="' + item.id + '">' + (item.reply ? '✏️ 修改回复' : '💬 回复') + '</button>' +
+                        (item.status === 'resolved'
+                            ? '<button class="action-btn edit fb-edit-reward" data-id="' + item.id + '">🎁 编辑奖励</button>'
+                            : '') +
+                        '<button class="action-btn del fb-del" data-id="' + item.id + '">🗑 删除</button>' +
+                    '</div>' +
+                    '<div class="reply-box" id="replyBox_' + item.id + '" style="display:none;margin-top:10px;">' +
+                        '<textarea class="reply-input" placeholder="输入回复内容..." rows="2" style="width:100%;padding:10px 12px;border-radius:10px;background:var(--theme-info-box);color:var(--theme-text);border:1px solid var(--theme-border);font-family:inherit;font-size:0.9em;resize:vertical;outline:none;">' + (item.reply || '') + '</textarea>' +
+                        '<div style="margin-top:6px;display:flex;gap:8px;">' +
+                            '<button class="action-btn save-reply-btn" data-id="' + item.id + '">保存回复</button>' +
+                            '<button class="action-btn cancel-reply-btn" data-id="' + item.id + '">取消</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        });
+        listEl.innerHTML = html;
+        resetAdminFbSelection();
+
+                /* ★ 状态下拉框 change：只要选"已解决"，都弹窗 */
+        listEl.querySelectorAll('.status-select').forEach(function (sel) {
+            sel.addEventListener('change', function () {
+                var selectEl = this;
+                var id = selectEl.getAttribute('data-id');
+                var status = selectEl.value;
+                var oldStatus = selectEl.getAttribute('data-old-status') || '';
+
+                if (status === 'resolved') {
+                    openFeedbackRewardDialog(id, selectEl, oldStatus, selectEl.closest('.feedback-item'));
+                    return;
+                }
+                updateFeedbackStatus(id, status, selectEl, oldStatus);
+            });
+        });
+
+        /* ★ 已解决的反馈有「🎁 编辑奖励」按钮，点击重新打开弹窗 */
+        listEl.querySelectorAll('.fb-edit-reward').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var itemEl = this.closest('.feedback-item');
+                openFeedbackRewardDialog(id, null, 'resolved', itemEl);
+            });
+        });
+
+        listEl.querySelectorAll('.reply-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var box = document.getElementById('replyBox_' + id);
+                box.style.display = box.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+
+        listEl.querySelectorAll('.save-reply-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                var reply = document.querySelector('#replyBox_' + id + ' .reply-input').value.trim();
+                supabaseClient.from('feedbacks').update({ reply: reply, updated_at: new Date().toISOString() }).eq('id', id).select().then(function (r) {
+                    if (r.error) { showToast('保存失败：' + r.error.message, 'error'); return; }
+                    if (!r.data || r.data.length === 0) { showToast('回复未保存：请检查反馈表的 update 权限（RLS 策略）', 'error'); return; }
+                    showToast('回复已保存', 'success');
+                    loadAllFeedbacks();
+                });
+            });
+        });
+
+        listEl.querySelectorAll('.cancel-reply-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var id = this.getAttribute('data-id');
+                document.getElementById('replyBox_' + id).style.display = 'none';
+            });
+        });
+    });
+}
+
+document.getElementById('refreshFeedbackBtn').addEventListener('click', function () { loadAllFeedbacks(); });
+document.getElementById('feedbackFilter').addEventListener('change', function () { loadAllFeedbacks(); });
+
+function resetAdminFbSelection() {
+    var sa = document.getElementById('fbAdminSelectAll');
+    if (sa) sa.checked = false;
+    updateAdminFbSelected();
+}
+function getAdminFbCheckedIds() {
+    var ids = [];
+    document.querySelectorAll('#adminFeedbackList .fb-item-check:checked').forEach(function (c) {
+        ids.push(c.getAttribute('data-id'));
+    });
+    return ids;
+}
+function updateAdminFbSelected() {
+    var ids = getAdminFbCheckedIds();
+    var btn = document.getElementById('fbAdminDeleteSelected');
+    var cnt = document.getElementById('fbAdminSelectedCount');
+    var sa  = document.getElementById('fbAdminSelectAll');
+    if (btn) btn.disabled = ids.length === 0;
+    if (cnt) cnt.textContent = '已选 ' + ids.length + ' 条';
+    if (sa) {
+        var total = document.querySelectorAll('#adminFeedbackList .fb-item-check').length;
+        sa.checked = total > 0 && ids.length === total;
+    }
+}
+function deleteAdminFb(ids, single) {
+    if (!ids.length) return;
+    var msg = single ? '确定删除这条反馈吗？删除后不可恢复。' : '确定删除选中的 ' + ids.length + ' 条反馈吗？删除后不可恢复。';
+    confirmFb(msg).then(function (ok) {
+        if (!ok) return;
+        var q = supabaseClient.from('feedbacks').delete().select();
+        q = single ? q.eq('id', ids[0]) : q.in('id', ids);
+        q.then(function (res) {
+            if (res.error) { showToast('删除失败：' + res.error.message, 'error'); return; }
+            if (!res.data || res.data.length === 0) {
+                showToast('删除未生效：反馈表缺少删除权限（RLS 策略），请先在 Supabase 中添加 delete 策略', 'error');
+                loadAllFeedbacks();
+                return;
+            }
+            showToast(single ? '已删除该反馈' : '已删除 ' + res.data.length + ' 条反馈', 'success');
+            loadAllFeedbacks();
+        });
+    });
+}
+function showToast(msg, type) {
+    var t = document.getElementById('fbToast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'fbToast';
+        t.className = 'fb-toast';
+        document.body.appendChild(t);
+    }
+    t.className = 'fb-toast ' + (type === 'success' ? 'fb-toast-success' : type === 'error' ? 'fb-toast-error' : '');
+    t.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ') + msg;
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(function () { t.classList.remove('show'); }, 2600);
+}
+var fbPendingResolve = null;
+function confirmFb(message) {
+    return new Promise(function (resolve) {
+        var mask = document.getElementById('fbModalMask');
+        if (!mask) {
+            mask = document.createElement('div');
+            mask.id = 'fbModalMask';
+            mask.className = 'fb-modal-mask';
+            mask.innerHTML = '<div class="fb-modal"><div class="fb-modal-title">⚠️ 确认删除</div><div class="fb-modal-msg"></div><div class="fb-modal-actions"><button class="fb-btn" data-act="cancel">取消</button><button class="fb-btn fb-btn-ok" data-act="ok">确定删除</button></div></div>';
+            mask.addEventListener('click', function (e) {
+                if (e.target === mask || (e.target.getAttribute && e.target.getAttribute('data-act') === 'cancel')) {
+                    mask.classList.remove('show');
+                    if (fbPendingResolve) fbPendingResolve(false);
+                } else if (e.target.getAttribute && e.target.getAttribute('data-act') === 'ok') {
+                    mask.classList.remove('show');
+                    if (fbPendingResolve) fbPendingResolve(true);
+                }
+            });
+            document.body.appendChild(mask);
+        }
+        mask.querySelector('.fb-modal-msg').textContent = message;
+        fbPendingResolve = resolve;
+        mask.classList.add('show');
+    });
+}
+
+document.getElementById('fbAdminSelectAll').addEventListener('change', function () {
+    var checked = this.checked;
+    document.querySelectorAll('#adminFeedbackList .fb-item-check').forEach(function (c) { c.checked = checked; });
+    updateAdminFbSelected();
+});
+document.getElementById('fbAdminDeleteSelected').addEventListener('click', function () {
+    deleteAdminFb(getAdminFbCheckedIds(), false);
+});
+document.getElementById('adminFeedbackList').addEventListener('change', function (e) {
+    if (e.target && e.target.classList.contains('fb-item-check')) updateAdminFbSelected();
+});
+document.getElementById('adminFeedbackList').addEventListener('click', function (e) {
+    var del = e.target.closest ? e.target.closest('.fb-del') : null;
+    if (del) deleteAdminFb([del.getAttribute('data-id')], true);
+});
+
+/* ============================================================
+ *  反馈状态更新 + 积分奖励（新增）
+ * ============================================================ */
+function updateFeedbackStatus(id, status, selectEl, oldStatus) {
+    supabaseClient.from('feedbacks').update({
+        status: status,
+        updated_at: new Date().toISOString()
+    }).eq('id', id).select().then(function (r) {
+        if (r.error) {
+            showToast('更新失败：' + r.error.message, 'error');
+            if (selectEl) selectEl.value = oldStatus;
+            return;
+        }
+        if (!r.data || r.data.length === 0) {
+            showToast('状态未生效：请检查反馈表的 update 权限（RLS 策略）', 'error');
+            if (selectEl) selectEl.value = oldStatus;
+            return;
+        }
+        if (selectEl) selectEl.setAttribute('data-old-status', status);
+        showToast('状态已更新', 'success');
+    });
+}
+
+var fbRewardPending = null;
+
+function openFeedbackRewardDialog(feedbackId, selectEl, oldStatus, itemEl) {
+    var modal     = document.getElementById('feedbackRewardModal');
+    var hint      = document.getElementById('feedbackRewardHint');
+    var inputEl   = document.getElementById('feedbackRewardPoints');
+    var previewEl = document.getElementById('feedbackRewardPreview');
+
+    var emailEl = itemEl ? itemEl.querySelector('.feedback-email') : null;
+    var emailText = emailEl ? emailEl.textContent : '该用户';
+
+    hint.textContent = '给「' + emailText + '」奖励积分：';
+    inputEl.value = '5';
+
+    var oldPoints = 0;
+
+    function updatePreview() {
+        var v = parseInt(inputEl.value, 10) || 0;
+        if (oldPoints > 0) {
+            if (v === oldPoints) {
+                previewEl.textContent = '保持 ' + v + ' 积分（无变化）';
+            } else if (v > oldPoints) {
+                previewEl.textContent = '从 ' + oldPoints + ' 增加到 ' + v + ' 积分（+' + (v - oldPoints) + '）';
+            } else {
+                previewEl.textContent = '从 ' + oldPoints + ' 减少到 ' + v + ' 积分（-' + (oldPoints - v) + '）';
+            }
+        } else {
+            previewEl.textContent = v > 0 ? ('奖励 ' + v + ' 积分') : '不奖励（仅标记已解决）';
+        }
+    }
+    inputEl.oninput = updatePreview;
+    updatePreview();
+
+    /* 读已有奖励分，预填输入框 */
+    supabaseClient.from('feedbacks').select('reward_points').eq('id', feedbackId).maybeSingle()
+        .then(function (r) {
+            oldPoints = (r.data && r.data.reward_points) || 0;
+            inputEl.value = oldPoints > 0 ? String(oldPoints) : '5';
+            updatePreview();
+        });
+
+    modal.style.display = 'flex';
+    setTimeout(function () { inputEl.focus(); inputEl.select(); }, 50);
+
+    fbRewardPending = {
+        id: feedbackId,
+        selectEl: selectEl,
+        oldStatus: oldStatus
+    };
+}
+
+function closeFeedbackRewardDialog() {
+    document.getElementById('feedbackRewardModal').style.display = 'none';
+    if (fbRewardPending && fbRewardPending.selectEl) {
+        fbRewardPending.selectEl.value = fbRewardPending.oldStatus;
+    }
+    fbRewardPending = null;
+}
+
+document.getElementById('feedbackRewardConfirmBtn').addEventListener('click', function () {
+    if (!fbRewardPending) return;
+    var id = fbRewardPending.id;
+    var selectEl = fbRewardPending.selectEl;
+    var points = parseInt(document.getElementById('feedbackRewardPoints').value, 10) || 0;
+    if (points < 0) points = 0;
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '处理中...';
+
+    supabaseClient.from('feedbacks').select('user_id, user_email, reward_points').eq('id', id).maybeSingle()
+    .then(function (r) {
+        if (r.error || !r.data) throw new Error('无法读取反馈信息');
+        var userId = r.data.user_id;
+        var delta = points - (r.data.reward_points || 0);   // ★ 差量
+
+        return supabaseClient.from('feedbacks').update({
+            status: 'resolved',
+            reward_points: points,
+            updated_at: new Date().toISOString()
+        }).eq('id', id).then(function (uRes) {
+            if (uRes.error) throw new Error('更新反馈状态失败：' + uRes.error.message);
+            return { userId: userId, delta: delta };       // ★ 带上 delta
+        });
+    })
+        .then(function (info) {
+    if (!info.userId || info.delta === 0) return null;
+
+            return supabaseClient.from('profiles')
+                .select('points')
+                .eq('id', info.userId)
+                .maybeSingle()
+                .then(function (pRes) {
+                    if (pRes.error || !pRes.data) throw new Error('无法读取用户积分');
+                       var newPoints = (pRes.data.points || 0) + info.delta;
+                    return supabaseClient.from('profiles')
+                        .update({ points: newPoints })
+                        .eq('id', info.userId)
+                        .then(function (upRes) {
+                            if (upRes.error) throw new Error('加分失败：' + upRes.error.message);
+                            return { newPoints: newPoints };
+                        });
+                });
+        })
+        .then(function (result) {
+            btn.disabled = false;
+            btn.textContent = '确认并奖励';
+            document.getElementById('feedbackRewardModal').style.display = 'none';
+
+            if (selectEl) selectEl.setAttribute('data-old-status', 'resolved');
+            fbRewardPending = null;
+
+            if (result && result.newPoints != null) {
+                showToast('已标记为已解决，奖励 ' + points + ' 积分', 'success');
+            } else {
+                showToast('已标记为已解决', 'success');
+            }
+            loadAllFeedbacks();
+        })
+        .catch(function (err) {
+            btn.disabled = false;
+            btn.textContent = '确认并奖励';
+            showToast((err && err.message) ? err.message : '处理失败', 'error');
+        });
+});
+
+document.getElementById('feedbackRewardCancelBtn').addEventListener('click', closeFeedbackRewardDialog);
+document.getElementById('feedbackRewardModal').addEventListener('click', function (e) {
+    if (e.target === this) closeFeedbackRewardDialog();
+});
+/* 每日签到积分管理 */
+function loadPointsConfig() {
+    supabaseClient.from('checkin_config').select('*').eq('id', 1).maybeSingle()
+        .then(function (res) {
+            if (res.error || !res.data) return;
+            var c = res.data;
+            document.getElementById('cfgMonday').value    = c.monday    != null ? c.monday    : 1;
+            document.getElementById('cfgTuesday').value   = c.tuesday   != null ? c.tuesday   : 1;
+            document.getElementById('cfgWednesday').value = c.wednesday != null ? c.wednesday : 2;
+            document.getElementById('cfgThursday').value  = c.thursday  != null ? c.thursday  : 2;
+            document.getElementById('cfgFriday').value    = c.friday    != null ? c.friday    : 3;
+            document.getElementById('cfgSaturday').value  = c.saturday  != null ? c.saturday  : 5;
+            document.getElementById('cfgSunday').value    = c.sunday    != null ? c.sunday    : 5;
+        });
+}
+document.getElementById('saveConfigBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+    var data = {
+        id: 1,
+        monday:    parseInt(document.getElementById('cfgMonday').value)    || 0,
+        tuesday:   parseInt(document.getElementById('cfgTuesday').value)   || 0,
+        wednesday: parseInt(document.getElementById('cfgWednesday').value) || 0,
+        thursday:  parseInt(document.getElementById('cfgThursday').value)  || 0,
+        friday:    parseInt(document.getElementById('cfgFriday').value)    || 0,
+        saturday:  parseInt(document.getElementById('cfgSaturday').value)  || 0,
+        sunday:    parseInt(document.getElementById('cfgSunday').value)    || 0,
+        updated_at: new Date().toISOString()
+    };
+    supabaseClient.from('checkin_config').upsert(data, { onConflict: 'id' })
+        .then(function (res) {
+            btn.disabled = false;
+            btn.textContent = '💾 保存配置';
+            if (res.error) { alert('保存失败：' + res.error.message); return; }
+            alert('配置已保存！');
+        });
+});
+function loadPoints() {
+    loadPointsConfig();
+
+    var body = document.getElementById('pointsBody');
+    var badge = document.getElementById('badgePoints');
+    body.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+
+    supabaseClient.from('profiles')
+        .select('id, uid, email, full_name, avatar_url, points, checkin_streak, last_checkin_date')
+        .order('points', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                body.innerHTML = '<tr><td colspan="6" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                return;
+            }
+            var data = res.data || [];
+            badge.textContent = data.length + ' 人';
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" class="empty">暂无数据</td></tr>';
+                return;
+            }
+            var html = '';
+            data.forEach(function (item) {
+                var avatar = item.avatar_url || DEFAULT_AVATAR;
+                html += '<tr>' +
+                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '未分配') + '</strong></td>' +
+                    '<td><div class="user-cell">' +
+                        '<img class="user-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
+                        '<div style="display:flex;flex-direction:column;">' +
+                            '<span>' + escapeHtml(item.email || '未知') + '</span>' +
+                            '<span style="font-size:0.8em;color:var(--theme-text-faint);">' + escapeHtml(item.full_name || '未设置昵称') + '</span>' +
+                        '</div>' +
+                    '</div></td>' +
+                    '<td><strong style="color:var(--theme-accent);">' + (item.points || 0) + '</strong></td>' +
+                    '<td>' + (item.checkin_streak || 0) + ' 天</td>' +
+                    '<td>' + formatDate(item.last_checkin_date) + '</td>' +
+                    '<td><button class="action-btn edit" data-id="' + item.id + '" data-email="' + escapeHtml(item.email || '') + '" data-points="' + (item.points || 0) + '" data-streak="' + (item.checkin_streak || 0) + '">调整数据</button></td>' +
+                '</tr>';
+            });
+            body.innerHTML = html;
+            body.querySelectorAll('.action-btn.edit').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    currentPointsUserId = this.getAttribute('data-id');
+                    var email  = this.getAttribute('data-email');
+                    var pts    = this.getAttribute('data-points');
+                    var streak = this.getAttribute('data-streak');
+                    document.getElementById('pointsTargetHint').textContent = email;
+                    document.getElementById('pointsNewValue').value = pts;
+                    document.getElementById('streakNewValue').value = streak;
+                    document.getElementById('pointsModal').style.display = 'flex';
+                });
+            });
+        });
+}
+document.getElementById('refreshPointsBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadPoints();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
+});
+document.getElementById('pointsCancelBtn').addEventListener('click', function () {
+    document.getElementById('pointsModal').style.display = 'none';
+    currentPointsUserId = null;
+});
+document.getElementById('pointsConfirmBtn').addEventListener('click', function () {
+    if (!currentPointsUserId) return;
+
+    var pointsVal = parseInt(document.getElementById('pointsNewValue').value, 10);
+    var streakVal = parseInt(document.getElementById('streakNewValue').value, 10);
+    if (isNaN(pointsVal) || pointsVal < 0) { alert('请输入有效的积分值（≥0）'); return; }
+    if (isNaN(streakVal) || streakVal < 0) { alert('请输入有效的连续天数（≥0）'); return; }
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+    Promise.all([
+        supabaseClient.from('profiles').update({ points: pointsVal }).eq('id', currentPointsUserId),
+        supabaseClient.rpc('admin_update_streak', { target_user_id: currentPointsUserId, new_streak: streakVal })
+    ]).then(function (results) {
+        btn.disabled = false;
+        btn.textContent = '保存';
+        var pErr = results[0].error;
+        var sRes = results[1];
+        var sErr = sRes.error || (sRes.data && sRes.data.error);
+        if (pErr || sErr) {
+            alert('保存失败：\n' + (pErr ? '积分：' + pErr.message + '\n' : '') + (sErr ? '连续天数：' + (sErr.message || sErr) : ''));
+            return;
+        }
+        document.getElementById('pointsModal').style.display = 'none';
+        currentPointsUserId = null;
+        loadPoints();
+    });
+});
+
+/* 忘记密码申请 */
+function loadForgotRequests() {
+    var body = document.getElementById('forgotBody');
+    var badge = document.getElementById('badgeForgot');
+    body.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+    supabaseClient.from('forgot_requests').select('*')
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                body.innerHTML = '<tr><td colspan="5" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                return;
+            }
+            var data = res.data || [];
+            badge.textContent = data.length + ' 条';
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="empty">暂无申请</td></tr>';
+                return;
+            }
+            var html = '';
+            data.forEach(function (item) {
+                html += '<tr>' +
+                    '<td>' + escapeHtml(item.email) + '</td>' +
+                    '<td>' + escapeHtml(item.contact) + '</td>' +
+                    '<td>' + escapeHtml(item.reason || '—') + '</td>' +
+                    '<td>' + formatTime(item.created_at) + '</td>' +
+                    '<td><button class="action-btn del" data-id="' + item.id + '">删除</button></td>' +
+                '</tr>';
+            });
+            body.innerHTML = html;
+            body.querySelectorAll('.action-btn.del').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    if (!confirm('确定删除这条记录吗？')) return;
+                    supabaseClient.from('forgot_requests').delete().eq('id', id)
+                        .then(function (r) {
+                            if (r.error) { alert('删除失败：' + r.error.message); return; }
+                            loadForgotRequests();
+                        });
+                });
+            });
+        });
+}
+document.getElementById('refreshForgotBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadForgotRequests();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
+});
+
+/* 注册用户列表 */
+function loadProfiles() {
+    var body = document.getElementById('profilesBody');
+    var badge = document.getElementById('badgeProfiles');
+    body.innerHTML = '<tr><td colspan="7" class="loading">加载中...</td></tr>';
+    supabaseClient.from('profiles').select('*')
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                body.innerHTML = '<tr><td colspan="7" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                return;
+            }
+            var data = res.data || [];
+            allProfiles = data;
+            badge.textContent = data.length + ' 人';
+            updateManageSelect();
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="7" class="empty">暂无用户</td></tr>';
+                return;
+            }
+            var html = '';
+            data.forEach(function (item) {
+                var isBlocked = item.is_blocked === true;
+                var avatar = item.avatar_url || DEFAULT_AVATAR;
+                var statusHtml = isBlocked
+                    ? '<span class="status-tag blocked">已拉黑</span>'
+                    : '<span class="status-tag active">正常</span>';
+                var blockBtn = isBlocked
+                    ? '<button class="action-btn unblock" data-id="' + item.id + '">解除拉黑</button>'
+                    : '<button class="action-btn block" data-id="' + item.id + '">拉黑</button>';
+                var remain = '';
+                if (isBlocked) {
+                    var rt = getRemainingTime(item.banned_until);
+                    if (rt) remain = '<span class="remaining-tag">剩余：' + escapeHtml(rt) + '</span>';
+                }
+                html += '<tr>' +
+                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '未分配') + '</strong></td>' +
+                    '<td><div class="user-cell">' +
+                        '<img class="user-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
+                        '<span>' + escapeHtml(item.email) + '</span>' +
+                    '</div></td>' +
+                    '<td>' + escapeHtml(item.full_name || '—') + '</td>' +
+                    '<td>' + escapeHtml(item.phone || '—') + '</td>' +
+                    '<td>' + statusHtml + '</td>' +
+                    '<td>' + formatTime(item.created_at) + '</td>' +
+                    '<td>' +
+                        '<button class="action-btn del" data-id="' + item.id + '">删除</button>' +
+                        blockBtn + remain +
+                    '</td>' +
+                '</tr>';
+            });
+            body.innerHTML = html;
+            bindProfileActions();
+        });
+}
+document.getElementById('refreshProfilesBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadProfiles();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
+});
+function bindProfileActions() {
+    var body = document.getElementById('profilesBody');
+    if (!body) return;
+    body.querySelectorAll('.action-btn.del[data-id]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = this.getAttribute('data-id');
+            if (!confirm('⚠️ 确定要彻底删除该用户吗？\n此操作不可恢复！')) return;
+            callEdgeFunction('delete', id).then(function (res) {
+                if (res.error || (res.data && res.data.error)) {
+                    alert('删除失败：' + (res.error ? res.error.message : res.data.error));
+                    return;
+                }
+                loadProfiles();
+            });
+        });
+    });
+    body.querySelectorAll('.action-btn.block').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            currentBanUserId = this.getAttribute('data-id');
+            document.getElementById('banDays').value = '0';
+            document.getElementById('banHours').value = '0';
+            document.getElementById('banMinutes').value = '0';
+            updateBanPreview();
+            document.getElementById('banDurationModal').style.display = 'flex';
+        });
+    });
+    body.querySelectorAll('.action-btn.unblock').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var id = this.getAttribute('data-id');
+            if (!confirm('确定要解除拉黑吗？')) return;
+            callRPC('admin_unban_user', { target_user_id: id }).then(function (res) {
+                if (res.error || (res.data && res.data.error)) {
+                    alert('操作失败：' + (res.error ? res.error.message : res.data.error));
+                    return;
+                }
+                loadProfiles();
+            });
+        });
+    });
+}
+function updateBanPreview() {
+    var d = parseInt(document.getElementById('banDays').value) || 0;
+    var h = parseInt(document.getElementById('banHours').value) || 0;
+    var m = parseInt(document.getElementById('banMinutes').value) || 0;
+    if (d === 0 && h === 0 && m === 0) {
+        document.getElementById('banPreview').textContent = '永久封禁';
+        return;
+    }
+    var parts = [];
+    if (d > 0) parts.push(d + ' 天');
+    if (h > 0) parts.push(h + ' 小时');
+    if (m > 0) parts.push(m + ' 分钟');
+    document.getElementById('banPreview').textContent = '总封禁时长：' + parts.join(' ');
+}
+
+document.getElementById('banDays').addEventListener('input', updateBanPreview);
+document.getElementById('banHours').addEventListener('input', updateBanPreview);
+document.getElementById('banMinutes').addEventListener('input', updateBanPreview);
+
+document.getElementById('banCancelBtn').addEventListener('click', function () {
+    document.getElementById('banDurationModal').style.display = 'none';
+    currentBanUserId = null;
+});
+document.getElementById('banDurationModal').addEventListener('click', function (e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+        currentBanUserId = null;
+    }
+});
+document.getElementById('banConfirmBtn').addEventListener('click', function () {
+    if (!currentBanUserId) return;
+    var d = parseInt(document.getElementById('banDays').value)    || 0;
+    var h = parseInt(document.getElementById('banHours').value)   || 0;
+    var m = parseInt(document.getElementById('banMinutes').value) || 0;
+
+    var totalSeconds = 0;
+    if (d !== 0 || h !== 0 || m !== 0) {
+        totalSeconds = d * 86400 + h * 3600 + m * 60;
+    }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '处理中...';
+
+    callRPC('admin_ban_user', {
+        target_user_id: currentBanUserId,
+        ban_seconds: totalSeconds
+    }).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '确定封禁';
+        if (res.error || (res.data && res.data.error)) {
+            alert('拉黑失败：' + (res.error ? res.error.message : res.data.error));
+            return;
+        }
+        document.getElementById('banDurationModal').style.display = 'none';
+        currentBanUserId = null;
+        loadProfiles();
+    });
+});
+
+/* 用户管理 */
+function updateManageSelect() {
+    var sel = document.getElementById('manageUserSelect');
+    var cur = sel.value;
+    var html = '<option value="">-- 请选择用户 --</option>';
+    allProfiles.forEach(function (p) {
+        var uidTag = p.uid ? ('[UID ' + p.uid + '] ') : '';
+        html += '<option value="' + p.id + '">' + escapeHtml(uidTag + (p.email || '未知') + ' （' + (p.full_name || '未设置昵称') + '）') + '</option>';
+    });
+    sel.innerHTML = html;
+    if (cur) sel.value = cur;
+}
+document.getElementById('manageUserSelect').addEventListener('change', function () {
+    var id = this.value;
+    if (!id) { clearManageForm(); updatePreview(null); return; }
+    var user = allProfiles.find(function (p) { return p.id === id; });
+    if (!user) { clearManageForm(); updatePreview(null); return; }
+    document.getElementById('manageUid').value = user.uid != null ? String(user.uid) : '';
+    document.getElementById('manageName').value = user.full_name || '';
+    document.getElementById('managePhone').value = user.phone || '';
+    document.getElementById('manageEmail').value = user.email || '';
+    document.getElementById('managePassword').value = '';
+    updatePreview(user);
+});
+
+function updatePreview(user) {
+    var av = document.getElementById('previewAvatar');
+    var nm = document.getElementById('previewName');
+    var em = document.getElementById('previewEmail');
+    var st = document.getElementById('previewStatus');
+    if (!user) {
+        av.src = DEFAULT_AVATAR;
+        nm.textContent = '未选择用户';
+        em.textContent = '请从右侧下拉框选择';
+        st.style.display = 'none';
+        return;
+    }
+    av.src = user.avatar_url || DEFAULT_AVATAR;
+    nm.textContent = user.full_name || '未设置昵称';
+    em.textContent = user.email || '未知邮箱';
+    st.style.display = 'inline-block';
+    if (user.is_blocked === true) {
+        st.className = 'preview-status blocked';
+        st.textContent = '已拉黑';
+    } else {
+        st.className = 'preview-status active';
+        st.textContent = '正常';
+    }
+}
+
+function clearManageForm() {
+    document.getElementById('manageUid').value = '';
+    document.getElementById('manageName').value = '';
+    document.getElementById('managePhone').value = '';
+    document.getElementById('manageEmail').value = '';
+    document.getElementById('managePassword').value = '';
+}
+
+document.getElementById('resetManageBtn').addEventListener('click', function () {
+    document.getElementById('manageUserSelect').value = '';
+    clearManageForm();
+    updatePreview(null);
+});
+
+document.getElementById('saveManageBtn').addEventListener('click', function () {
+    var userId = document.getElementById('manageUserSelect').value;
+    if (!userId) { alert('请先选择用户'); return; }
+    var user = allProfiles.find(function (p) { return p.id === userId; });
+    if (!user) { alert('找不到该用户信息'); return; }
+
+    var newUid   = document.getElementById('manageUid').value.trim();
+    var newName  = document.getElementById('manageName').value.trim();
+    var newPhone = document.getElementById('managePhone').value.trim();
+    var newEmail = document.getElementById('manageEmail').value.trim();
+    var newPwd   = document.getElementById('managePassword').value;
+
+    var tasks = [];
+    var messages = [];
+
+    var oldUid = user.uid != null ? String(user.uid) : '';
+    if (newUid !== oldUid) {
+        if (newUid === '') {
+            alert('UID 不能为空');
+            return;
+        }
+        if (!/^\d{5,9}$/.test(newUid)) {
+            alert('UID 必须是 5 到 9 位的纯数字！');
+            return;
+        }
+        tasks.push(
+            supabaseClient.from('profiles').update({ uid: parseInt(newUid, 10) }).eq('id', userId)
+                .then(function (r) {
+                    if (r.error) {
+                        if (r.error.code === '23505') {
+                            return { ok: false, field: 'UID', err: { message: '该 UID 已被其他用户占用，请更换' } };
+                        }
+                        return { ok: false, field: 'UID', err: r.error };
+                    }
+                    return { ok: true, field: 'UID' };
+                })
+        );
+        messages.push('UID');
+    }
+
+    var nameChanged  = newName  !== (user.full_name || '');
+    var phoneChanged = newPhone !== (user.phone || '');
+
+    if (nameChanged || phoneChanged) {
+        var fields = [];
+        if (nameChanged)  fields.push('昵称');
+        if (phoneChanged) fields.push('手机号');
+        tasks.push(
+            callRPC('admin_update_profile', {
+                target_user_id: userId,
+                new_full_name: newName || null,
+                new_phone: newPhone || null
+            }).then(function (r) {
+                if (r.error || (r.data && r.data.error)) return { ok: false, field: fields.join('+'), err: r.error };
+                return { ok: true, field: fields.join('+') };
+            })
+        );
+        messages.push(fields.join('、'));
+    }
+
+    if (newEmail && newEmail !== (user.email || '')) {
+        tasks.push(callEdgeFunction('update_email', userId, null, newEmail).then(function (r) {
+            if (r.error || (r.data && r.data.error)) return { ok: false, field: '邮箱', err: r.error };
+            return { ok: true, field: '邮箱' };
+        }));
+        messages.push('邮箱');
+    }
+
+    if (newPwd) {
+        if (newPwd.length < 6) { alert('密码至少 6 位'); return; }
+        tasks.push(callEdgeFunction('update_password', userId, null, newPwd).then(function (r) {
+            if (r.error || (r.data && r.data.error)) return { ok: false, field: '密码', err: r.error };
+            return { ok: true, field: '密码' };
+        }));
+        messages.push('密码');
+    }
+
+    if (tasks.length === 0) { alert('没有任何修改'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+
+    Promise.all(tasks).then(function (results) {
+        btn.disabled = false;
+        btn.textContent = '💾 保存修改';
+        var failures = results.filter(function (r) { return !r.ok; });
+        if (failures.length > 0) {
+            alert('部分修改失败：\n\n' + failures.map(function (f) {
+                return f.field + '：' + (f.err && f.err.message ? f.err.message : '失败');
+            }).join('\n'));
+        } else {
+            alert('修改成功：\n\n' + messages.join('、'));
+        }
+        loadProfiles();
+    });
+});
+
+/* 管理端积分商城 */
+function bindLimitToggle(toggleId, inputId) {
+    var t = document.getElementById(toggleId);
+    var i = document.getElementById(inputId);
+    if (!t || !i) return;
+
+    function sync() {
+        var on = t.dataset.on === 'true';
+        i.disabled = !on;
+        t.textContent = on ? '开启限购' : '关闭无限';
+    }
+    t.addEventListener('click', function () {
+        t.dataset.on = (t.dataset.on === 'true') ? 'false' : 'true';
+        sync();
+    });
+    sync();
+}
+bindLimitToggle('addLimitToggle',  'addShopLimit');
+bindLimitToggle('editLimitToggle', 'editShopLimit');
+
+function readLimit(toggleId, inputId) {
+    var t = document.getElementById(toggleId);
+    if (!t || t.dataset.on !== 'true') return null;
+    var v = parseInt(document.getElementById(inputId).value, 10) || 1;
+    if (v < 1) v = 1;
+    return v;
+}
+
+function loadAdminShop() {
+    var grid = document.getElementById('adminShopGrid');
+    var badge = document.getElementById('badgeShop');
+    if (!grid) return;
+
+    grid.innerHTML = '<div class="empty">加载中...</div>';
+
+    supabaseClient.from('shop_items').select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                grid.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var items = res.data || [];
+            badge.textContent = items.length + ' 件';
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty">暂无商品，请在上方上架</div>';
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (it) {
+                var stockText = (it.stock === 0) ? '已售罄' : ('库存: ' + (it.stock || 0));
+                var activeTag = it.is_active === false ? '（已下架）' : '';
+                var limitTag = '';
+                if (it.per_user_limit != null && it.per_user_limit > 0) {
+                    limitTag = '<div class="shop-item-limit">每人限购 ' + it.per_user_limit + ' 份</div>';
+                }
+
+                html +=
+                    '<div class="shop-item">' +
+                        '<div class="shop-item-icon">' + escapeHtml(it.icon || '🎁') + '</div>' +
+                        '<div class="shop-item-name">' + escapeHtml(it.name) + activeTag + '</div>' +
+                        '<div class="shop-item-price">' + (it.price || 0) + ' 积分</div>' +
+                        '<div class="shop-item-stock">' + stockText + '</div>' +
+                        limitTag +
+                        '<div class="shop-item-actions">' +
+                            '<button class="btn-edit" data-id="' + it.id + '">编辑</button>' +
+                            '<button class="btn-del" data-id="' + it.id + '">删除</button>' +
+                        '</div>' +
+                    '</div>';
+            });
+            grid.innerHTML = html;
+
+            grid.querySelectorAll('.btn-del').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    if (!confirm('确定删除该商品吗？此操作不可恢复。')) return;
+                    supabaseClient.from('shop_items').delete().eq('id', id)
+                        .then(function (r) {
+                            if (r.error) { alert('删除失败：' + r.error.message); return; }
+                            loadAdminShop();
+                        });
+                });
+            });
+
+            grid.querySelectorAll('.btn-edit').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var it = items.find(function (x) { return String(x.id) === String(id); });
+                    if (!it) return;
+
+                    currentEditShopId = id;
+
+                    document.getElementById('editShopName').value   = it.name || '';
+                    document.getElementById('editShopPrice').value  = it.price || 0;
+                    document.getElementById('editShopStock').value  = it.stock || 0;
+                    document.getElementById('editShopDesc').value   = it.description || '';
+                    document.getElementById('editShopDetail').value = it.detail || '';
+                    document.getElementById('editShopImage').value  = it.image_url || '';
+                    document.getElementById('editShopIcon').value   = it.icon || '🎁';
+
+                    var editToggle = document.getElementById('editLimitToggle');
+                    var editLimitInput = document.getElementById('editShopLimit');
+                    if (it.per_user_limit != null && it.per_user_limit > 0) {
+                        editToggle.dataset.on = 'true';
+                        editLimitInput.value = it.per_user_limit;
+                        editLimitInput.disabled = false;
+                        editToggle.textContent = '开启（限购）';
+                    } else {
+                        editToggle.dataset.on = 'false';
+                        editLimitInput.value = 1;
+                        editLimitInput.disabled = true;
+                        editToggle.textContent = '关闭（无限）';
+                    }
+
+                    document.getElementById('editShopModal').style.display = 'flex';
+                });
+            });
+        });
+}
+
+document.getElementById('refreshShopBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadAdminShop();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
+});
+
+document.getElementById('addShopBtn').addEventListener('click', function () {
+    var name   = document.getElementById('addShopName').value.trim();
+    var price  = parseInt(document.getElementById('addShopPrice').value, 10) || 0;
+    var stock  = parseInt(document.getElementById('addShopStock').value, 10) || 0;
+    var desc   = document.getElementById('addShopDesc').value.trim();
+    var detail = document.getElementById('addShopDetail').value.trim();
+    var image  = document.getElementById('addShopImage').value.trim();
+    var icon   = document.getElementById('addShopIcon').value.trim() || '🎁';
+    var limitVal = readLimit('addLimitToggle', 'addShopLimit');
+
+    if (!name) { alert('请填写商品名称'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '上架中...';
+
+    supabaseClient.from('shop_items').insert([{
+        name: name,
+        description: desc,
+        detail: detail,
+        price: price,
+        stock: stock,
+        icon: icon,
+        image_url: image,
+        per_user_limit: limitVal,
+        is_active: true,
+        sort_order: 0
+    }]).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '➕ 上架商品';
+        if (res.error) {
+            alert('上架失败：' + res.error.message);
+            return;
+        }
+        alert('上架成功！所有用户刷新页面即可看到。');
+        ['addShopName','addShopPrice','addShopDesc','addShopDetail','addShopImage'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('addShopStock').value = '10';
+        document.getElementById('addShopIcon').value  = '🎁';
+        var addToggle = document.getElementById('addLimitToggle');
+        var addLimitInput = document.getElementById('addShopLimit');
+        addToggle.dataset.on = 'false';
+        addToggle.textContent = '关闭（无限）';
+        addLimitInput.value = 1;
+        addLimitInput.disabled = true;
+
+        loadAdminShop();
+    });
+});
+
+document.getElementById('editShopSaveBtn').addEventListener('click', function () {
+    var id = currentEditShopId;
+    if (!id) return;
+
+    var name   = document.getElementById('editShopName').value.trim();
+    var price  = parseInt(document.getElementById('editShopPrice').value, 10) || 0;
+    var stock  = parseInt(document.getElementById('editShopStock').value, 10) || 0;
+    var desc   = document.getElementById('editShopDesc').value.trim();
+    var detail = document.getElementById('editShopDetail').value.trim();
+    var image  = document.getElementById('editShopImage').value.trim();
+    var icon   = document.getElementById('editShopIcon').value.trim() || '🎁';
+    var limitVal = readLimit('editLimitToggle', 'editShopLimit');
+
+    if (!name) { alert('商品名称不能为空'); return; }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+
+    supabaseClient.from('shop_items').update({
+        name: name,
+        price: price,
+        stock: stock,
+        description: desc,
+        detail: detail,
+        image_url: image,
+        icon: icon,
+        per_user_limit: limitVal
+    }).eq('id', id).then(function (r) {
+        btn.disabled = false;
+        btn.textContent = '保存修改';
+        if (r.error) { alert('保存失败：' + r.error.message); return; }
+        document.getElementById('editShopModal').style.display = 'none';
+        currentEditShopId = null;
+        loadAdminShop();
+    });
+});
+
+document.getElementById('editShopCancelBtn').addEventListener('click', function () {
+    document.getElementById('editShopModal').style.display = 'none';
+    currentEditShopId = null;
+});
+document.getElementById('editShopModal').addEventListener('click', function (e) {
+    if (e.target === this) {
+        this.style.display = 'none';
+        currentEditShopId = null;
+    }
+});
+
+/* 兑换记录 */
+function loadPurchases() {
+    var listEl = document.getElementById('purchaseUsersList');
+    var badge  = document.getElementById('badgePurchases');
+    if (!listEl) return;
+
+    listEl.innerHTML = '<div class="empty">加载中...</div>';
+
+    supabaseClient.from('user_purchases').select('*')
+        .order('created_at', { ascending: false })
+        .then(function (res) {
+            if (res.error) {
+                listEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var records = res.data || [];
+            if (records.length === 0) {
+                listEl.innerHTML = '<div class="empty">暂无兑换记录</div>';
+                badge.textContent = '0 人';
+                return;
+            }
+
+            var groups = {};
+            records.forEach(function (r) {
+                var uid = r.user_id || 'unknown';
+                if (!groups[uid]) {
+                    groups[uid] = { user_id: uid, records: [] };
+                }
+                groups[uid].records.push(r);
+            });
+
+            var userIds = Object.keys(groups);
+
+            supabaseClient.from('profiles')
+                .select('id, uid, email, full_name, avatar_url')
+                .in('id', userIds)
+                .then(function (pRes) {
+                    var profiles = {};
+                    (pRes.data || []).forEach(function (p) { profiles[p.id] = p; });
+
+                    badge.textContent = userIds.length + ' 人';
+
+                    var html = '';
+                    userIds.forEach(function (uid) {
+                        var u = profiles[uid] || {};
+                        var recs = groups[uid].records;
+                        var lastTime = recs[0]
+                            ? new Date(recs[0].created_at).toLocaleString('zh-CN', { hour12: false })
+                            : '—';
+                        var name = u.full_name || u.email || '未知用户';
+                        var email = u.email || '';
+                        var avatar = u.avatar_url || DEFAULT_AVATAR;
+                        var uidTag = u.uid ? ('UID ' + u.uid + ' · ') : '';
+
+                        var recordsHtml = '';
+                        recs.forEach(function (r) {
+                            var t = new Date(r.created_at).toLocaleString('zh-CN', { hour12: false });
+                            recordsHtml +=
+                                '<div class="purchase-record">' +
+                                    '<span class="pr-icon">' + escapeHtml(r.item_icon || '🎁') + '</span>' +
+                                    '<div class="pr-info">' +
+                                        '<div class="pr-name">' + escapeHtml(r.item_name || '未知商品') + '</div>' +
+                                        '<div class="pr-time">' + t + '</div>' +
+                                    '</div>' +
+                                    '<span class="pr-price">-' + (r.price_paid || 0) + '</span>' +
+                                '</div>';
+                        });
+
+                        html +=
+                            '<div class="purchase-user" data-uid="' + uid + '">' +
+                                '<div class="purchase-user-head">' +
+                                    '<img class="pu-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
+                                    '<div class="pu-info">' +
+                                        '<div class="pu-name">' + escapeHtml(name) + '</div>' +
+                                        '<div class="pu-email">' + escapeHtml(uidTag + email) + '</div>' +
+                                    '</div>' +
+                                    '<span class="pu-count">' + recs.length + ' 件</span>' +
+                                    '<span class="pu-last">最近：' + lastTime + '</span>' +
+                                    '<span class="pu-arrow">▾</span>' +
+                                '</div>' +
+                                '<div class="purchase-user-body">' + recordsHtml + '</div>' +
+                            '</div>';
+                    });
+
+                    listEl.innerHTML = html;
+
+                    listEl.querySelectorAll('.purchase-user-head').forEach(function (head) {
+                        head.addEventListener('click', function () {
+                            var card = this.parentElement;
+                            var wasOpen = card.classList.contains('open');
+
+                            listEl.querySelectorAll('.purchase-user').forEach(function (el) {
+                                el.classList.remove('open');
+                            });
+
+                            if (!wasOpen) card.classList.add('open');
+                        });
+                    });
+                });
+        });
+}
+
+document.getElementById('refreshPurchasesBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.classList.add('spinning');
+    loadPurchases();
+    setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
+});
+
+/* 服务端信息 */
+function renderHealthCard(name, ok) {
+    return '<div class="health-card">' +
+        '<div class="health-dot ' + (ok ? 'ok' : 'error') + '"></div>' +
+        '<div class="health-info">' +
+            '<span class="name">' + name + '</span>' +
+            '<span class="status">' + (ok ? '运行正常' : '异常') + '</span>' +
+        '</div>' +
+    '</div>';
+}
+
+function loadServerInfo() {
+    var btn = document.getElementById('refreshServerBtn');
+    btn.disabled = true;
+    btn.textContent = '加载中...';
+
+    supabaseClient.functions.invoke('server-info', { body: {} }).then(function (res) {
+        btn.disabled = false;
+        btn.textContent = '🔄 刷新';
+        if (res.error) { alert('加载失败：' + res.error.message); return; }
+        var data = res.data;
+        if (!data || !data.success) { alert('加载失败：' + (data && data.error ? data.error : '未知错误')); return; }
+
+        var health = data.health || {};
+        document.getElementById('healthGrid').innerHTML =
+            renderHealthCard('Database', health.database === true) +
+            renderHealthCard('Auth', health.auth === true) +
+            renderHealthCard('Storage', health.storage === true) +
+            renderHealthCard('Edge Functions', health.edgeFunctions === true);
+
+        var stats = data.stats || {};
+        document.getElementById('statAuthUsers').textContent = stats.authUsers || 0;
+        document.getElementById('statProfiles').textContent  = stats.profiles || 0;
+        document.getElementById('statForgot').textContent    = stats.forgotRequests || 0;
+        document.getElementById('statBlocked').textContent   = stats.blockedUsers || 0;
+        document.getElementById('statAvatars').textContent   = stats.avatars || 0;
+        document.getElementById('statAvatarSize').innerHTML  = (stats.avatarSizeMB || 0) + '<span class="unit">MB</span>';
+
+        var proj = data.project || {};
+        document.getElementById('infoUrl').textContent    = proj.url || '—';
+        document.getElementById('infoRegion').textContent = proj.region || '—';
+
+        var rt = data.runtime || {};
+        document.getElementById('infoQueryTime').textContent = (rt.queryTimeMs || 0) + ' ms';
+        document.getElementById('infoMemory').textContent    = (rt.memoryUsageMB || 0) + ' MB';
+        document.getElementById('infoDeno').textContent      = rt.denoVersion || '—';
+        document.getElementById('infoTimestamp').textContent = data.timestamp
+            ? new Date(data.timestamp).toLocaleString('zh-CN', { hour12: false }) : '—';
+
+        document.getElementById('lastUpdate').textContent = '最后更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
+    }).catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = '🔄 刷新';
+        alert('加载失败：' + (err && err.message ? err.message : err));
+    });
+}
+
+document.getElementById('refreshServerBtn').addEventListener('click', loadServerInfo);
+
+/* 我的签到 */
+function myToDateStr(d) {
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var dd = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + dd;
+}
+function myShanghaiNow() {
+    var now = new Date();
+    return new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000);
+}
+
+function myLoadCheckinCalendar() {
+    if (!currentAdmin) return;
+
+    var today = myShanghaiNow();
+    var dow = today.getDay();
+    var diff = dow === 0 ? -6 : 1 - dow;
+    var monday = new Date(today);
+    monday.setDate(today.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+
+    var sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+
+    var startStr = myToDateStr(monday);
+    var endStr   = myToDateStr(sunday);
+
+    Promise.all([
+        supabaseClient.from('checkin_config').select('*').eq('id', 1).maybeSingle(),
+        supabaseClient.from('checkins')
+            .select('checkin_date, points')
+            .eq('user_id', currentAdmin.id)
+            .gte('checkin_date', startStr)
+            .lte('checkin_date', endStr)
+    ]).then(function (results) {
+        var cfg = results[0].data || {};
+        var checked = {};
+        (results[1].data || []).forEach(function (c) { checked[c.checkin_date] = c.points; });
+        myRenderCalendar(monday, cfg, checked);
+    }).catch(function () { myRenderCalendar(monday, {}, {}); });
+}
+
+function myRenderCalendar(monday, cfg, checked) {
+    var names = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    var keys  = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    var todayStr = myToDateStr(myShanghaiNow());
+
+    var html = '';
+    for (var i = 0; i < 7; i++) {
+        var d = new Date(monday);
+        d.setDate(monday.getDate() + i);
+        var dateStr = myToDateStr(d);
+        var isToday = dateStr === todayStr;
+        var isChecked = Object.prototype.hasOwnProperty.call(checked, dateStr);
+        var reward = cfg[keys[i]] != null ? cfg[keys[i]] : 1;
+
+        var cls = 'checkin-day';
+        if (isToday)   cls += ' today';
+        if (isChecked) cls += ' checked';
+        var pointText = isChecked ? ('+' + checked[dateStr]) : ('+' + reward);
+
+        html += '<div class="' + cls + '">' +
+            '<div class="day-name">' + names[i] + '</div>' +
+            '<div class="day-date">' + (d.getMonth() + 1) + '/' + d.getDate() + '</div>' +
+            '<div class="day-points">' + pointText + '</div>' +
+        '</div>';
+    }
+    document.getElementById('myCheckinCalendar').innerHTML = html;
+}
+
+function myRefreshCheckinUI() {
+    if (!currentAdmin) return;
+    var today = myToDateStr(myShanghaiNow());
+
+    Promise.all([
+        supabaseClient.from('profiles')
+            .select('points, checkin_streak')
+            .eq('id', currentAdmin.id).maybeSingle(),
+        supabaseClient.from('checkins')
+            .select('checkin_date, points')
+            .eq('user_id', currentAdmin.id)
+            .eq('checkin_date', today)
+            .maybeSingle()
+    ]).then(function (results) {
+        var p = results[0].data || {};
+        var todayRow = results[1].data;
+        var hasCheckedToday = !!todayRow;
+
+        document.getElementById('myPoints').textContent = p.points || 0;
+        document.getElementById('myStreak').textContent = p.checkin_streak || 0;
+
+        var btn = document.getElementById('myCheckinBtn');
+        if (hasCheckedToday) {
+            btn.textContent = '✓ 今日已签到';
+            btn.disabled = true;
+            document.getElementById('myTodayReward').textContent = '+' + (todayRow.points || 0);
+        } else {
+            btn.textContent = '签 到';
+            btn.disabled = false;
+            document.getElementById('myTodayReward').textContent = '—';
+        }
+
+        myLoadRank(currentAdmin.id);
+    });
+}
+
+function myLoadRank(userId) {
+    supabaseClient.from('profiles')
+        .select('points')
+        .eq('id', userId)
+        .maybeSingle()
+        .then(function (r) {
+            if (r.error || !r.data) return;
+            var myPoints = r.data.points || 0;
+
+            Promise.all([
+                supabaseClient.from('profiles')
+                    .select('id', { count: 'exact', head: true })
+                    .gt('points', myPoints),
+                supabaseClient.from('profiles')
+                    .select('id', { count: 'exact', head: true })
+            ]).then(function (res) {
+                var higher = (res[0] && res[0].count) || 0;
+                var total  = (res[1] && res[1].count) || 0;
+                var rank   = higher + 1;
+                var el = document.getElementById('myAdminRank');
+                if (el) el.textContent = rank + ' / ' + total;
+            });
+        });
+}
+
+document.getElementById('myCheckinBtn').addEventListener('click', function () {
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '签到中...';
+
+    supabaseClient.rpc('do_checkin').then(function (res) {
+        if (res.error) {
+            alert('签到失败：' + res.error.message);
+            btn.disabled = false;
+            btn.textContent = '签 到';
+            return;
+        }
+        var data = res.data || {};
+        if (data.error) {
+            alert(data.error);
+            myRefreshCheckinUI();
+            myLoadCheckinCalendar();
+            return;
+        }
+        btn.textContent = '✓ 今日已签到';
+        document.getElementById('myPoints').textContent =
+            (parseInt(document.getElementById('myPoints').textContent) || 0) + (data.points || 0);
+        document.getElementById('myStreak').textContent = data.streak || 0;
+        document.getElementById('myTodayReward').textContent = '+' + (data.points || 0);
+        myLoadCheckinCalendar();
+        alert('签到成功！\n获得 ' + data.points + ' 积分\n连续签到 ' + data.streak + ' 天');
+    }).catch(function (err) {
+        alert('签到失败：' + (err.message || err));
+        btn.disabled = false;
+        btn.textContent = '签 到';
+    });
+});
+
+/* 我的好友 */
+function myLoadFriends() {
+    if (!currentAdmin) return;
+
+    var pendingList = document.getElementById('myPendingList');
+    var friendList  = document.getElementById('myFriendList');
+    var badge       = document.getElementById('myBadgeFriends');
+
+    pendingList.innerHTML = '<div class="empty-state">加载中...</div>';
+    friendList.innerHTML  = '<div class="empty-state">加载中...</div>';
+
+    supabaseClient.from('friendships').select('*')
+        .or('user_id.eq.' + currentAdmin.id + ',friend_id.eq.' + currentAdmin.id)
+        .then(function (res) {
+            if (res.error) {
+                pendingList.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                friendList.innerHTML  = '<div class="empty-state">加载失败</div>';
+                return;
+            }
+
+            var all = res.data || [];
+            var pendingFromOthers = [];
+            var friendIds = [];
+
+            all.forEach(function (f) {
+                if (f.status === 'pending' && f.friend_id === currentAdmin.id) {
+                    pendingFromOthers.push(f);
+                } else if (f.status === 'accepted') {
+                    friendIds.push(f.user_id === currentAdmin.id ? f.friend_id : f.user_id);
+                }
+            });
+
+            badge.textContent = friendIds.length + ' 位好友';
+
+            var allIds = friendIds.concat(pendingFromOthers.map(function (f) { return f.user_id; }));
+            if (allIds.length === 0) {
+                pendingList.innerHTML = '<div class="empty-state">暂无待处理的请求</div>';
+                friendList.innerHTML  = '<div class="empty-state">还没有好友，输入邮箱添加吧~</div>';
+                return;
+            }
+
+            supabaseClient.from('profiles').select('id, email, full_name, avatar_url').in('id', allIds)
+                .then(function (pRes) {
+                    var map = {};
+                    (pRes.data || []).forEach(function (p) { map[p.id] = p; });
+
+                    if (pendingFromOthers.length === 0) {
+                        pendingList.innerHTML = '<div class="empty-state">暂无待处理的请求</div>';
+                    } else {
+                        var ph = '';
+                        pendingFromOthers.forEach(function (f) {
+                            var u = map[f.user_id] || {};
+                            ph += myRenderFriendItem(u, f.id, true);
+                        });
+                        pendingList.innerHTML = ph;
+                        myBindPendingActions();
+                    }
+
+                    myFriendsCache = friendIds.map(function (id) { return map[id]; }).filter(Boolean);
+                    if (myFriendsCache.length === 0) {
+                        friendList.innerHTML = '<div class="empty-state">还没有好友，输入邮箱添加吧~</div>';
+                    } else {
+                        var fh = '';
+                        myFriendsCache.forEach(function (u) {
+                            fh += myRenderFriendItem(u, null, false);
+                        });
+                        friendList.innerHTML = fh;
+                        myBindFriendClicks();
+                    }
+                });
+        });
+}
+
+function myRenderFriendItem(user, fsId, isPending) {
+    var avatar = user.avatar_url || DEFAULT_AVATAR;
+    var name = user.full_name || user.email || '未知';
+    var email = user.email || '';
+    if (isPending) {
+        return '<div class="friend-item pending" data-fsid="' + fsId + '" data-uid="' + user.id + '">' +
+            '<img src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
+            '<div class="friend-info">' +
+                '<div class="friend-name">' + escapeHtml(name) + '</div>' +
+                '<div class="friend-email">' + escapeHtml(email) + '</div>' +
+            '</div>' +
+            '<div class="friend-actions">' +
+                '<button class="accept-btn">同意</button>' +
+                '<button class="reject-btn">拒绝</button>' +
+            '</div>' +
+        '</div>';
+    }
+    return '<div class="friend-item" data-uid="' + user.id + '">' +
+        '<img src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
+        '<div class="friend-info">' +
+            '<div class="friend-name">' + escapeHtml(name) + '</div>' +
+            '<div class="friend-email">' + escapeHtml(email) + '</div>' +
+        '</div>' +
+        '<div class="friend-arrow">💬</div>' +
+    '</div>';
+}
+
+function myBindPendingActions() {
+    document.querySelectorAll('#myPendingList .friend-item.pending').forEach(function (item) {
+        var fsId = item.getAttribute('data-fsid');
+        item.querySelector('.accept-btn').addEventListener('click', function () {
+            supabaseClient.from('friendships').update({ status: 'accepted' }).eq('id', fsId)
+                .then(function (r) {
+                    if (r.error) { alert('操作失败：' + r.error.message); return; }
+                    myLoadFriends();
+                });
+        });
+        item.querySelector('.reject-btn').addEventListener('click', function () {
+            if (!confirm('确定拒绝该好友请求吗？')) return;
+            supabaseClient.from('friendships').delete().eq('id', fsId)
+                .then(function (r) {
+                    if (r.error) { alert('操作失败：' + r.error.message); return; }
+                    myLoadFriends();
+                });
+        });
+    });
+}
+
+function myBindFriendClicks() {
+    document.querySelectorAll('#myFriendList .friend-item[data-uid]').forEach(function (item) {
+        item.addEventListener('click', function () {
+            var uid = this.getAttribute('data-uid');
+            var friend = myFriendsCache.find(function (u) { return u.id === uid; });
+            if (friend) myOpenChat(friend);
+        });
+    });
+}
+
+document.getElementById('myAddFriendBtn').addEventListener('click', function () {
+    var input = document.getElementById('myFriendEmailInput');
+    var email = input.value.trim().toLowerCase();
+    if (!email) { alert('请输入对方邮箱'); return; }
+    if (email === (currentAdmin.email || '').toLowerCase()) {
+        alert('不能添加自己为好友');
+        return;
+    }
+
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '添加中...';
+
+    supabaseClient.from('profiles').select('id, email, full_name').eq('email', email).maybeSingle()
+        .then(function (res) {
+            if (res.error || !res.data) {
+                btn.disabled = false;
+                btn.textContent = '➕ 添加好友';
+                alert('找不到这个邮箱的用户');
+                return;
+            }
+
+            var targetId = res.data.id;
+
+            supabaseClient.from('friendships').select('*')
+                .or('and(user_id.eq.' + currentAdmin.id + ',friend_id.eq.' + targetId + '),and(user_id.eq.' + targetId + ',friend_id.eq.' + currentAdmin.id + ')')
+                .maybeSingle()
+                .then(function (fRes) {
+                    if (fRes.data) {
+                        btn.disabled = false;
+                        btn.textContent = '➕ 添加好友';
+                        if (fRes.data.status === 'accepted') alert('你们已经是好友了');
+                        else if (fRes.data.user_id === currentAdmin.id) alert('已发送过请求，等待对方同意');
+                        else alert('对方已经向你发起了请求，去"待处理"里同意吧');
+                        return;
+                    }
+
+                    supabaseClient.from('friendships').insert([{
+                        user_id: currentAdmin.id,
+                        friend_id: targetId,
+                        status: 'pending'
+                    }]).then(function (iRes) {
+                        btn.disabled = false;
+                        btn.textContent = '➕ 添加好友';
+                        if (iRes.error) { alert('添加失败：' + iRes.error.message); return; }
+                        input.value = '';
+                        alert('好友请求已发送！');
+                        myLoadFriends();
+                    });
+                });
+        });
+});
+
+function myOpenChat(friend) {
+    myCurrentChatFriend = friend;
+    myLastMsgTs = null;
+    document.getElementById('myChatFriendName').textContent = friend.full_name || friend.email;
+    document.getElementById('myChatFriendAvatar').src = friend.avatar_url || DEFAULT_AVATAR;
+    document.getElementById('myChatModal').style.display = 'flex';
+    document.getElementById('myChatBody').innerHTML = '<div class="empty-state">加载中...</div>';
+    myLoadMessages();
+
+    if (myChatPollTimer) clearInterval(myChatPollTimer);
+    myChatPollTimer = setInterval(myLoadMessages, 3000);
+    setTimeout(function () { document.getElementById('myChatInput').focus(); }, 100);
+}
+
+function myCloseChat() {
+    document.getElementById('myChatModal').style.display = 'none';
+    if (myChatPollTimer) { clearInterval(myChatPollTimer); myChatPollTimer = null; }
+    myCurrentChatFriend = null;
+    myLastMsgTs = null;
+}
+
+document.getElementById('myChatCloseBtn').addEventListener('click', myCloseChat);
+document.getElementById('myChatModal').addEventListener('click', function (e) {
+    if (e.target === this) myCloseChat();
+});
+
+function myLoadMessages() {
+    if (!currentAdmin || !myCurrentChatFriend) return;
+
+    supabaseClient.from('messages').select('*')
+        .or('and(from_user.eq.' + currentAdmin.id + ',to_user.eq.' + myCurrentChatFriend.id + '),and(from_user.eq.' + myCurrentChatFriend.id + ',to_user.eq.' + currentAdmin.id + ')')
+        .order('created_at', { ascending: true })
+        .then(function (res) {
+            if (res.error) return;
+            var data = res.data || [];
+            var body = document.getElementById('myChatBody');
+
+            if (data.length === 0) {
+                body.innerHTML = '<div class="empty-state">还没有聊天记录，说点什么吧~</div>';
+                return;
+            }
+
+            var latestFromFriend = null;
+            data.forEach(function (m) {
+                if (m.from_user !== currentAdmin.id) {
+                    if (!latestFromFriend || new Date(m.created_at) > new Date(latestFromFriend)) {
+                        latestFromFriend = m.created_at;
+                    }
+                }
+            });
+            if (latestFromFriend) {
+                var isFirst = (myLastMsgTs === null);
+                if (!isFirst && new Date(latestFromFriend) > new Date(myLastMsgTs)) {
+                    if (window.LoginSound && window.LoginSound.playMessageIfEnabled) {
+                        window.LoginSound.playMessageIfEnabled();
+                    }
+                }
+                myLastMsgTs = latestFromFriend;
+            }
+
+            var html = '';
+            data.forEach(function (m) {
+                var mine = m.from_user === currentAdmin.id;
+                var time = new Date(m.created_at).toLocaleString('zh-CN', { hour12: false });
+                html += '<div class="chat-msg ' + (mine ? 'mine' : 'theirs') + '">' +
+                    escapeHtml(m.content) +
+                    '<span class="chat-time">' + time + '</span>' +
+                '</div>';
+            });
+            body.innerHTML = html;
+            body.scrollTop = body.scrollHeight;
+
+            var unreadIds = data.filter(function (m) { return m.to_user === currentAdmin.id && !m.is_read; })
+                                .map(function (m) { return m.id; });
+            if (unreadIds.length > 0) {
+                supabaseClient.from('messages').update({ is_read: true }).in('id', unreadIds).then(function () {});
+            }
+        });
+}
+
+function mySendMessage() {
+    if (!currentAdmin || !myCurrentChatFriend) return;
+    var input = document.getElementById('myChatInput');
+    var content = input.value.trim();
+    if (!content) return;
+
+    var btn = document.getElementById('myChatSendBtn');
+    btn.disabled = true;
+
+    supabaseClient.from('messages').insert([{
+        from_user: currentAdmin.id,
+        to_user: myCurrentChatFriend.id,
+        content: content
+    }]).then(function (res) {
+        btn.disabled = false;
+        if (res.error) { alert('发送失败：' + res.error.message); return; }
+        input.value = '';
+        myLoadMessages();
+    });
+}
+
+document.getElementById('myChatSendBtn').addEventListener('click', mySendMessage);
+document.getElementById('myChatInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') mySendMessage();
+});
+
+/* 音效设置 */
+(function initSoundSetting() {
+    var pairs = [
+        { elId: 'toggleLoginSound',   key: 'nangua_loginSound'   },
+        { elId: 'toggleMessageSound', key: 'nangua_messageSound' }
+    ];
+
+    pairs.forEach(function (p) {
+        var el = document.getElementById(p.elId);
+        if (!el) return;
+
+        function syncUI() {
+            var on = localStorage.getItem(p.key) === 'on';
+            el.classList.toggle('active', on);
+            el.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }
+        syncUI();
+
+        el.addEventListener('click', function () {
+            var willBeOn = !el.classList.contains('active');
+            localStorage.setItem(p.key, willBeOn ? 'on' : 'off');
+            syncUI();
+        });
+    });
+
+    var t1 = document.getElementById('testLoginSoundBtn');
+    if (t1) t1.addEventListener('click', function () {
+        if (window.LoginSound && window.LoginSound.play) {
+            window.LoginSound.play();
+        } else {
+            alert('音效模块未加载，请检查 other/sound.js');
+        }
+    });
+
+    var t2 = document.getElementById('testMessageSoundBtn');
+    if (t2) t2.addEventListener('click', function () {
+        if (window.LoginSound && window.LoginSound.playMessage) {
+            window.LoginSound.playMessage();
+        } else {
+            alert('音效模块未加载，请检查 other/sound.js');
+        }
+    });
+})();
