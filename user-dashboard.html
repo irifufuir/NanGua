@@ -86,50 +86,31 @@
     .avatar-edit:hover { transform: scale(1.08); }
 
     .user-details {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        flex: 1;
-        gap: var(--space-2);
+        display: flex; flex-direction: column;
+        min-width: 0; flex: 1; gap: var(--space-2);
     }
     .user-name-row {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        min-width: 0;
-        flex: 1;
+        display: flex; align-items: center;
+        gap: var(--space-2); min-width: 0; flex: 1;
     }
     .user-name-row .email {
-        font-size: 0.92em;
-        font-weight: 500;
-        color: var(--theme-text);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
+        font-size: 0.92em; font-weight: 500; color: var(--theme-text);
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
     }
     .user-name-row .role {
-        font-size: 0.72em;
-        font-weight: 500;
-        color: var(--theme-accent);
+        font-size: 0.72em; font-weight: 500; color: var(--theme-accent);
         background: var(--theme-accent-soft);
         border: 1px solid var(--theme-accent-border);
-        padding: 2px 10px;
-        border-radius: var(--radius-full);
-        white-space: nowrap;
-        flex-shrink: 0;
+        padding: 2px 10px; border-radius: var(--radius-full);
+        white-space: nowrap; flex-shrink: 0;
     }
     .user-action-row {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        width: 100%;
+        display: flex; align-items: center;
+        gap: var(--space-2); width: 100%;
     }
     .user-action-row .avatar-change-btn,
     .user-action-row .logout-btn-mini {
-        flex: 1;
-        text-align: center;
-        justify-content: center;
+        flex: 1; text-align: center; justify-content: center;
     }
     .logout-btn-mini {
         background: transparent; border: 1px solid var(--theme-border);
@@ -307,7 +288,7 @@
         transition: max-height .55s cubic-bezier(.22,1,.36,1),
                     opacity .4s ease, margin-top .4s ease;
     }
-    .profile-panel.open { max-height: 1000px; opacity: 1; margin-top: var(--space-6); }
+    .profile-panel.open { max-height: 1200px; opacity: 1; margin-top: var(--space-6); }
     .profile-panel-inner { padding-top: var(--space-5); border-top: 1px solid var(--theme-border-soft); }
     .profile-panel-title {
         display: flex; align-items: center; gap: var(--space-2);
@@ -428,7 +409,6 @@
     .checkin-stat .v { font-size: 1.4em; font-weight: 600; color: var(--theme-text); }
     .checkin-stat .k { font-size: 0.76em; color: var(--theme-text-faint); }
 
-    /* ========== 积分商城 · iOS 深色毛玻璃风格 ========== */
     .shop-hint {
         font-size: 0.86em;
         color: var(--theme-text-dim);
@@ -439,15 +419,12 @@
         border-radius: 12px;
         line-height: 1.6;
     }
-
-    /* 桌面端：每行 4~5 个 */
     .shop-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: var(--space-3);
         margin-bottom: var(--space-7);
     }
-
     .shop-item {
         position: relative;
         background: rgba(255, 255, 255, 0.035);
@@ -457,9 +434,7 @@
         display: flex; flex-direction: column; gap: var(--space-2);
         backdrop-filter: blur(20px) saturate(140%);
         -webkit-backdrop-filter: blur(20px) saturate(140%);
-        box-shadow:
-            0 1px 2px rgba(0, 0, 0, 0.15),
-            0 4px 12px rgba(0, 0, 0, 0.10);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.10);
         transition: transform .25s cubic-bezier(.4,0,.2,1),
                     box-shadow .25s cubic-bezier(.4,0,.2,1),
                     background-color .25s cubic-bezier(.4,0,.2,1);
@@ -467,74 +442,57 @@
     .shop-item:hover {
         transform: translateY(-2px);
         background: rgba(255, 255, 255, 0.055);
-        box-shadow:
-            0 2px 4px rgba(0, 0, 0, 0.18),
-            0 8px 24px rgba(0, 0, 0, 0.16);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.16);
     }
     .shop-item.out-of-stock { opacity: 0.55; }
-
     .shop-item-stock {
-        position: absolute;
-        top: 8px; right: 8px;
-        font-size: 0.65em;
-        padding: 2px 8px;
+        position: absolute; top: 8px; right: 8px;
+        font-size: 0.65em; padding: 2px 8px;
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.06);
         color: var(--theme-text-dim);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        font-weight: 500;
-        letter-spacing: 0.02em;
+        font-weight: 500; letter-spacing: 0.02em;
     }
     .shop-item-icon {
-        font-size: 1.9em;
-        line-height: 1;
-        text-align: center;
-        margin-top: 2px;
+        font-size: 1.9em; line-height: 1;
+        text-align: center; margin-top: 2px;
         filter: drop-shadow(0 2px 6px rgba(0,0,0,0.25));
     }
     .shop-item-name {
-        font-size: 0.92em;
-        font-weight: 600;
-        color: var(--theme-text);
-        text-align: center;
-        word-break: break-word;
-        line-height: 1.35;
+        font-size: 0.92em; font-weight: 600;
+        color: var(--theme-text); text-align: center;
+        word-break: break-word; line-height: 1.35;
     }
     .shop-item-desc {
-        font-size: 0.72em;
-        color: var(--theme-text-faint);
-        line-height: 1.5;
-        text-align: center;
-        min-height: 2em;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 0.72em; color: var(--theme-text-faint);
+        line-height: 1.5; text-align: center; min-height: 2em;
+        overflow: hidden; text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
     }
     .shop-item-price {
-        font-size: 0.95em;
-        font-weight: 700;
-        color: var(--theme-accent);
-        text-align: center;
+        font-size: 0.95em; font-weight: 700;
+        color: var(--theme-accent); text-align: center;
         display: flex; align-items: center; justify-content: center; gap: 3px;
-        margin-top: auto;
-        letter-spacing: 0.01em;
+        margin-top: auto; letter-spacing: 0.01em;
+    }
+    .shop-item-limit {
+        font-size: 0.7em; color: var(--theme-accent);
+        text-align: center; letter-spacing: 0.02em;
     }
     .shop-buy-btn {
         height: 34px;
         background: var(--theme-accent-soft);
         border: none;
         color: var(--theme-accent);
-        font-size: 0.8em;
-        font-weight: 500;
+        font-size: 0.8em; font-weight: 500;
         font-family: inherit;
         border-radius: 12px;
         cursor: pointer;
-        transition: background-color .2s ease,
-                    color .2s ease,
-                    transform .12s ease;
+        transition: background-color .2s ease, color .2s ease, transform .12s ease;
         outline: none;
     }
     .shop-buy-btn:hover:not(:disabled) {
@@ -579,15 +537,6 @@
         white-space: nowrap;
     }
 
-    /* ⭐ 新增：卡片上的限购标签 */
-    .shop-item-limit {
-        font-size: 0.7em;
-        color: var(--theme-accent);
-        text-align: center;
-        letter-spacing: 0.02em;
-    }
-
-    /* ========== 商品详情弹窗（左图右文） ========== */
     .modal-mask {
         position: fixed; inset: 0;
         background: rgba(10,11,14,.55);
@@ -605,6 +554,10 @@
         overflow: hidden;
         animation: boxIn var(--transition-base) var(--ease);
     }
+    @keyframes boxIn {
+        from { transform: translateY(10px) scale(.98); opacity: 0; }
+        to   { transform: translateY(0) scale(1); opacity: 1; }
+    }
     .item-detail-left {
         width: 42%;
         background: var(--theme-info-box);
@@ -621,29 +574,23 @@
     }
     #detailIconFallback {
         font-size: 5em;
-        align-items: center;
-        justify-content: center;
+        align-items: center; justify-content: center;
         width: 100%; height: 100%;
         line-height: 1;
     }
     .item-detail-right {
         width: 58%;
         padding: var(--space-7) var(--space-6);
-        display: flex;
-        flex-direction: column;
+        display: flex; flex-direction: column;
         gap: var(--space-4);
     }
     .item-detail-right h3 {
-        font-size: 1.25em;
-        font-weight: 600;
-        color: var(--theme-text);
-        margin: 0;
+        font-size: 1.25em; font-weight: 600;
+        color: var(--theme-text); margin: 0;
         word-break: break-word;
     }
     .detail-info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        display: flex; justify-content: space-between; align-items: center;
         padding-bottom: var(--space-3);
         border-bottom: 1px solid var(--theme-border-soft);
         font-size: 0.9em;
@@ -660,8 +607,7 @@
         border-radius: var(--radius-md);
         cursor: pointer;
         font-family: inherit;
-        font-size: 0.95em;
-        font-weight: 500;
+        font-size: 0.95em; font-weight: 500;
         transition: all var(--transition-base);
         outline: none;
     }
@@ -711,7 +657,6 @@
         padding-bottom: var(--space-3);
         border-bottom: 1px solid var(--theme-border-soft);
     }
-
     .friend-list { display: flex; flex-direction: column; gap: var(--space-3); }
     .friend-item {
         display: flex; align-items: center; gap: var(--space-4);
@@ -750,17 +695,13 @@
         border-color: rgba(130,200,150,.30);
         color: #8cc8a0;
     }
-    .friend-item.pending .friend-actions .accept-btn:hover {
-        background: rgba(130,200,150,.22);
-    }
+    .friend-item.pending .friend-actions .accept-btn:hover { background: rgba(130,200,150,.22); }
     .friend-item.pending .friend-actions .reject-btn {
         background: rgba(214,139,139,.10);
         border-color: rgba(214,139,139,.30);
         color: var(--danger);
     }
-    .friend-item.pending .friend-actions .reject-btn:hover {
-        background: rgba(214,139,139,.22);
-    }
+    .friend-item.pending .friend-actions .reject-btn:hover { background: rgba(214,139,139,.22); }
 
     .empty-state {
         text-align: center; color: var(--theme-text-faint);
@@ -776,7 +717,6 @@
         animation: maskIn var(--transition-base) var(--ease);
     }
     @keyframes maskIn { from { opacity: 0; } to { opacity: 1; } }
-
     .chat-box {
         width: 460px; max-width: 100%;
         height: 620px; max-height: 90vh;
@@ -788,11 +728,6 @@
         overflow: hidden;
         animation: boxIn var(--transition-base) var(--ease);
     }
-    @keyframes boxIn {
-        from { transform: translateY(10px) scale(.98); opacity: 0; }
-        to   { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
     .chat-header {
         display: flex; align-items: center; gap: var(--space-3);
         padding: var(--space-4) var(--space-5);
@@ -813,10 +748,7 @@
         font-size: 14px; line-height: 1;
         transition: all var(--transition-base); outline: none;
     }
-    .chat-close-btn:hover {
-        background: var(--theme-card);
-        color: var(--theme-text);
-    }
+    .chat-close-btn:hover { background: var(--theme-card); color: var(--theme-text); }
 
     .chat-body {
         flex: 1; overflow-y: auto;
@@ -826,7 +758,6 @@
     }
     .chat-body::-webkit-scrollbar { width: 6px; }
     .chat-body::-webkit-scrollbar-thumb { background: var(--theme-border); border-radius: 3px; }
-
     .chat-msg {
         max-width: 75%; padding: var(--space-3) var(--space-4);
         border-radius: var(--radius-md);
@@ -885,9 +816,7 @@
         border-radius: var(--radius-md); cursor: pointer;
         transition: all var(--transition-base); outline: none;
     }
-    .chat-input-box button:hover:not(:disabled) {
-        border-color: var(--theme-accent);
-    }
+    .chat-input-box button:hover:not(:disabled) { border-color: var(--theme-accent); }
     .chat-input-box button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .theme-section-hint {
@@ -895,122 +824,404 @@
         line-height: 1.7; margin-bottom: var(--space-7); max-width: 520px;
     }
 
-    /* ============================================================
-     *  手机端适配（≤768px）
-     * ============================================================ */
+    .feedback-form {
+        position: relative;
+        margin-bottom: var(--space-7);
+        padding: var(--space-5);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+    .feedback-form::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--theme-accent) 0%, transparent 80%);
+        opacity: 0.7;
+    }
+    .feedback-form-title {
+        display: flex; align-items: baseline; justify-content: space-between;
+        gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap;
+    }
+    .feedback-form-title > span:first-child {
+        font-size: 0.98em; font-weight: 600;
+        color: var(--theme-text); letter-spacing: 0.02em;
+    }
+    .feedback-form-sub {
+        font-size: 0.78em; color: var(--theme-text-faint);
+    }
+    .feedback-form textarea {
+        width: 100%; min-height: 120px;
+        padding: 14px 16px;
+        border-radius: var(--radius-md);
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border-soft);
+        color: var(--theme-text);
+        font-size: 0.95em; font-family: inherit;
+        line-height: 1.65; resize: vertical; outline: none;
+        transition: border-color var(--transition-base),
+                    box-shadow var(--transition-base),
+                    background-color var(--transition-base);
+    }
+    .feedback-form textarea::placeholder { color: var(--theme-text-faint); }
+    .feedback-form textarea:hover { border-color: var(--theme-border); }
+    .feedback-form textarea:focus {
+        border-color: var(--theme-accent);
+        box-shadow: 0 0 0 3px var(--theme-accent-soft);
+    }
+    .feedback-form-row {
+        display: flex; align-items: center; gap: var(--space-4);
+        margin-top: var(--space-4); flex-wrap: wrap;
+    }
+    .feedback-form-row .primary-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 26px;
+        border-radius: var(--radius-full);
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        font-size: 0.92em; font-weight: 600; font-family: inherit;
+        letter-spacing: 0.03em; cursor: pointer; outline: none;
+        transition: all var(--transition-base);
+    }
+    .feedback-form-row .primary-btn .btn-icon { font-size: 1.05em; }
+    .feedback-form-row .primary-btn:hover:not(:disabled) {
+        border-color: var(--theme-accent);
+        box-shadow: 0 0 0 6px var(--theme-accent-soft);
+        transform: translateY(-1px);
+    }
+    .feedback-form-row .primary-btn:active:not(:disabled) { transform: scale(0.97); }
+    .feedback-form-row .primary-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .feedback-hint { font-size: 0.82em; color: var(--theme-text-dim); }
+
+    .feedback-list {
+        display: flex; flex-direction: column; gap: var(--space-4);
+    }
+    .feedback-item {
+        display: flex; gap: var(--space-4); align-items: flex-start;
+        padding: var(--space-5);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-lg);
+        transition: border-color var(--transition-base),
+                    box-shadow var(--transition-base),
+                    transform var(--transition-base);
+    }
+    .feedback-item:hover {
+        border-color: var(--theme-border);
+        box-shadow: var(--shadow-sm);
+        transform: translateY(-1px);
+    }
+    .fb-check { flex-shrink: 0; margin-top: 5px; cursor: pointer; }
+    .fb-check input {
+        accent-color: var(--theme-accent);
+        width: 16px; height: 16px; cursor: pointer;
+    }
+    .fb-main { flex: 1; min-width: 0; }
+    .feedback-head {
+        display: flex; align-items: center; gap: var(--space-3);
+        margin-bottom: var(--space-3); flex-wrap: wrap;
+    }
+    .fb-avatar {
+        width: 32px; height: 32px;
+        border-radius: var(--radius-full);
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        font-size: 0.85em; font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .feedback-email {
+        font-size: 0.9em; font-weight: 600;
+        color: var(--theme-text); word-break: break-all;
+    }
+    .feedback-status {
+        display: inline-flex; align-items: center; gap: 4px;
+        font-size: 0.74em; font-weight: 600;
+        padding: 3px 10px; border-radius: var(--radius-full);
+        white-space: nowrap; letter-spacing: 0.02em;
+    }
+    .feedback-status.pending {
+        background: rgba(248, 200, 80, 0.12);
+        color: #f8c850;
+        border: 1px solid rgba(248, 200, 80, 0.28);
+    }
+    .feedback-status.processing {
+        background: rgba(124, 174, 224, 0.12);
+        color: #7caee0;
+        border: 1px solid rgba(124, 174, 224, 0.28);
+    }
+    .feedback-status.resolved {
+        background: rgba(130, 225, 160, 0.12);
+        color: #82e1a0;
+        border: 1px solid rgba(130, 225, 160, 0.28);
+    }
+    .feedback-time {
+        font-size: 0.78em; color: var(--theme-text-faint);
+        margin-left: auto; white-space: nowrap;
+    }
+    .feedback-content {
+        font-size: 0.92em; color: var(--theme-text);
+        line-height: 1.7; white-space: pre-wrap; word-break: break-word;
+    }
+    .feedback-reply {
+        margin-top: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        background: var(--theme-accent-soft);
+        border-left: 3px solid var(--theme-accent);
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        font-size: 0.86em; color: var(--theme-text-dim);
+        line-height: 1.65;
+    }
+    .feedback-reply b { color: var(--theme-accent); font-weight: 600; }
+
+    .feedback-actions {
+        display: flex; justify-content: flex-end;
+        gap: var(--space-3); margin-top: var(--space-4); flex-wrap: wrap;
+    }
+
+    .fb-toolbar {
+        display: flex; align-items: center; gap: var(--space-4);
+        margin: 0 0 var(--space-5); padding: var(--space-3) var(--space-4);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md); flex-wrap: wrap;
+    }
+    .fb-select-all {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 0.85em; color: var(--theme-text-dim);
+        cursor: pointer; user-select: none;
+    }
+    .fb-select-all input {
+        accent-color: var(--theme-accent);
+        width: 15px; height: 15px; cursor: pointer;
+    }
+    .fb-selected-count { font-size: 0.8em; color: var(--theme-text-faint); }
+    .fb-del-btn {
+        padding: 6px 14px;
+        border-radius: var(--radius-sm);
+        background: rgba(214, 139, 139, 0.10);
+        border: 1px solid rgba(214, 139, 139, 0.30);
+        color: #e08a8a;
+        font-size: 0.82em; font-weight: 500; font-family: inherit;
+        cursor: pointer; transition: all var(--transition-base); outline: none;
+    }
+    .fb-del-btn:hover:not(:disabled) {
+        background: rgba(214, 139, 139, 0.22);
+        border-color: rgba(214, 139, 139, 0.55);
+    }
+    .fb-del-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .fb-toast {
+        position: fixed; top: 26px; left: 50%;
+        transform: translateX(-50%) translateY(-16px);
+        background: var(--theme-card);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-text);
+        padding: 12px 22px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        font-size: 0.88em; z-index: 9999;
+        display: flex; align-items: center; gap: 8px;
+        opacity: 0; pointer-events: none;
+        transition: all .3s ease;
+        max-width: 90vw; white-space: nowrap;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+    .fb-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .fb-toast-success { border-color: rgba(110, 220, 150, .5); }
+    .fb-toast-error   { border-color: rgba(224, 138, 138, .55); }
+
+    .fb-modal-mask {
+        position: fixed; inset: 0;
+        background: rgba(0, 0, 0, .55);
+        backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        z-index: 9998;
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none;
+        transition: opacity .2s ease;
+    }
+    .fb-modal-mask.show { opacity: 1; pointer-events: auto; }
+    .fb-modal {
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border);
+        border-radius: var(--radius-lg);
+        padding: 24px 26px;
+        width: 380px; max-width: 92vw;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(8px);
+        transition: transform .2s ease;
+    }
+    .fb-modal-mask.show .fb-modal { transform: translateY(0); }
+    .fb-modal-title { font-size: 1em; font-weight: 600; margin-bottom: 12px; color: var(--theme-text); }
+    .fb-modal-msg   { font-size: 0.88em; color: var(--theme-text-dim); line-height: 1.7; margin-bottom: 22px; word-break: break-all; }
+    .fb-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .fb-btn {
+        padding: 9px 18px;
+        border-radius: var(--radius-sm);
+        font-size: 0.85em; font-family: inherit;
+        cursor: pointer;
+        border: 1px solid var(--theme-border);
+        background: var(--theme-info-box);
+        color: var(--theme-text);
+        transition: all var(--transition-base); outline: none;
+    }
+    .fb-btn:hover { border-color: var(--theme-accent-border); }
+    .fb-btn-ok {
+        background: rgba(214, 139, 139, .12);
+        border-color: rgba(214, 139, 139, .35);
+        color: #e08a8a; font-weight: 500;
+    }
+    .fb-btn-ok:hover {
+        background: rgba(214, 139, 139, .25);
+        border-color: rgba(214, 139, 139, .6);
+    }
+
+    /* ========== 个人简介弹窗 ========== */
+    #bioModal .modal-box {
+        width: 340px;
+        max-width: 92vw;
+        padding: 24px 22px;
+        border-radius: var(--radius-lg);
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+    }
+    #bioModal h3 {
+        margin: 0 0 14px;
+        font-size: 1em;
+        font-weight: 600;
+        color: var(--theme-text);
+        text-align: center;
+    }
+    #bioInput {
+        width: 100%;
+        min-height: 90px;
+        padding: 12px 14px;
+        border-radius: var(--radius-md);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border);
+        color: var(--theme-text);
+        font-family: inherit;
+        font-size: 0.95em;
+        line-height: 1.6;
+        resize: vertical;
+        outline: none;
+        transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+    #bioInput:focus {
+        border-color: var(--theme-accent);
+        box-shadow: 0 0 0 3px var(--theme-accent-soft);
+    }
+    #bioModal .bio-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
+    #bioModal .bio-actions button {
+        flex: 1;
+        height: 42px;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.95em;
+        cursor: pointer;
+        outline: none;
+        transition: all var(--transition-base);
+    }
+    #bioCancelBtn {
+        background: transparent;
+        border: 1px solid var(--theme-border);
+        color: var(--theme-text-dim);
+    }
+    #bioCancelBtn:hover {
+        background: var(--theme-info-box);
+        color: var(--theme-text);
+    }
+    #bioSaveBtn {
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        font-weight: 500;
+    }
+    #bioSaveBtn:hover { border-color: var(--theme-accent); }
+
+    #editBioBtn {
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        padding: 3px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.78em;
+        font-family: inherit;
+        white-space: nowrap;
+        outline: none;
+        transition: all var(--transition-base);
+    }
+    #editBioBtn:hover { border-color: var(--theme-accent); }
+
     @media (max-width: 900px) {
         .main-content { padding: var(--space-7) var(--space-6); }
         .card { padding: var(--space-7) var(--space-6); }
-        /* 中等屏：每行 3 个 */
         .shop-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     }
 
     @media (max-width: 768px),
            (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
         body { flex-direction: column; }
-
         .sidebar {
-            width: 100%;
-            padding: 0;
+            width: 100%; padding: 0;
             border-right: none;
             border-bottom: 1px solid var(--theme-border-soft);
-            flex-direction: column;
-            align-items: stretch;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+            flex-direction: column; align-items: stretch;
+            position: sticky; top: 0; z-index: 50;
             background: var(--theme-sidebar);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
         }
-
-        .user-profile {
-            padding: 6px 12px 4px;
-            margin-bottom: 0;
-            gap: 8px;
-        }
+        .user-profile { padding: 6px 12px 4px; margin-bottom: 0; gap: 8px; }
         .avatar-wrapper { width: 30px; height: 30px; }
-        .avatar-edit {
-            width: 13px; height: 13px;
-            font-size: 7px;
-            bottom: -1px; right: -1px;
-        }
+        .avatar-edit { width: 13px; height: 13px; font-size: 7px; bottom: -1px; right: -1px; }
         .user-details { gap: 0; }
         .user-name-row { gap: 6px; }
         .user-name-row .email { font-size: 0.82em; }
         .user-name-row .role { display: none; }
-
-        /* ⭐ 修复：按钮不再拉满整行 */
-        .user-action-row {
-            gap: 6px;
-            width: auto;
-            flex-wrap: nowrap;
-        }
+        .user-action-row { gap: 6px; width: auto; flex-wrap: nowrap; }
         .user-action-row .avatar-change-btn,
-        .user-action-row .logout-btn-mini {
-            flex: 0 0 auto;
-            width: auto;
-            text-align: center;
-            justify-content: center;
-        }
-        .logout-btn-mini,
-        .avatar-change-btn {
-            font-size: 0.66em;
-            padding: 2px 8px;
-            border-radius: 8px;
-        }
-
-        .nav-menu {
-            flex: none;
-            width: 100%;
-            padding: 0;
-            display: block;
-            overflow: visible;
-        }
-
+        .user-action-row .logout-btn-mini { flex: 0 0 auto; width: auto; }
+        .logout-btn-mini, .avatar-change-btn { font-size: 0.66em; padding: 2px 8px; border-radius: 8px; }
+        .nav-menu { flex: none; width: 100%; padding: 0; display: block; overflow: visible; }
         .nav-main-row {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: center;
-            gap: 4px;
+            display: flex; flex-direction: row; flex-wrap: nowrap;
+            align-items: center; gap: 4px;
             padding: 2px 8px 6px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
             scroll-snap-type: x proximity;
         }
         .nav-main-row::-webkit-scrollbar { display: none; }
-
         .nav-main-row .nav-item,
         .nav-main-row .nav-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            padding: 6px 12px;
-            min-width: 66px;
-            flex-shrink: 0;
-            font-size: 0.72em;
-            line-height: 1.15;
-            text-align: center;
-            white-space: nowrap;
-            border-radius: 10px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 2px; padding: 6px 12px;
+            min-width: 66px; flex-shrink: 0;
+            font-size: 0.72em; line-height: 1.15; text-align: center;
+            white-space: nowrap; border-radius: 10px;
             scroll-snap-align: start;
-            color: var(--theme-text-dim);
-            background: transparent;
+            color: var(--theme-text-dim); background: transparent;
             transition: background 0.2s ease, color 0.2s ease;
             cursor: pointer;
         }
         .nav-main-row .nav-item::before,
         .nav-main-row .nav-group::before { display: none; }
         .nav-main-row .nav-item:hover,
-        .nav-main-row .nav-group:hover {
-            padding-left: 12px;
-            background: var(--theme-hover);
-        }
+        .nav-main-row .nav-group:hover { padding-left: 12px; background: var(--theme-hover); }
         .nav-main-row .nav-item.active,
         .nav-main-row .nav-group.open {
             padding-left: 12px;
@@ -1018,59 +1229,36 @@
             color: var(--theme-accent);
         }
         .nav-main-row .nav-text {
-            font-size: 1em;
-            max-width: 78px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: center;
-            flex: none;
+            font-size: 1em; max-width: 78px;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            text-align: center; flex: none;
         }
         .nav-main-row .nav-arrow { display: none; }
-
         .nav-sub-row {
-            display: none;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            align-items: center;
-            gap: 6px;
+            display: none; flex-direction: row; flex-wrap: nowrap;
+            align-items: center; gap: 6px;
             padding: 6px 8px 8px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch;
             scroll-snap-type: x proximity;
             border-top: 1px solid var(--theme-border-soft);
         }
         .nav-sub-row::-webkit-scrollbar { display: none; }
         .nav-sub-row.show { display: flex; }
-
         .nav-sub-row .nav-sub {
             display: none !important;
-            flex-direction: row;
-            flex-shrink: 0;
-            gap: 6px;
-            padding: 0;
-            max-height: none;
-            overflow: visible;
-            opacity: 1;
-            transition: none;
-            background: transparent;
-            border: none;
+            flex-direction: row; flex-shrink: 0; gap: 6px;
+            padding: 0; max-height: none; overflow: visible;
+            opacity: 1; transition: none;
+            background: transparent; border: none;
         }
         .nav-sub-row .nav-sub.show { display: flex !important; }
-
         .nav-sub-row .nav-sub-item {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 14px;
-            flex-shrink: 0;
+            display: flex; flex-direction: row;
+            align-items: center; justify-content: center;
+            padding: 8px 14px; flex-shrink: 0;
             scroll-snap-align: start;
-            font-size: 0.78em;
-            line-height: 1.15;
-            white-space: nowrap;
+            font-size: 0.78em; line-height: 1.15; white-space: nowrap;
             border-radius: 999px;
             background: var(--theme-info-box);
             border: 1px solid var(--theme-border-soft);
@@ -1079,121 +1267,71 @@
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
         .nav-sub-row .nav-sub-item::before { display: none; }
-        .nav-sub-row .nav-sub-item:hover {
-            background: var(--theme-hover);
-            color: var(--theme-text);
-        }
+        .nav-sub-row .nav-sub-item:hover { background: var(--theme-hover); color: var(--theme-text); }
         .nav-sub-row .nav-sub-item.active {
             background: var(--theme-accent-soft);
             border-color: var(--theme-accent-border);
             color: var(--theme-accent);
             font-weight: 500;
         }
-
-        .main-content {
-            padding: 12px;
-            scrollbar-width: none;
-        }
+        .main-content { padding: 12px; scrollbar-width: none; }
         .main-content::-webkit-scrollbar { display: none; }
-
-        .card {
-            padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 1px 2px rgba(0,0,0,.06);
-        }
-        .card-head {
-            margin-bottom: 14px;
-            padding-bottom: 12px;
-            gap: 8px;
-        }
+        .card { padding: 16px; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+        .card-head { margin-bottom: 14px; padding-bottom: 12px; gap: 8px; }
         .card-head h2 { font-size: 1em; }
-        .card-head .badge {
-            font-size: 0.68em;
-            padding: 3px 10px;
-        }
-
+        .card-head .badge { font-size: 0.68em; padding: 3px 10px; }
         .welcome-card { padding: 20px 16px; gap: 12px; }
         .welcome-avatar { width: 76px; height: 76px; }
         .welcome-title { font-size: 1.2em; }
         .welcome-email { font-size: 0.85em; }
         .welcome-hint { font-size: 0.78em; }
-
         .info-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
         .info-box { padding: 10px 12px; }
         .info-box .label { font-size: 0.72em; }
         .info-box .value { font-size: 0.9em; }
-
         .checkin-hero { padding: 14px 0; gap: 14px; }
         .checkin-points .num { font-size: 2.4em; }
         .checkin-points .lbl { font-size: 0.72em; }
         .checkin-btn { padding: 12px 30px; font-size: 0.95em; }
-        .checkin-calendar {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            max-width: 100%;
-            margin-top: 12px;
-        }
+        .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 4px; max-width: 100%; margin-top: 12px; }
         .checkin-day { padding: 6px 3px; border-radius: 8px; gap: 1px; }
         .checkin-day .day-name { font-size: 0.62em; }
         .checkin-day .day-date { font-size: 0.84em; }
         .checkin-day .day-points { font-size: 0.62em; }
-
         .checkin-stats {
             grid-template-columns: 1fr 1fr 1fr !important;
             max-width: 100% !important;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 6px; margin-top: 8px;
         }
         .checkin-stat { padding: 8px 4px; }
         .checkin-stat .v { font-size: 1.1em; }
         .checkin-stat .k { font-size: 0.66em; }
-
-        /* 手机端：单列，卡片占满宽度 */
-        .shop-grid {
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-        .shop-item {
-            padding: 16px;
-            gap: 8px;
-            border-radius: 18px;
-        }
+        .shop-grid { grid-template-columns: 1fr; gap: 10px; }
+        .shop-item { padding: 16px; gap: 8px; border-radius: 18px; }
         .shop-item-icon { font-size: 2.2em; }
         .shop-item-name { font-size: 0.95em; }
         .shop-item-desc { font-size: 0.78em; min-height: 1.4em; -webkit-line-clamp: 2; }
         .shop-item-price { font-size: 1em; }
         .shop-buy-btn { height: 40px; font-size: 0.88em; border-radius: 14px; }
         .shop-history-item { padding: 10px 12px; font-size: 0.85em; }
-
         .item-detail-box { flex-direction: column; }
         .item-detail-left { width: 100%; min-height: 180px; }
         .item-detail-right { width: 100%; padding: var(--space-5); }
-
         .add-friend-box { flex-direction: column; gap: 8px; margin-bottom: 18px; }
-        .add-friend-box input,
-        .add-friend-box button { width: 100%; height: 44px; font-size: 16px; }
+        .add-friend-box input, .add-friend-box button { width: 100%; height: 44px; font-size: 16px; }
         .friend-section { margin-bottom: 18px; }
-        .friend-section-title {
-            font-size: 0.74em;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
-        }
+        .friend-section-title { font-size: 0.74em; margin-bottom: 10px; padding-bottom: 8px; }
         .friend-item { padding: 10px 12px; gap: 10px; }
         .friend-item img { width: 38px; height: 38px; }
         .friend-item .friend-name { font-size: 0.88em; }
         .friend-item .friend-email { font-size: 0.72em; }
         .friend-item.pending .friend-actions { flex-direction: column; gap: 4px; }
-        .friend-item.pending .friend-actions button {
-            padding: 4px 10px;
-            font-size: 0.74em;
-        }
-
+        .friend-item.pending .friend-actions button { padding: 4px 10px; font-size: 0.74em; }
         .announce-list { gap: 10px; }
         .announce-item { padding: 12px; }
         .announce-item .announce-title { font-size: 0.92em; }
         .announce-item .announce-content { font-size: 0.84em; line-height: 1.7; }
         .announce-item .announce-time { font-size: 0.7em; }
-
         .theme-section-hint { font-size: 0.82em; margin-bottom: 16px; }
         .theme-switcher { padding: 12px; gap: 8px; }
         .theme-dot { width: 30px; height: 30px; }
@@ -1206,13 +1344,10 @@
         .setting-btn { min-width: 0; padding: 10px 8px; font-size: 0.84em; }
         .setting-reset-row { margin-top: 18px; padding-top: 14px; }
         .setting-reset-btn { width: 100%; padding: 10px 16px; font-size: 0.84em; }
-
         .chat-mask { padding: 0; align-items: flex-end; }
         .chat-box {
-            width: 100%;
-            max-width: 100%;
-            height: 90vh;
-            max-height: 90vh;
+            width: 100%; max-width: 100%;
+            height: 90vh; max-height: 90vh;
             border-radius: 20px 20px 0 0;
             border-bottom: none;
             padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1224,109 +1359,39 @@
         .chat-body { padding: 12px; gap: 8px; }
         .chat-msg { max-width: 82%; padding: 8px 12px; font-size: 0.9em; }
         .chat-input-box { padding: 10px 12px; gap: 8px; }
-        .chat-input-box input {
-            height: 40px;
-            font-size: 16px;
-            padding: 0 12px;
-        }
-        .chat-input-box button {
-            height: 40px;
-            padding: 0 16px;
-            font-size: 0.9em;
-        }
+        .chat-input-box input { height: 40px; font-size: 16px; padding: 0 12px; }
+        .chat-input-box button { height: 40px; padding: 0 16px; font-size: 0.9em; }
+        .feedback-form { padding: 14px; }
+        .feedback-form textarea { font-size: 16px; min-height: 100px; }
+        .feedback-item { padding: 14px; }
+        .feedback-content { font-size: 0.88em; }
+        .feedback-time { font-size: 0.72em; }
+        .fb-toolbar { gap: 10px; padding: 10px 12px; }
+        .fb-del-btn { padding: 6px 12px; font-size: 0.78em; }
     }
 
     @media (max-width: 380px) {
         .user-profile { padding: 4px 10px 2px; gap: 6px; }
         .avatar-wrapper { width: 26px; height: 26px; }
         .user-name-row .email { font-size: 0.76em; }
-
-        /* ⭐ 小屏也保持短按钮 */
-        .user-action-row {
-            gap: 6px;
-            width: auto;
-            flex-wrap: nowrap;
-        }
+        .user-action-row { gap: 6px; width: auto; flex-wrap: nowrap; }
         .user-action-row .avatar-change-btn,
-        .user-action-row .logout-btn-mini {
-            flex: 0 0 auto;
-            width: auto;
-        }
-        .logout-btn-mini,
-        .avatar-change-btn { font-size: 0.62em; padding: 2px 6px; }
-
+        .user-action-row .logout-btn-mini { flex: 0 0 auto; width: auto; }
+        .logout-btn-mini, .avatar-change-btn { font-size: 0.62em; padding: 2px 6px; }
         .nav-main-row .nav-item,
-        .nav-main-row .nav-group {
-            min-width: 58px;
-            padding: 6px 10px;
-            font-size: 0.68em;
-        }
+        .nav-main-row .nav-group { min-width: 58px; padding: 6px 10px; font-size: 0.68em; }
         .nav-main-row .nav-text { max-width: 66px; }
-
-        .nav-sub-row .nav-sub-item {
-            padding: 6px 10px;
-            font-size: 0.72em;
-        }
-
+        .nav-sub-row .nav-sub-item { padding: 6px 10px; font-size: 0.72em; }
         .main-content { padding: 10px; }
         .card { padding: 14px; }
-
         .info-grid { grid-template-columns: 1fr; }
         .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
         .checkin-stat { padding: 8px 3px; }
-
         .shop-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
-        .user-profile {
-            padding: 2px 10px 1px;
-            gap: 6px;
-        }
-        .avatar-wrapper { width: 26px; height: 26px; }
-        .avatar-edit {
-            width: 12px; height: 12px; font-size: 6px;
-        }
-        .user-name-row .email { font-size: 0.76em; }
-
-        /* ⭐ 横屏也保持短按钮 */
-        .user-action-row {
-            gap: 6px;
-            width: auto;
-            flex-wrap: nowrap;
-        }
-        .user-action-row .avatar-change-btn,
-        .user-action-row .logout-btn-mini {
-            flex: 0 0 auto;
-            width: auto;
-        }
-        .logout-btn-mini,
-        .avatar-change-btn {
-            font-size: 0.62em;
-            padding: 1px 6px;
-        }
-        .nav-main-row {
-            padding: 1px 8px 4px;
-        }
-        .nav-main-row .nav-item,
-        .nav-main-row .nav-group {
-            padding: 4px 10px;
-            min-width: 58px;
-            font-size: 0.68em;
-        }
-        .nav-main-row .nav-text { max-width: 68px; }
-        .nav-sub-row {
-            padding: 4px 8px 6px;
-        }
-        .nav-sub-row .nav-sub-item {
-            padding: 6px 12px;
-            font-size: 0.74em;
-        }
     }
     </style>
 </head>
 <body>
-
     <aside class="sidebar">
         <div class="user-profile">
             <div class="avatar-wrapper">
@@ -1376,7 +1441,7 @@
             </div>
 
             <div class="nav-item" data-tab="feedback">
-                <span class="nav-text">📝 我要反馈</span>
+                <span class="nav-text">📝 使用反馈</span>
             </div>
         </nav>
     </aside>
@@ -1389,8 +1454,7 @@
                     <img id="welcomeAvatar" class="welcome-avatar"
                          src="image/default-avatar.png" alt="头像">
                     <div class="welcome-title" id="welcomeTitle">欢迎回来</div>
-                    <div class="welcome-email" id="welcomeEmail">—</div>
-                    <div class="welcome-hint">这里是你的个人主页</div>
+                    <div class="welcome-hint" id="welcomeBio">这里是你的个人主页</div>
                 </div>
 
                 <div class="profile-panel" id="profilePanel">
@@ -1412,6 +1476,19 @@
                             <div class="info-box">
                                 <span class="label">注册时间</span>
                                 <span class="value" id="infoCreated">—</span>
+                            </div>
+                            <!-- ★ UID -->
+                            <div class="info-box">
+                                <span class="label">UID</span>
+                                <span class="value" id="infoUid">—</span>
+                            </div>
+                            <!-- ★ 个人简介 + 设置按钮 -->
+                            <div class="info-box">
+                                <span class="label">个人简介</span>
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                                    <span class="value" id="infoBio" style="flex:1; font-size:0.9em; word-break:break-all;">—</span>
+                                    <button id="editBioBtn">设置</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1457,7 +1534,6 @@
                 </div>
             </div>
 
-            <!-- 积分商城 -->
             <div class="card" id="cardShop">
                 <div class="card-head">
                     <h2>🛒 积分商城</h2>
@@ -1466,9 +1542,7 @@
                         <button class="refresh-btn-mini" id="refreshUserShopBtn" title="刷新">🔄</button>
                     </div>
                 </div>
-                <div class="shop-hint">
-                    用积分兑换心仪的商品，兑换后积分立即扣除。
-                </div>
+                <div class="shop-hint">用积分兑换心仪的商品，兑换后积分立即扣除。</div>
                 <div class="shop-grid" id="shopGrid">
                     <div class="empty-state">加载中...</div>
                 </div>
@@ -1506,9 +1580,7 @@
                     <h2>🎨 外观设置</h2>
                     <span class="badge">跟账号同步</span>
                 </div>
-                <div class="theme-section-hint">
-                    所有设置都会保存到你的账号，换设备登录时自动同步。
-                </div>
+                <div class="theme-section-hint">所有设置都会保存到你的账号，换设备登录时自动同步。</div>
                 <div class="setting-group">
                     <div class="setting-label">
                         <span class="setting-title">主题配色</span>
@@ -1550,31 +1622,41 @@
                     </div>
                 </div>
                 <div class="setting-reset-row">
-                    <button class="setting-reset-btn" id="resetAppearanceBtn">
-                        ↺ 恢复默认设置
-                    </button>
+                    <button class="setting-reset-btn" id="resetAppearanceBtn">↺ 恢复默认设置</button>
                 </div>
             </div>
 
-            <!-- ========== 我要反馈 ========== -->
             <div class="card" id="cardFeedback">
                 <div class="card-head">
-                    <h2>📝 我要反馈</h2>
-                    <button class="refresh-btn" id="refreshFeedbackBtn" title="刷新">🔄</button>
+                    <h2>📝 使用反馈</h2>
+                    <button class="refresh-btn-mini" id="refreshFeedbackBtn" title="刷新">🔄</button>
                 </div>
 
                 <div class="feedback-form">
+                    <div class="feedback-form-title">
+                        <span>💭 告诉我们你的想法</span>
+                        <span class="feedback-form-sub">你的反馈会直达管理员</span>
+                    </div>
                     <textarea id="feedbackContent" placeholder="请描述你遇到的问题或建议..." rows="4"></textarea>
                     <div class="feedback-form-row">
-                        <button class="primary-btn" id="submitFeedbackBtn">提交反馈</button>
+                        <button class="primary-btn" id="submitFeedbackBtn">
+                            <span class="btn-icon">📤</span> 提交反馈
+                        </button>
                         <span class="feedback-hint">提交后管理员会尽快处理</span>
                     </div>
                 </div>
 
                 <div class="card-head" style="margin-top:24px;">
-                    <h3>我的反馈记录</h3>
+                    <h2>📋 我的反馈记录</h2>
                     <span class="badge" id="badgeFeedback">—</span>
                 </div>
+
+                <div class="fb-toolbar">
+                    <label class="fb-select-all"><input type="checkbox" id="fbSelectAll"><span>全选</span></label>
+                    <span class="fb-selected-count" id="fbSelectedCount">已选 0 条</span>
+                    <button class="fb-del-btn" id="fbDeleteSelected" disabled>🗑 删除选中</button>
+                </div>
+
                 <div class="feedback-list" id="myFeedbackList">
                     <div class="empty-state">加载中...</div>
                 </div>
@@ -1583,7 +1665,20 @@
         </main>
     </div>
 
-    <!-- 商品详情弹窗（左图右文） -->
+    <!-- ★ 编辑个人简介弹窗 -->
+    <div class="modal-mask" id="bioModal" style="display:none;">
+        <div class="modal-box">
+            <h3>设置个人简介</h3>
+            <textarea id="bioInput" rows="3" maxlength="50"
+                placeholder="介绍一下自己吧（最多50字）..."></textarea>
+            <div class="bio-actions">
+                <button id="bioCancelBtn">取消</button>
+                <button id="bioSaveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品详情弹窗 -->
     <div class="modal-mask" id="itemDetailModal" style="display:none;">
         <div class="item-detail-box">
             <div class="item-detail-left">
@@ -1593,17 +1688,14 @@
             </div>
             <div class="item-detail-right">
                 <h3 id="detailName">商品名称</h3>
-
                 <div class="detail-info-row">
                     <span class="label">消耗积分</span>
                     <span class="value highlight" id="detailPrice">-0</span>
                 </div>
-
                 <div class="detail-info-row">
                     <span class="label">兑换时间</span>
                     <span class="value" id="detailTime">—</span>
                 </div>
-
                 <div class="detail-info-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
                     <span class="label" style="margin-bottom:4px;">商品详情</span>
                     <span class="value" id="detailDesc"
@@ -1611,7 +1703,6 @@
                                  color:var(--theme-text-dim); white-space:pre-wrap;
                                  word-break:break-word;">—</span>
                 </div>
-
                 <div style="display:flex; gap:10px; margin-top:auto;">
                     <button class="item-detail-close" id="detailCloseBtn" style="flex:1;">关 闭</button>
                     <button class="item-detail-close" id="detailDeleteBtn"
@@ -1642,12 +1733,10 @@
 
 <script>
 /* ============================================================
- *  移动端导航分组：主菜单一行 + 子菜单一行（下面单独弹出）
+ *  移动端导航分组
  * ============================================================ */
 (function setupMobileNav() {
-    function isMobile() {
-        return window.innerWidth <= 768;
-    }
+    function isMobile() { return window.innerWidth <= 768; }
 
     function build() {
         var navMenu = document.querySelector('.nav-menu');
@@ -1701,7 +1790,6 @@
         function syncSubRow() {
             var allSubs = subRow.querySelectorAll('.nav-sub');
             if (allSubs.length === 0) return;
-
             var activeSub = null;
             allSubs.forEach(function (sub) {
                 if (sub.classList.contains('open')) activeSub = sub;
@@ -1745,9 +1833,7 @@
 
         subRow.querySelectorAll('.nav-sub-item').forEach(function (item) {
             item.addEventListener('click', function () {
-                setTimeout(function () {
-                    subRow.classList.add('show');
-                }, 0);
+                setTimeout(function () { subRow.classList.add('show'); }, 0);
             });
         });
 
@@ -1756,9 +1842,7 @@
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', build);
-    } else {
-        build();
-    }
+    } else { build(); }
 
     var t = null;
     var lastMode = isMobile();
@@ -1766,19 +1850,13 @@
         clearTimeout(t);
         t = setTimeout(function () {
             var now = isMobile();
-            if (now !== lastMode) {
-                lastMode = now;
-                build();
-            } else if (now && window.syncMobileSubRow) {
-                window.syncMobileSubRow();
-            }
+            if (now !== lastMode) { lastMode = now; build(); }
+            else if (now && window.syncMobileSubRow) { window.syncMobileSubRow(); }
         }, 150);
     });
 })();
 
-/* ============================================================
- *  以下为页面原有逻辑
- * ============================================================ */
+/* ============================================================ */
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
 var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1793,7 +1871,6 @@ var avatarInput    = document.getElementById('avatarInput');
 var avatarImg      = document.getElementById('avatarImg');
 var welcomeAvatar  = document.getElementById('welcomeAvatar');
 var welcomeTitle   = document.getElementById('welcomeTitle');
-var welcomeEmail   = document.getElementById('welcomeEmail');
 var infoEmail      = document.getElementById('infoEmail');
 var infoName       = document.getElementById('infoName');
 var infoPhone      = document.getElementById('infoPhone');
@@ -1830,7 +1907,6 @@ function bootUser(user) {
     }
 
     userEmailEl.textContent = user.email || '未知邮箱';
-    welcomeEmail.textContent = user.email || '未知邮箱';
 
     var avatarUrl = (user.user_metadata && user.user_metadata.avatar_url)
         ? user.user_metadata.avatar_url : DEFAULT_AVATAR;
@@ -1852,6 +1928,36 @@ function bootUser(user) {
                 ? new Date(profile.created_at).toLocaleString('zh-CN', { hour12: false })
                 : '—';
 
+            /* ====== ★ UID + 个人简介 ====== */
+            var userBio = profile.bio || '';
+            document.getElementById('infoUid').textContent = profile.uid || '未分配';
+            document.getElementById('infoBio').textContent = userBio || '暂无简介';
+            document.getElementById('welcomeBio').textContent = userBio || '这里是你的个人主页';
+
+            document.getElementById('editBioBtn').addEventListener('click', function () {
+                document.getElementById('bioInput').value = userBio;
+                document.getElementById('bioModal').style.display = 'flex';
+            });
+
+            document.getElementById('bioCancelBtn').addEventListener('click', function () {
+                document.getElementById('bioModal').style.display = 'none';
+            });
+
+            document.getElementById('bioSaveBtn').addEventListener('click', function () {
+                var newBio = document.getElementById('bioInput').value.trim();
+                if (newBio.length > 50) { alert('个人简介不能超过50个字'); return; }
+
+                supabaseClient.from('profiles').update({ bio: newBio }).eq('id', user.id).then(function (res) {
+                    if (res.error) { alert('保存失败：' + res.error.message); return; }
+                    userBio = newBio;
+                    document.getElementById('infoBio').textContent = newBio || '暂无简介';
+                    document.getElementById('welcomeBio').textContent = newBio || '这里是你的个人主页';
+                    document.getElementById('bioModal').style.display = 'none';
+                    alert('个人简介已更新！');
+                });
+            });
+            /* ====== ★ UID + 个人简介 结束 ====== */
+
             document.getElementById('myPoints').textContent = profile.points || 0;
             document.getElementById('myStreak').textContent = profile.checkin_streak || 0;
 
@@ -1872,6 +1978,7 @@ function bootUser(user) {
                 });
 
             loadCheckinCalendar();
+            loadMyRank(user.id);
         });
 }
 
@@ -1949,8 +2056,6 @@ function toDateStr(d) {
     var dd = String(d.getDate()).padStart(2, '0');
     return y + '-' + m + '-' + dd;
 }
-
-/* 签到日期统一按 Asia/Shanghai（北京时间）计算，与服务端 do_checkin 保持一致 */
 function shanghaiNow() {
     var now = new Date();
     return new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000);
@@ -2050,7 +2155,7 @@ function loadAnnouncements() {
         });
 }
 
-/* ========== 我要反馈 ========== */
+/* ========== 使用反馈 ========== */
 function loadMyFeedbacks() {
     var listEl = document.getElementById('myFeedbackList');
     var badge  = document.getElementById('badgeFeedback');
@@ -2069,7 +2174,8 @@ function loadMyFeedbacks() {
             var data = res.data || [];
             badge.textContent = data.length + ' 条';
             if (data.length === 0) {
-                listEl.innerHTML = '<div class="empty-state">暂无反馈记录</div>';
+                listEl.innerHTML = '<div class="empty-state">📭 暂无反馈记录</div>';
+                resetFbSelection();
                 return;
             }
             var statusMap = { pending: '⏳ 待处理', processing: '🔄 处理中', resolved: '✅ 已解决' };
@@ -2077,26 +2183,33 @@ function loadMyFeedbacks() {
             data.forEach(function (item) {
                 var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
                 html += '<div class="feedback-item">' +
-                    '<div class="feedback-head">' +
-                        '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
-                        '<span class="feedback-time">' + time + '</span>' +
+                    '<label class="fb-check" title="选择这条反馈"><input type="checkbox" class="fb-item-check" data-id="' + item.id + '"></label>' +
+                    '<div class="fb-main">' +
+                        '<div class="feedback-head">' +
+                            '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
+                            '<span class="feedback-time">' + time + '</span>' +
+                        '</div>' +
+                        '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
+                        (item.reply ? '<div class="feedback-reply">💬 <b>管理员回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
+                        '<div class="feedback-actions">' +
+                            '<button class="fb-del-btn fb-del" data-id="' + item.id + '">🗑 删除</button>' +
+                        '</div>' +
                     '</div>' +
-                    '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
-                    (item.reply ? '<div class="feedback-reply"><b>管理员回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
                 '</div>';
             });
             listEl.innerHTML = html;
+            resetFbSelection();
         });
 }
 
 document.getElementById('submitFeedbackBtn').addEventListener('click', function () {
     var content = document.getElementById('feedbackContent').value.trim();
-    if (!content) { alert('请填写反馈内容'); return; }
-    if (!currentUser) { alert('请先登录'); return; }
+    if (!content) { showToast('请填写反馈内容', 'error'); return; }
+    if (!currentUser) { showToast('请先登录', 'error'); return; }
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '提交中...';
+    btn.innerHTML = '<span class="btn-icon">📤</span> 提交中...';
 
     supabaseClient.from('feedbacks').insert([{
         user_id: currentUser.id,
@@ -2104,16 +2217,117 @@ document.getElementById('submitFeedbackBtn').addEventListener('click', function 
         content: content
     }]).then(function (res) {
         btn.disabled = false;
-        btn.textContent = '提交反馈';
-        if (res.error) { alert('提交失败：' + res.error.message); return; }
+        btn.innerHTML = '<span class="btn-icon">📤</span> 提交反馈';
+        if (res.error) { showToast('提交失败：' + res.error.message, 'error'); return; }
         document.getElementById('feedbackContent').value = '';
-        alert('反馈提交成功，感谢你的反馈！');
+        showToast('反馈提交成功，感谢你的反馈！', 'success');
         loadMyFeedbacks();
     });
 });
 
 document.getElementById('refreshFeedbackBtn').addEventListener('click', function () {
     loadMyFeedbacks();
+});
+
+function resetFbSelection() {
+    var sa = document.getElementById('fbSelectAll');
+    if (sa) sa.checked = false;
+    updateFbSelected();
+}
+function getFbCheckedIds() {
+    var ids = [];
+    document.querySelectorAll('#myFeedbackList .fb-item-check:checked').forEach(function (c) {
+        ids.push(c.getAttribute('data-id'));
+    });
+    return ids;
+}
+function updateFbSelected() {
+    var ids = getFbCheckedIds();
+    var btn = document.getElementById('fbDeleteSelected');
+    var cnt = document.getElementById('fbSelectedCount');
+    var sa  = document.getElementById('fbSelectAll');
+    if (btn) btn.disabled = ids.length === 0;
+    if (cnt) cnt.textContent = '已选 ' + ids.length + ' 条';
+    if (sa) {
+        var total = document.querySelectorAll('#myFeedbackList .fb-item-check').length;
+        sa.checked = total > 0 && ids.length === total;
+    }
+}
+function deleteFbRecords(ids, single) {
+    if (!ids.length) return;
+    var msg = single ? '确定删除这条反馈吗？删除后不可恢复。' : '确定删除选中的 ' + ids.length + ' 条反馈吗？删除后不可恢复。';
+    confirmFb(msg).then(function (ok) {
+        if (!ok) return;
+        var q = supabaseClient.from('feedbacks').delete().select();
+        q = single ? q.eq('id', ids[0]) : q.in('id', ids);
+        q.then(function (res) {
+            if (res.error) { showToast('删除失败：' + res.error.message, 'error'); return; }
+            if (!res.data || res.data.length === 0) {
+                showToast('删除未生效：反馈表缺少删除权限（RLS 策略），请先在 Supabase 中添加 delete 策略', 'error');
+                loadMyFeedbacks();
+                return;
+            }
+            showToast(single ? '已删除该反馈' : '已删除 ' + res.data.length + ' 条反馈', 'success');
+            loadMyFeedbacks();
+        });
+    });
+}
+
+function showToast(msg, type) {
+    var t = document.getElementById('fbToast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'fbToast';
+        t.className = 'fb-toast';
+        document.body.appendChild(t);
+    }
+    t.className = 'fb-toast ' + (type === 'success' ? 'fb-toast-success' : type === 'error' ? 'fb-toast-error' : '');
+    t.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ') + msg;
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(function () { t.classList.remove('show'); }, 2600);
+}
+var fbPendingResolve = null;
+function confirmFb(message) {
+    return new Promise(function (resolve) {
+        var mask = document.getElementById('fbModalMask');
+        if (!mask) {
+            mask = document.createElement('div');
+            mask.id = 'fbModalMask';
+            mask.className = 'fb-modal-mask';
+            mask.innerHTML = '<div class="fb-modal"><div class="fb-modal-title">⚠️ 确认删除</div><div class="fb-modal-msg"></div><div class="fb-modal-actions"><button class="fb-btn" data-act="cancel">取消</button><button class="fb-btn fb-btn-ok" data-act="ok">确定删除</button></div></div>';
+            mask.addEventListener('click', function (e) {
+                if (e.target === mask || (e.target.getAttribute && e.target.getAttribute('data-act') === 'cancel')) {
+                    mask.classList.remove('show');
+                    if (fbPendingResolve) fbPendingResolve(false);
+                } else if (e.target.getAttribute && e.target.getAttribute('data-act') === 'ok') {
+                    mask.classList.remove('show');
+                    if (fbPendingResolve) fbPendingResolve(true);
+                }
+            });
+            document.body.appendChild(mask);
+        }
+        mask.querySelector('.fb-modal-msg').textContent = message;
+        fbPendingResolve = resolve;
+        mask.classList.add('show');
+    });
+}
+
+document.getElementById('fbSelectAll').addEventListener('change', function () {
+    var checked = this.checked;
+    document.querySelectorAll('#myFeedbackList .fb-item-check').forEach(function (c) { c.checked = checked; });
+    updateFbSelected();
+});
+document.getElementById('fbDeleteSelected').addEventListener('click', function () {
+    deleteFbRecords(getFbCheckedIds(), false);
+});
+document.getElementById('myFeedbackList').addEventListener('change', function (e) {
+    if (e.target && e.target.classList.contains('fb-item-check')) updateFbSelected();
+});
+document.getElementById('myFeedbackList').addEventListener('click', function (e) {
+    var del = e.target.closest ? e.target.closest('.fb-del') : null;
+    if (del) deleteFbRecords([del.getAttribute('data-id')], true);
 });
 
 function refreshCheckinUI() {
@@ -2141,8 +2355,7 @@ function refreshCheckinUI() {
         if (hasCheckedToday) {
             btn.textContent = '✓ 今日已签到';
             btn.disabled = true;
-            document.getElementById('todayReward').textContent =
-                '+' + (todayRow.points || 0);
+            document.getElementById('todayReward').textContent = '+' + (todayRow.points || 0);
         } else {
             btn.textContent = '签 到';
             btn.disabled = false;
@@ -2217,14 +2430,12 @@ document.getElementById('checkinBtn').addEventListener('click', function () {
 function loadShop() {
     if (!currentUser) return;
 
-    /* 刷新顶部积分显示 */
     supabaseClient.from('profiles').select('points').eq('id', currentUser.id).maybeSingle()
         .then(function (r) {
             var p = (r.data && r.data.points) || 0;
             document.getElementById('shopMyPoints').textContent = '积分：' + p;
         });
 
-    /* 加载商品 */
     var grid = document.getElementById('shopGrid');
     grid.innerHTML = '<div class="empty-state">加载中...</div>';
 
@@ -2250,7 +2461,6 @@ function loadShop() {
                 if (it.stock > 0) stockTag = '<span class="shop-item-stock">仅剩 ' + it.stock + '</span>';
                 else if (it.stock === 0) stockTag = '<span class="shop-item-stock">已售罄</span>';
 
-                /* ⭐ 新增：限购标签 */
                 var limitTag = '';
                 if (it.per_user_limit != null && it.per_user_limit > 0) {
                     limitTag = '<div class="shop-item-limit">每人限购 ' + it.per_user_limit + ' 份</div>';
@@ -2281,7 +2491,6 @@ function loadShop() {
             });
         });
 
-    /* 加载兑换记录 */
     var hist = document.getElementById('shopHistory');
     hist.innerHTML = '<div class="empty-state">加载中...</div>';
 
@@ -2321,7 +2530,6 @@ function loadShop() {
             });
             hist.innerHTML = h;
 
-            /* 点击记录 → 打开商品详情弹窗 */
             hist.querySelectorAll('.shop-history-item').forEach(function (el) {
                 el.addEventListener('click', function () {
                     var id     = this.getAttribute('data-id');
@@ -2392,7 +2600,6 @@ function doPurchase(itemId, itemName, price) {
         });
 }
 
-/* 用户端商城刷新按钮 */
 (function () {
     var b = document.getElementById('refreshUserShopBtn');
     if (!b) return;
@@ -2702,7 +2909,6 @@ document.getElementById('chatInput').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') sendMessage();
 });
 
-/* 更换头像按钮 */
 document.getElementById('avatarChangeBtn').addEventListener('click', function () {
     document.getElementById('avatarInput').click();
 });
@@ -2719,7 +2925,6 @@ avatarInput.addEventListener('change', function (e) {
         if (userRes.error || !userRes.data.user) { alert('获取用户信息失败'); return; }
         var userId = userRes.data.user.id;
 
-        // ⭐ 限流键按用户区分，避免换账号后还受上一个账号的冷却限制
         var storageKey = 'last_avatar_upload_' + userId;
         var lastUpload = localStorage.getItem(storageKey);
         if (lastUpload) {
@@ -2764,7 +2969,6 @@ logoutBtn.addEventListener('click', function () {
     supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
 });
 
-/* 商品详情弹窗：关闭 + 删除记录 */
 (function () {
     var modal     = document.getElementById('itemDetailModal');
     var btnClose  = document.getElementById('detailCloseBtn');

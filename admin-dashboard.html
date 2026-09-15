@@ -85,50 +85,31 @@
     .avatar-edit:hover { transform: scale(1.08); box-shadow: var(--shadow-md); }
 
     .user-details {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-        flex: 1;
-        gap: var(--space-2);
+        display: flex; flex-direction: column;
+        min-width: 0; flex: 1; gap: var(--space-2);
     }
     .user-name-row {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        min-width: 0;
-        flex: 1;
+        display: flex; align-items: center;
+        gap: var(--space-2); min-width: 0; flex: 1;
     }
     .user-name-row .email {
-        font-size: 0.92em;
-        font-weight: 500;
-        color: var(--theme-text);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        flex: 1;
+        font-size: 0.92em; font-weight: 500; color: var(--theme-text);
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
     }
     .user-name-row .role {
-        font-size: 0.72em;
-        font-weight: 500;
-        color: var(--theme-accent);
+        font-size: 0.72em; font-weight: 500; color: var(--theme-accent);
         background: var(--theme-accent-soft);
         border: 1px solid var(--theme-accent-border);
-        padding: 2px 10px;
-        border-radius: var(--radius-full);
-        white-space: nowrap;
-        flex-shrink: 0;
+        padding: 2px 10px; border-radius: var(--radius-full);
+        white-space: nowrap; flex-shrink: 0;
     }
     .user-action-row {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        width: 100%;
+        display: flex; align-items: center;
+        gap: var(--space-2); width: 100%;
     }
     .user-action-row .avatar-change-btn,
     .user-action-row .logout-btn-mini {
-        flex: 1;
-        text-align: center;
-        justify-content: center;
+        flex: 1; text-align: center; justify-content: center;
     }
     .logout-btn-mini {
         background: transparent; border: 1px solid var(--theme-border);
@@ -722,48 +703,16 @@
         border-color: var(--theme-accent-border);
         box-shadow: var(--shadow-sm);
     }
-    .shop-item-icon {
-        font-size: 2.4em;
-        text-align: center;
-        line-height: 1;
-    }
-    .shop-item-name {
-        font-size: 1em;
-        font-weight: 600;
-        text-align: center;
-        word-break: break-word;
-    }
-    .shop-item-price {
-        font-size: 1.05em;
-        font-weight: 700;
-        color: var(--theme-accent);
-        text-align: center;
-    }
-    .shop-item-stock {
-        font-size: 0.78em;
-        color: var(--theme-text-faint);
-        text-align: center;
-    }
-    .shop-item-limit {
-        font-size: 0.72em;
-        color: var(--theme-accent);
-        text-align: center;
-        letter-spacing: 0.02em;
-    }
-    .shop-item-actions {
-        display: flex;
-        gap: var(--space-2);
-        margin-top: auto;
-    }
+    .shop-item-icon { font-size: 2.4em; text-align: center; line-height: 1; }
+    .shop-item-name { font-size: 1em; font-weight: 600; text-align: center; word-break: break-word; }
+    .shop-item-price { font-size: 1.05em; font-weight: 700; color: var(--theme-accent); text-align: center; }
+    .shop-item-stock { font-size: 0.78em; color: var(--theme-text-faint); text-align: center; }
+    .shop-item-limit { font-size: 0.72em; color: var(--theme-accent); text-align: center; letter-spacing: 0.02em; }
+    .shop-item-actions { display: flex; gap: var(--space-2); margin-top: auto; }
     .shop-item-actions button {
-        flex: 1;
-        height: 36px;
-        font-size: 0.85em;
-        font-family: inherit;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        transition: all var(--transition-base);
-        outline: none;
+        flex: 1; height: 36px; font-size: 0.85em; font-family: inherit;
+        border-radius: var(--radius-sm); cursor: pointer;
+        transition: all var(--transition-base); outline: none;
         border: 1px solid transparent;
     }
     .shop-item-actions .btn-edit {
@@ -771,19 +720,14 @@
         border-color: var(--theme-accent-border);
         color: var(--theme-accent);
     }
-    .shop-item-actions .btn-edit:hover {
-        border-color: var(--theme-accent);
-    }
+    .shop-item-actions .btn-edit:hover { border-color: var(--theme-accent); }
     .shop-item-actions .btn-del {
         background: rgba(214,139,139,.10);
         border-color: rgba(214,139,139,.30);
         color: var(--danger);
     }
-    .shop-item-actions .btn-del:hover {
-        background: rgba(214,139,139,.22);
-    }
+    .shop-item-actions .btn-del:hover { background: rgba(214,139,139,.22); }
 
-    /* 上架表单：标签在上、输入在下，按序号排 */
     .shop-add-form {
         display: flex; flex-direction: column; gap: var(--space-4);
         padding: var(--space-5);
@@ -797,9 +741,7 @@
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: var(--space-4);
     }
-    .shop-add-form .form-group {
-        display: flex; flex-direction: column; gap: var(--space-2);
-    }
+    .shop-add-form .form-group { display: flex; flex-direction: column; gap: var(--space-2); }
     .shop-add-form .form-group label {
         font-size: 0.85em; color: var(--theme-text-dim); font-weight: 500;
     }
@@ -823,14 +765,10 @@
         border-color: var(--theme-accent-border);
         box-shadow: 0 0 0 3px var(--theme-accent-soft);
     }
-    .shop-add-form .form-submit {
-        display: flex; justify-content: flex-end;
-    }
+    .shop-add-form .form-submit { display: flex; justify-content: flex-end; }
 
     /* ========== 限购开关 ========== */
-    .limit-row {
-        display: flex; align-items: center; gap: 10px;
-    }
+    .limit-row { display: flex; align-items: center; gap: 10px; }
     .limit-toggle {
         flex-shrink: 0;
         height: 34px;
@@ -865,21 +803,11 @@
         outline: none;
         transition: all var(--transition-base);
     }
-    .limit-row input[type="number"]:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-    .limit-row .limit-unit {
-        font-size: 0.85em;
-        color: var(--theme-text-faint);
-    }
+    .limit-row input[type="number"]:disabled { opacity: 0.4; cursor: not-allowed; }
+    .limit-row .limit-unit { font-size: 0.85em; color: var(--theme-text-faint); }
 
     /* ========== 兑换记录（按用户折叠） ========== */
-    .purchase-users {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3);
-    }
+    .purchase-users { display: flex; flex-direction: column; gap: var(--space-3); }
     .purchase-user {
         background: var(--theme-info-box);
         border: 1px solid var(--theme-border-soft);
@@ -894,9 +822,7 @@
         user-select: none;
         transition: background var(--transition-base);
     }
-    .purchase-user-head:hover {
-        background: var(--theme-hover);
-    }
+    .purchase-user-head:hover { background: var(--theme-hover); }
     .purchase-user-head .pu-avatar {
         width: 36px; height: 36px;
         border-radius: var(--radius-full);
@@ -949,9 +875,7 @@
         transition: max-height var(--transition-slow);
         background: rgba(0, 0, 0, 0.15);
     }
-    .purchase-user.open .purchase-user-body {
-        max-height: 2000px;
-    }
+    .purchase-user.open .purchase-user-body { max-height: 2000px; }
     .purchase-record {
         display: flex; align-items: center; gap: var(--space-3);
         padding: var(--space-3) var(--space-5) var(--space-3) calc(var(--space-5) + 36px + var(--space-3));
@@ -989,12 +913,8 @@
         display: flex; flex-direction: column; gap: 2px;
         min-width: 0; flex: 1;
     }
-    .toggle-label .title {
-        font-size: 0.94em; font-weight: 500; color: var(--theme-text);
-    }
-    .toggle-label .desc {
-        font-size: 0.78em; color: var(--theme-text-faint);
-    }
+    .toggle-label .title { font-size: 0.94em; font-weight: 500; color: var(--theme-text); }
+    .toggle-label .desc { font-size: 0.78em; color: var(--theme-text-faint); }
     .toggle-switch {
         position: relative; width: 54px; height: 30px;
         flex-shrink: 0;
@@ -1043,6 +963,10 @@
         box-shadow: var(--shadow-lg);
         display: flex; flex-direction: column; gap: var(--space-5);
         animation: boxIn var(--transition-base) var(--ease);
+    }
+    @keyframes boxIn {
+        from { transform: translateY(10px) scale(.98); opacity: 0; }
+        to   { transform: translateY(0) scale(1); opacity: 1; }
     }
     .dialog h3 { font-size: 1.05em; font-weight: 600; color: var(--theme-text); text-align: center; }
     .dialog .dialog-hint { font-size: 0.82em; color: var(--theme-text-faint); text-align: center; margin-top: calc(-1 * var(--space-3)); }
@@ -1096,9 +1020,7 @@
         gap: var(--space-3);
     }
 
-    /* ============================================================
-     *  每日签到（管理员本人的签到）
-     * ============================================================ */
+    /* ========== 每日签到（管理员本人的签到） ========== */
     .checkin-hero {
         display: flex; flex-direction: column; align-items: center;
         text-align: center; padding: var(--space-6) var(--space-5);
@@ -1173,9 +1095,7 @@
     .checkin-stat .v { font-size: 1.4em; font-weight: 600; color: var(--theme-text); }
     .checkin-stat .k { font-size: 0.76em; color: var(--theme-text-faint); }
 
-    /* ============================================================
-     *  好友系统
-     * ============================================================ */
+    /* ========== 好友系统 ========== */
     .add-friend-box {
         display: flex; gap: var(--space-3);
         margin-bottom: var(--space-7);
@@ -1268,9 +1188,7 @@
         padding: var(--space-6) 0; font-size: 0.9em;
     }
 
-    /* ============================================================
-     *  聊天弹窗
-     * ============================================================ */
+    /* ========== 聊天弹窗 ========== */
     .chat-mask {
         position: fixed; inset: 0;
         background: rgba(10,11,14,.55);
@@ -1278,10 +1196,6 @@
         display: flex; justify-content: center; align-items: center;
         z-index: 3000; padding: var(--space-5);
         animation: maskIn var(--transition-base) var(--ease);
-    }
-    @keyframes boxIn {
-        from { transform: translateY(10px) scale(.98); opacity: 0; }
-        to   { transform: translateY(0) scale(1); opacity: 1; }
     }
     .chat-box {
         width: 460px; max-width: 100%;
@@ -1314,10 +1228,7 @@
         font-size: 14px; line-height: 1;
         transition: all var(--transition-base); outline: none;
     }
-    .chat-close-btn:hover {
-        background: var(--theme-card);
-        color: var(--theme-text);
-    }
+    .chat-close-btn:hover { background: var(--theme-card); color: var(--theme-text); }
     .chat-body {
         flex: 1; overflow-y: auto;
         padding: var(--space-5);
@@ -1385,6 +1296,312 @@
     }
     .chat-input-box button:hover:not(:disabled) { border-color: var(--theme-accent); }
     .chat-input-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ============================================================
+     *  用户反馈（美化版）
+     * ============================================================ */
+    .feedback-toolbar-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .feedback-filter-select {
+        padding: 8px 32px 8px 14px;
+        border-radius: var(--radius-md);
+        background: var(--theme-info-box);
+        color: var(--theme-text);
+        border: 1px solid var(--theme-border);
+        font-size: 0.85em;
+        font-family: inherit;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image:
+            linear-gradient(45deg, transparent 50%, var(--theme-text-dim) 50%),
+            linear-gradient(135deg, var(--theme-text-dim) 50%, transparent 50%);
+        background-position:
+            calc(100% - 16px) 50%,
+            calc(100% - 11px) 50%;
+        background-size: 5px 5px, 5px 5px;
+        background-repeat: no-repeat;
+        transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+    .feedback-filter-select:hover { border-color: var(--theme-accent-border); }
+    .feedback-filter-select:focus {
+        border-color: var(--theme-accent);
+        box-shadow: 0 0 0 3px var(--theme-accent-soft);
+    }
+    .feedback-filter-select option {
+        background: var(--theme-elevated);
+        color: var(--theme-text);
+    }
+
+    .feedback-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        margin-top: var(--space-2);
+    }
+    .feedback-item {
+        display: flex;
+        gap: var(--space-4);
+        align-items: flex-start;
+        padding: var(--space-5);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-lg);
+        transition: border-color var(--transition-base),
+                    box-shadow var(--transition-base),
+                    transform var(--transition-base);
+    }
+    .feedback-item:hover {
+        border-color: var(--theme-border);
+        box-shadow: var(--shadow-sm);
+        transform: translateY(-1px);
+    }
+    .fb-check {
+        flex-shrink: 0;
+        margin-top: 5px;
+        cursor: pointer;
+    }
+    .fb-check input {
+        accent-color: var(--theme-accent);
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+    .fb-main { flex: 1; min-width: 0; }
+    .feedback-head {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-3);
+        flex-wrap: wrap;
+    }
+    .fb-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: var(--radius-full);
+        background: var(--theme-accent-soft);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-accent);
+        font-size: 0.85em;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .feedback-email {
+        font-size: 0.9em;
+        font-weight: 600;
+        color: var(--theme-text);
+        word-break: break-all;
+    }
+    .feedback-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.74em;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: var(--radius-full);
+        white-space: nowrap;
+        letter-spacing: 0.02em;
+    }
+    .feedback-status.pending {
+        background: rgba(248, 200, 80, 0.12);
+        color: #f8c850;
+        border: 1px solid rgba(248, 200, 80, 0.28);
+    }
+    .feedback-status.processing {
+        background: rgba(124, 174, 224, 0.12);
+        color: #7caee0;
+        border: 1px solid rgba(124, 174, 224, 0.28);
+    }
+    .feedback-status.resolved {
+        background: rgba(130, 225, 160, 0.12);
+        color: #82e1a0;
+        border: 1px solid rgba(130, 225, 160, 0.28);
+    }
+    .feedback-time {
+        font-size: 0.78em;
+        color: var(--theme-text-faint);
+        margin-left: auto;
+        white-space: nowrap;
+    }
+    .feedback-content {
+        font-size: 0.92em;
+        color: var(--theme-text);
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .feedback-reply {
+        margin-top: var(--space-4);
+        padding: var(--space-3) var(--space-4);
+        background: var(--theme-accent-soft);
+        border-left: 3px solid var(--theme-accent);
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        font-size: 0.86em;
+        color: var(--theme-text-dim);
+        line-height: 1.65;
+    }
+    .feedback-reply b {
+        color: var(--theme-accent);
+        font-weight: 600;
+    }
+    .feedback-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+        flex-wrap: wrap;
+    }
+    .feedback-actions .action-btn { margin-right: 0; }
+    .feedback-actions .fb-del { margin-left: auto; }
+    .feedback-actions .status-select {
+        padding: 7px 12px;
+        border-radius: var(--radius-sm);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border);
+        color: var(--theme-text);
+        font-size: 0.84em;
+        font-family: inherit;
+        cursor: pointer;
+        outline: none;
+        transition: border-color var(--transition-base);
+    }
+    .feedback-actions .status-select:focus { border-color: var(--theme-accent); }
+    .feedback-actions .reply-btn {
+        background: var(--theme-accent-soft);
+        border-color: var(--theme-accent-border);
+        color: var(--theme-accent);
+    }
+    .feedback-actions .reply-btn:hover {
+        background: var(--theme-accent);
+        color: var(--theme-sidebar);
+    }
+    .feedback-actions .save-reply-btn,
+    .feedback-actions .cancel-reply-btn { margin-right: 0; }
+    .reply-box textarea {
+        font-family: inherit;
+        font-size: 0.9em;
+        line-height: 1.6;
+    }
+
+    .fb-toolbar {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        margin: 0 0 var(--space-5);
+        padding: var(--space-3) var(--space-4);
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: var(--radius-md);
+        flex-wrap: wrap;
+    }
+    .fb-select-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85em;
+        color: var(--theme-text-dim);
+        cursor: pointer;
+        user-select: none;
+    }
+    .fb-select-all input, .fb-check input {
+        accent-color: var(--theme-accent);
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+    }
+    .fb-selected-count { font-size: 0.8em; color: var(--theme-text-faint); }
+    .fb-batch-del { margin-right: 0; }
+
+    /* 页面内提示与确认弹窗 */
+    .fb-toast {
+        position: fixed;
+        top: 26px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-16px);
+        background: var(--theme-card);
+        border: 1px solid var(--theme-accent-border);
+        color: var(--theme-text);
+        padding: 12px 22px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        font-size: 0.88em;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        pointer-events: none;
+        transition: all .3s ease;
+        max-width: 90vw;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .fb-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .fb-toast-success { border-color: rgba(110, 220, 150, .5); }
+    .fb-toast-error { border-color: rgba(224, 138, 138, .55); }
+    .fb-modal-mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 9998;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .2s ease;
+    }
+    .fb-modal-mask.show { opacity: 1; pointer-events: auto; }
+    .fb-modal {
+        background: var(--theme-card);
+        border: 1px solid var(--theme-border);
+        border-radius: var(--radius-lg);
+        padding: 24px 26px;
+        width: 380px;
+        max-width: 92vw;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(8px);
+        transition: transform .2s ease;
+    }
+    .fb-modal-mask.show .fb-modal { transform: translateY(0); }
+    .fb-modal-title { font-size: 1em; font-weight: 600; margin-bottom: 12px; color: var(--theme-text); }
+    .fb-modal-msg { font-size: 0.88em; color: var(--theme-text-dim); line-height: 1.7; margin-bottom: 22px; word-break: break-all; }
+    .fb-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .fb-btn {
+        padding: 9px 18px;
+        border-radius: var(--radius-sm);
+        font-size: 0.85em;
+        font-family: inherit;
+        cursor: pointer;
+        border: 1px solid var(--theme-border);
+        background: var(--theme-info-box);
+        color: var(--theme-text);
+        transition: all var(--transition-base);
+        outline: none;
+    }
+    .fb-btn:hover { border-color: var(--theme-accent-border); }
+    .fb-btn-ok {
+        background: rgba(214,139,139,.12);
+        border-color: rgba(214,139,139,.35);
+        color: #e08a8a;
+        font-weight: 500;
+    }
+    .fb-btn-ok:hover {
+        background: rgba(214,139,139,.25);
+        border-color: rgba(214,139,139,.6);
+    }
 
     /* ============================================================
      *  手机端适配
@@ -1647,6 +1864,14 @@
         .purchase-record {
             padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-4) + 36px + var(--space-2));
         }
+        .feedback-item { padding: 14px; }
+        .feedback-content { font-size: 0.88em; }
+        .feedback-time { font-size: 0.72em; }
+        .fb-toolbar { gap: 10px; padding: 10px 12px; }
+        .feedback-actions { gap: 8px; }
+        .feedback-actions .fb-del { margin-left: 0; width: 100%; }
+        .feedback-toolbar-right { width: 100%; }
+        .feedback-filter-select { flex: 1; }
     }
 
     @media (max-width: 380px) {
@@ -1717,7 +1942,7 @@
             <div class="nav-sub" data-sub="msg">
                 <div class="nav-sub-item" data-tab="announce">📢 公告管理</div>
                 <div class="nav-sub-item" data-tab="forgot">📝 忘记密码</div>
-                <div class="nav-sub-item" data-tab="feedback">💬 反馈信息</div>
+                <div class="nav-sub-item" data-tab="feedback">💬 用户反馈</div>
             </div>
 
             <div class="nav-group" data-group="pointsGroup">
@@ -1808,34 +2033,13 @@
                 <div class="config-section">
                     <div class="config-title">每周签到积分配置</div>
                     <div class="config-grid">
-                        <div class="config-field">
-                            <label>周一</label>
-                            <input type="number" id="cfgMonday" min="0" max="9999" value="1"/>
-                        </div>
-                        <div class="config-field">
-                            <label>周二</label>
-                            <input type="number" id="cfgTuesday" min="0" max="9999" value="1"/>
-                        </div>
-                        <div class="config-field">
-                            <label>周三</label>
-                            <input type="number" id="cfgWednesday" min="0" max="9999" value="2"/>
-                        </div>
-                        <div class="config-field">
-                            <label>周四</label>
-                            <input type="number" id="cfgThursday" min="0" max="9999" value="2"/>
-                        </div>
-                        <div class="config-field">
-                            <label>周五</label>
-                            <input type="number" id="cfgFriday" min="0" max="9999" value="3"/>
-                        </div>
-                        <div class="config-field">
-                            <label>周六</label>
-                            <input type="number" id="cfgSaturday" min="0" max="9999" value="5"/>
-                        </div>
-                        <div class="config-field">
-                            <label>周日</label>
-                            <input type="number" id="cfgSunday" min="0" max="9999" value="5"/>
-                        </div>
+                        <div class="config-field"><label>周一</label><input type="number" id="cfgMonday" min="0" max="9999" value="1"/></div>
+                        <div class="config-field"><label>周二</label><input type="number" id="cfgTuesday" min="0" max="9999" value="1"/></div>
+                        <div class="config-field"><label>周三</label><input type="number" id="cfgWednesday" min="0" max="9999" value="2"/></div>
+                        <div class="config-field"><label>周四</label><input type="number" id="cfgThursday" min="0" max="9999" value="2"/></div>
+                        <div class="config-field"><label>周五</label><input type="number" id="cfgFriday" min="0" max="9999" value="3"/></div>
+                        <div class="config-field"><label>周六</label><input type="number" id="cfgSaturday" min="0" max="9999" value="5"/></div>
+                        <div class="config-field"><label>周日</label><input type="number" id="cfgSunday" min="0" max="9999" value="5"/></div>
                     </div>
                     <div class="config-actions">
                         <button class="btn-save" id="saveConfigBtn">💾 保存配置</button>
@@ -1848,6 +2052,7 @@
                         <table>
                             <thead>
                                 <tr>
+                                    <th>UID</th>
                                     <th>用户</th>
                                     <th>积分</th>
                                     <th>连续签到</th>
@@ -1856,7 +2061,7 @@
                                 </tr>
                             </thead>
                             <tbody id="pointsBody">
-                                <tr><td colspan="5" class="loading">加载中...</td></tr>
+                                <tr><td colspan="6" class="loading">加载中...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1903,6 +2108,8 @@
                     <table>
                         <thead>
                             <tr>
+                                <!-- ★★★ UID 列 ★★★ -->
+                                <th>UID</th>
                                 <th>用户</th>
                                 <th>昵称</th>
                                 <th>手机号</th>
@@ -1912,7 +2119,7 @@
                             </tr>
                         </thead>
                         <tbody id="profilesBody">
-                            <tr><td colspan="6" class="loading">加载中...</td></tr>
+                            <tr><td colspan="7" class="loading">加载中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1934,7 +2141,7 @@
                         <div class="preview-divider"></div>
                         <div class="preview-hint">
                             修改后点击右侧「保存修改」<br>
-                            昵称、手机号、邮箱、密码将实时同步
+                            昵称、手机号、邮箱、密码、UID 将实时同步
                         </div>
                     </div>
                     <div class="manage-form">
@@ -1946,6 +2153,11 @@
                             </select>
                         </div>
                         <div class="form-section-title">② 修改用户资料</div>
+                        <!-- ★★★ UID 输入框 ★★★ -->
+                        <div class="form-group">
+                            <label>UID <span class="hint">（5-9 位数字，仅管理员可改）</span></label>
+                            <input type="text" id="manageUid" placeholder="例如 10001" maxlength="9"/>
+                        </div>
                         <div class="form-group">
                             <label>昵称</label>
                             <input type="text" id="manageName" placeholder="输入新的昵称"/>
@@ -1982,36 +2194,15 @@
 
                 <div class="shop-add-form">
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>① 商品名称</label>
-                            <input type="text" id="addShopName" placeholder="请输入商品名称"/>
-                        </div>
-                        <div class="form-group">
-                            <label>② 积分价格</label>
-                            <input type="number" id="addShopPrice" placeholder="请输入积分价格" min="0"/>
-                        </div>
-                        <div class="form-group">
-                            <label>③ 库存</label>
-                            <input type="number" id="addShopStock" placeholder="请输入库存" min="0" value="10"/>
-                        </div>
+                        <div class="form-group"><label>① 商品名称</label><input type="text" id="addShopName" placeholder="请输入商品名称"/></div>
+                        <div class="form-group"><label>② 积分价格</label><input type="number" id="addShopPrice" placeholder="请输入积分价格" min="0"/></div>
+                        <div class="form-group"><label>③ 库存</label><input type="number" id="addShopStock" placeholder="请输入库存" min="0" value="10"/></div>
                     </div>
-                    <div class="form-group">
-                        <label>④ 商品描述（用户看到的简短介绍）</label>
-                        <textarea id="addShopDesc" rows="2" placeholder="请输入商品描述"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>⑤ 商品详情（用户兑换后才能看到）</label>
-                        <textarea id="addShopDetail" rows="3" placeholder="请输入商品详情"></textarea>
-                    </div>
+                    <div class="form-group"><label>④ 商品描述（用户看到的简短介绍）</label><textarea id="addShopDesc" rows="2" placeholder="请输入商品描述"></textarea></div>
+                    <div class="form-group"><label>⑤ 商品详情（用户兑换后才能看到）</label><textarea id="addShopDetail" rows="3" placeholder="请输入商品详情"></textarea></div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>⑥ 商品图片展示链接（可选）</label>
-                            <input type="text" id="addShopImage" placeholder="https://..."/>
-                        </div>
-                        <div class="form-group">
-                            <label>⑦ 商品图标（Emoji）</label>
-                            <input type="text" id="addShopIcon" placeholder="如 🎁" value="🎁"/>
-                        </div>
+                        <div class="form-group"><label>⑥ 商品图片展示链接（可选）</label><input type="text" id="addShopImage" placeholder="https://..."/></div>
+                        <div class="form-group"><label>⑦ 商品图标（Emoji）</label><input type="text" id="addShopIcon" placeholder="如 🎁" value="🎁"/></div>
                     </div>
                     <div class="form-group">
                         <label>⑧ 每人限购</label>
@@ -2059,18 +2250,9 @@
                     <button class="checkin-btn" id="myCheckinBtn">签 到</button>
                     <div class="checkin-calendar" id="myCheckinCalendar"></div>
                     <div class="checkin-stats" style="grid-template-columns: 1fr 1fr 1fr; max-width: 520px;">
-                        <div class="checkin-stat">
-                            <span class="v" id="myStreak">0</span>
-                            <span class="k">连续签到</span>
-                        </div>
-                        <div class="checkin-stat">
-                            <span class="v" id="myTodayReward">—</span>
-                            <span class="k">今日奖励</span>
-                        </div>
-                        <div class="checkin-stat">
-                            <span class="v" id="myAdminRank">—</span>
-                            <span class="k">积分排名</span>
-                        </div>
+                        <div class="checkin-stat"><span class="v" id="myStreak">0</span><span class="k">连续签到</span></div>
+                        <div class="checkin-stat"><span class="v" id="myTodayReward">—</span><span class="k">今日奖励</span></div>
+                        <div class="checkin-stat"><span class="v" id="myAdminRank">—</span><span class="k">积分排名</span></div>
                     </div>
                 </div>
             </div>
@@ -2087,15 +2269,11 @@
                 </div>
                 <div class="friend-section">
                     <div class="friend-section-title">待处理的好友请求</div>
-                    <div class="friend-list" id="myPendingList">
-                        <div class="empty-state">加载中...</div>
-                    </div>
+                    <div class="friend-list" id="myPendingList"><div class="empty-state">加载中...</div></div>
                 </div>
                 <div class="friend-section">
                     <div class="friend-section-title">我的好友</div>
-                    <div class="friend-list" id="myFriendList">
-                        <div class="empty-state">加载中...</div>
-                    </div>
+                    <div class="friend-list" id="myFriendList"><div class="empty-state">加载中...</div></div>
                 </div>
             </div>
 
@@ -2113,9 +2291,7 @@
                 <div class="health-grid" id="healthGrid">
                     <div class="health-card">
                         <div class="health-dot" style="background:#555;"></div>
-                        <div class="health-info">
-                            <span class="name">加载中...</span>
-                        </div>
+                        <div class="health-info"><span class="name">加载中...</span></div>
                     </div>
                 </div>
                 <div class="stat-section-title">📈 数据统计</div>
@@ -2196,10 +2372,7 @@
                     <h2>🔊 音效设置</h2>
                     <span class="badge">全站生效</span>
                 </div>
-                <div class="theme-section-hint">
-                    音效设置保存在浏览器本地，所有页面共享。
-                </div>
-
+                <div class="theme-section-hint">音效设置保存在浏览器本地，所有页面共享。</div>
                 <div class="toggle-row">
                     <div class="toggle-label">
                         <span class="title">🔔 登录音效</span>
@@ -2207,7 +2380,6 @@
                     </div>
                     <button type="button" class="toggle-switch" id="toggleLoginSound" aria-label="登录音效开关"></button>
                 </div>
-
                 <div class="toggle-row">
                     <div class="toggle-label">
                         <span class="title">💬 消息提示音</span>
@@ -2215,7 +2387,6 @@
                     </div>
                     <button type="button" class="toggle-switch" id="toggleMessageSound" aria-label="消息提示音开关"></button>
                 </div>
-
                 <div class="setting-group" style="margin-top: 28px;">
                     <div class="setting-label">
                         <span class="setting-title">试听</span>
@@ -2228,22 +2399,28 @@
                 </div>
             </div>
 
-            <!-- ========== 反馈信息 ========== -->
+            <!-- 用户反馈 -->
             <div class="card" id="cardFeedback">
                 <div class="card-head">
                     <h2>💬 用户反馈</h2>
-                    <div style="display:flex;gap:8px;align-items:center;">
-                        <select id="feedbackFilter" style="padding:6px 10px;border-radius:8px;background:var(--theme-bg-soft);color:var(--theme-text);border:1px solid var(--theme-border);">
+                    <div class="feedback-toolbar-right">
+                        <span class="badge" id="badgeFeedback">—</span>
+                        <select id="feedbackFilter" class="feedback-filter-select">
                             <option value="all">全部</option>
-                            <option value="pending">待处理</option>
-                            <option value="processing">处理中</option>
-                            <option value="resolved">已解决</option>
+                            <option value="pending">⏳ 待处理</option>
+                            <option value="processing">🔄 处理中</option>
+                            <option value="resolved">✅ 已解决</option>
                         </select>
-                        <button class="refresh-btn" id="refreshFeedbackBtn" title="刷新">🔄</button>
+                        <button class="refresh-btn-mini" id="refreshFeedbackBtn" title="刷新">🔄</button>
                     </div>
                 </div>
+                <div class="fb-toolbar">
+                    <label class="fb-select-all"><input type="checkbox" id="fbAdminSelectAll"><span>全选</span></label>
+                    <span class="fb-selected-count" id="fbAdminSelectedCount">已选 0 条</span>
+                    <button class="action-btn del fb-batch-del" id="fbAdminDeleteSelected" disabled>🗑 删除选中</button>
+                </div>
                 <div class="feedback-list" id="adminFeedbackList">
-                    <div class="empty">加载中...</div>
+                    <div class="empty-state">加载中...</div>
                 </div>
             </div>
 
@@ -2274,14 +2451,8 @@
             <h3>调整用户数据</h3>
             <p class="dialog-hint" id="pointsTargetHint">—</p>
             <div class="field-row">
-                <div class="field">
-                    <label>积分</label>
-                    <input type="number" id="pointsNewValue" value="0" min="0"/>
-                </div>
-                <div class="field">
-                    <label>连续签到天数</label>
-                    <input type="number" id="streakNewValue" value="0" min="0"/>
-                </div>
+                <div class="field"><label>积分</label><input type="number" id="pointsNewValue" value="0" min="0"/></div>
+                <div class="field"><label>连续签到天数</label><input type="number" id="streakNewValue" value="0" min="0"/></div>
             </div>
             <div class="dialog-actions">
                 <button type="button" class="btn-cancel" id="pointsCancelBtn">取消</button>
@@ -2326,23 +2497,20 @@
                 <span class="chat-name" id="myChatFriendName">—</span>
                 <button class="chat-close-btn" id="myChatCloseBtn">✕</button>
             </div>
-            <div class="chat-body" id="myChatBody">
-                <div class="empty-state">加载中...</div>
-            </div>
+            <div class="chat-body" id="myChatBody"><div class="empty-state">加载中...</div></div>
             <div class="chat-input-box">
                 <input type="text" id="myChatInput" placeholder="输入消息..."/>
                 <button id="myChatSendBtn">发送</button>
             </div>
         </div>
     </div>
+
 <script>
 /* ============================================================
- *  移动端导航分组：主菜单一行 + 子菜单一行（下面单独弹出）
+ *  移动端导航分组
  * ============================================================ */
 (function setupMobileNav() {
-    function isMobile() {
-        return window.innerWidth <= 768;
-    }
+    function isMobile() { return window.innerWidth <= 768; }
 
     function build() {
         var navMenu = document.querySelector('.nav-menu');
@@ -2396,7 +2564,6 @@
         function syncSubRow() {
             var allSubs = subRow.querySelectorAll('.nav-sub');
             if (allSubs.length === 0) return;
-
             var activeSub = null;
             allSubs.forEach(function (sub) {
                 if (sub.classList.contains('open')) activeSub = sub;
@@ -2440,9 +2607,7 @@
 
         subRow.querySelectorAll('.nav-sub-item').forEach(function (item) {
             item.addEventListener('click', function () {
-                setTimeout(function () {
-                    subRow.classList.add('show');
-                }, 0);
+                setTimeout(function () { subRow.classList.add('show'); }, 0);
             });
         });
 
@@ -2451,9 +2616,7 @@
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', build);
-    } else {
-        build();
-    }
+    } else { build(); }
 
     var t = null;
     var lastMode = isMobile();
@@ -2461,19 +2624,13 @@
         clearTimeout(t);
         t = setTimeout(function () {
             var now = isMobile();
-            if (now !== lastMode) {
-                lastMode = now;
-                build();
-            } else if (now && window.syncMobileSubRow) {
-                window.syncMobileSubRow();
-            }
+            if (now !== lastMode) { lastMode = now; build(); }
+            else if (now && window.syncMobileSubRow) { window.syncMobileSubRow(); }
         }, 150);
     });
 })();
 
-/* ============================================================
- *  以下为页面原有逻辑
- * ============================================================ */
+/* ============================================================ */
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
 var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -2484,6 +2641,11 @@ var currentAdmin = null;
 var currentBanUserId = null;
 var currentPointsUserId = null;
 var currentEditShopId = null;
+
+var myFriendsCache = [];
+var myCurrentChatFriend = null;
+var myChatPollTimer = null;
+var myLastMsgTs = null;
 
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
@@ -2630,12 +2792,10 @@ supabaseClient.auth.onAuthStateChange(function (event, session) {
     if (event === 'SIGNED_OUT' || !session) location.href = 'index.html';
 });
 
-/* 更换头像按钮 */
 document.getElementById('avatarChangeBtn').addEventListener('click', function () {
     document.getElementById('avatarInput').click();
 });
 
-/* 头像上传 */
 document.getElementById('avatarInput').addEventListener('change', function (e) {
     var file = e.target.files[0];
     if (!file) return;
@@ -2685,11 +2845,12 @@ document.getElementById('avatarInput').addEventListener('change', function (e) {
             });
     });
 });
-/* 退出登录 */
+
 document.getElementById('logoutBtn').addEventListener('click', function () {
     if (myChatPollTimer) clearInterval(myChatPollTimer);
     supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
 });
+
 /* 公告管理 */
 function loadAnnouncements() {
     var listEl = document.getElementById('announceList');
@@ -2771,62 +2932,74 @@ function loadAllFeedbacks() {
     var listEl = document.getElementById('adminFeedbackList');
     var filter = document.getElementById('feedbackFilter').value;
     if (!listEl) return;
-    listEl.innerHTML = '<div class="empty">加载中...</div>';
+    listEl.innerHTML = '<div class="empty-state">加载中...</div>';
 
     var query = supabaseClient.from('feedbacks').select('*').order('created_at', { ascending: false });
     if (filter !== 'all') query = query.eq('status', filter);
 
     query.then(function (res) {
         if (res.error) {
-            listEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+            listEl.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
             return;
         }
         var data = res.data || [];
-        if (data.length === 0) { listEl.innerHTML = '<div class="empty">暂无反馈</div>'; return; }
+        document.getElementById('badgeFeedback').textContent = data.length + ' 条';
+        if (data.length === 0) {
+            listEl.innerHTML = '<div class="empty-state">📭 ' + (filter === 'all' ? '暂无反馈' : '该状态下暂无反馈') + '</div>';
+            resetAdminFbSelection();
+            return;
+        }
 
         var statusMap = { pending: '⏳ 待处理', processing: '🔄 处理中', resolved: '✅ 已解决' };
         var html = '';
         data.forEach(function (item) {
             var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
-            html += '<div class="feedback-item" data-id="' + item.id + '">' +
-                '<div class="feedback-head">' +
-                    '<span class="feedback-email">' + escapeHtml(item.user_email || '匿名用户') + '</span>' +
-                    '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
-                    '<span class="feedback-time">' + time + '</span>' +
-                '</div>' +
-                '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
-                (item.reply ? '<div class="feedback-reply"><b>已回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
-                '<div class="feedback-actions">' +
-                    '<select class="status-select" data-id="' + item.id + '">' +
-                        '<option value="pending"' + (item.status==='pending'?' selected':'') + '>待处理</option>' +
-                        '<option value="processing"' + (item.status==='processing'?' selected':'') + '>处理中</option>' +
-                        '<option value="resolved"' + (item.status==='resolved'?' selected':'') + '>已解决</option>' +
-                    '</select>' +
-                    '<button class="action-btn reply-btn" data-id="' + item.id + '">' + (item.reply ? '修改回复' : '回复') + '</button>' +
-                '</div>' +
-                '<div class="reply-box" id="replyBox_' + item.id + '" style="display:none;margin-top:10px;">' +
-                    '<textarea class="reply-input" placeholder="输入回复内容..." rows="2" style="width:100%;padding:8px;border-radius:8px;background:var(--theme-bg-soft);color:var(--theme-text);border:1px solid var(--theme-border);resize:vertical;">' + (item.reply || '') + '</textarea>' +
-                    '<div style="margin-top:6px;display:flex;gap:8px;">' +
-                        '<button class="action-btn save-reply-btn" data-id="' + item.id + '">保存回复</button>' +
-                        '<button class="action-btn cancel-reply-btn" data-id="' + item.id + '">取消</button>' +
+            var initial = (item.user_email || '匿').charAt(0).toUpperCase();
+            html += '<div class="feedback-item">' +
+                '<label class="fb-check" title="选择这条反馈"><input type="checkbox" class="fb-item-check" data-id="' + item.id + '"></label>' +
+                '<div class="fb-main">' +
+                    '<div class="feedback-head">' +
+                        '<span class="fb-avatar">' + escapeHtml(initial) + '</span>' +
+                        '<span class="feedback-email">' + escapeHtml(item.user_email || '匿名用户') + '</span>' +
+                        '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
+                        '<span class="feedback-time">' + time + '</span>' +
+                    '</div>' +
+                    '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
+                    (item.reply ? '<div class="feedback-reply">💬 <b>已回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
+                    '<div class="feedback-actions">' +
+                        '<select class="status-select" data-id="' + item.id + '">' +
+                            '<option value="pending"' + (item.status==='pending'?' selected':'') + '>待处理</option>' +
+                            '<option value="processing"' + (item.status==='processing'?' selected':'') + '>处理中</option>' +
+                            '<option value="resolved"' + (item.status==='resolved'?' selected':'') + '>已解决</option>' +
+                        '</select>' +
+                        '<button class="action-btn edit reply-btn" data-id="' + item.id + '">' + (item.reply ? '✏️ 修改回复' : '💬 回复') + '</button>' +
+                        '<button class="action-btn del fb-del" data-id="' + item.id + '">🗑 删除</button>' +
+                    '</div>' +
+                    '<div class="reply-box" id="replyBox_' + item.id + '" style="display:none;margin-top:10px;">' +
+                        '<textarea class="reply-input" placeholder="输入回复内容..." rows="2" style="width:100%;padding:10px 12px;border-radius:10px;background:var(--theme-info-box);color:var(--theme-text);border:1px solid var(--theme-border);font-family:inherit;font-size:0.9em;resize:vertical;outline:none;">' + (item.reply || '') + '</textarea>' +
+                        '<div style="margin-top:6px;display:flex;gap:8px;">' +
+                            '<button class="action-btn save-reply-btn" data-id="' + item.id + '">保存回复</button>' +
+                            '<button class="action-btn cancel-reply-btn" data-id="' + item.id + '">取消</button>' +
+                        '</div>' +
                     '</div>' +
                 '</div>' +
             '</div>';
         });
         listEl.innerHTML = html;
+        resetAdminFbSelection();
 
-        // 状态切换
         listEl.querySelectorAll('.status-select').forEach(function (sel) {
             sel.addEventListener('change', function () {
                 var id = this.getAttribute('data-id');
                 var status = this.value;
-                supabaseClient.from('feedbacks').update({ status: status, updated_at: new Date().toISOString() }).eq('id', id).then(function (r) {
-                    if (r.error) { alert('更新失败：' + r.error.message); return; }
+                supabaseClient.from('feedbacks').update({ status: status, updated_at: new Date().toISOString() }).eq('id', id).select().then(function (r) {
+                    if (r.error) { showToast('更新失败：' + r.error.message, 'error'); return; }
+                    if (!r.data || r.data.length === 0) { showToast('状态未生效：请检查反馈表的 update 权限（RLS 策略）', 'error'); return; }
+                    showToast('状态已更新', 'success');
                 });
             });
         });
 
-        // 回复按钮
         listEl.querySelectorAll('.reply-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var id = this.getAttribute('data-id');
@@ -2835,20 +3008,19 @@ function loadAllFeedbacks() {
             });
         });
 
-        // 保存回复
         listEl.querySelectorAll('.save-reply-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var id = this.getAttribute('data-id');
                 var reply = document.querySelector('#replyBox_' + id + ' .reply-input').value.trim();
-                supabaseClient.from('feedbacks').update({ reply: reply, updated_at: new Date().toISOString() }).eq('id', id).then(function (r) {
-                    if (r.error) { alert('保存失败：' + r.error.message); return; }
-                    alert('回复已保存');
+                supabaseClient.from('feedbacks').update({ reply: reply, updated_at: new Date().toISOString() }).eq('id', id).select().then(function (r) {
+                    if (r.error) { showToast('保存失败：' + r.error.message, 'error'); return; }
+                    if (!r.data || r.data.length === 0) { showToast('回复未保存：请检查反馈表的 update 权限（RLS 策略）', 'error'); return; }
+                    showToast('回复已保存', 'success');
                     loadAllFeedbacks();
                 });
             });
         });
 
-        // 取消回复
         listEl.querySelectorAll('.cancel-reply-btn').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var id = this.getAttribute('data-id');
@@ -2860,6 +3032,106 @@ function loadAllFeedbacks() {
 
 document.getElementById('refreshFeedbackBtn').addEventListener('click', function () { loadAllFeedbacks(); });
 document.getElementById('feedbackFilter').addEventListener('change', function () { loadAllFeedbacks(); });
+
+function resetAdminFbSelection() {
+    var sa = document.getElementById('fbAdminSelectAll');
+    if (sa) sa.checked = false;
+    updateAdminFbSelected();
+}
+function getAdminFbCheckedIds() {
+    var ids = [];
+    document.querySelectorAll('#adminFeedbackList .fb-item-check:checked').forEach(function (c) {
+        ids.push(c.getAttribute('data-id'));
+    });
+    return ids;
+}
+function updateAdminFbSelected() {
+    var ids = getAdminFbCheckedIds();
+    var btn = document.getElementById('fbAdminDeleteSelected');
+    var cnt = document.getElementById('fbAdminSelectedCount');
+    var sa  = document.getElementById('fbAdminSelectAll');
+    if (btn) btn.disabled = ids.length === 0;
+    if (cnt) cnt.textContent = '已选 ' + ids.length + ' 条';
+    if (sa) {
+        var total = document.querySelectorAll('#adminFeedbackList .fb-item-check').length;
+        sa.checked = total > 0 && ids.length === total;
+    }
+}
+function deleteAdminFb(ids, single) {
+    if (!ids.length) return;
+    var msg = single ? '确定删除这条反馈吗？删除后不可恢复。' : '确定删除选中的 ' + ids.length + ' 条反馈吗？删除后不可恢复。';
+    confirmFb(msg).then(function (ok) {
+        if (!ok) return;
+        var q = supabaseClient.from('feedbacks').delete().select();
+        q = single ? q.eq('id', ids[0]) : q.in('id', ids);
+        q.then(function (res) {
+            if (res.error) { showToast('删除失败：' + res.error.message, 'error'); return; }
+            if (!res.data || res.data.length === 0) {
+                showToast('删除未生效：反馈表缺少删除权限（RLS 策略），请先在 Supabase 中添加 delete 策略', 'error');
+                loadAllFeedbacks();
+                return;
+            }
+            showToast(single ? '已删除该反馈' : '已删除 ' + res.data.length + ' 条反馈', 'success');
+            loadAllFeedbacks();
+        });
+    });
+}
+function showToast(msg, type) {
+    var t = document.getElementById('fbToast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'fbToast';
+        t.className = 'fb-toast';
+        document.body.appendChild(t);
+    }
+    t.className = 'fb-toast ' + (type === 'success' ? 'fb-toast-success' : type === 'error' ? 'fb-toast-error' : '');
+    t.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ') + msg;
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(t._t);
+    t._t = setTimeout(function () { t.classList.remove('show'); }, 2600);
+}
+var fbPendingResolve = null;
+function confirmFb(message) {
+    return new Promise(function (resolve) {
+        var mask = document.getElementById('fbModalMask');
+        if (!mask) {
+            mask = document.createElement('div');
+            mask.id = 'fbModalMask';
+            mask.className = 'fb-modal-mask';
+            mask.innerHTML = '<div class="fb-modal"><div class="fb-modal-title">⚠️ 确认删除</div><div class="fb-modal-msg"></div><div class="fb-modal-actions"><button class="fb-btn" data-act="cancel">取消</button><button class="fb-btn fb-btn-ok" data-act="ok">确定删除</button></div></div>';
+            mask.addEventListener('click', function (e) {
+                if (e.target === mask || (e.target.getAttribute && e.target.getAttribute('data-act') === 'cancel')) {
+                    mask.classList.remove('show');
+                    if (fbPendingResolve) fbPendingResolve(false);
+                } else if (e.target.getAttribute && e.target.getAttribute('data-act') === 'ok') {
+                    mask.classList.remove('show');
+                    if (fbPendingResolve) fbPendingResolve(true);
+                }
+            });
+            document.body.appendChild(mask);
+        }
+        mask.querySelector('.fb-modal-msg').textContent = message;
+        fbPendingResolve = resolve;
+        mask.classList.add('show');
+    });
+}
+
+document.getElementById('fbAdminSelectAll').addEventListener('change', function () {
+    var checked = this.checked;
+    document.querySelectorAll('#adminFeedbackList .fb-item-check').forEach(function (c) { c.checked = checked; });
+    updateAdminFbSelected();
+});
+document.getElementById('fbAdminDeleteSelected').addEventListener('click', function () {
+    deleteAdminFb(getAdminFbCheckedIds(), false);
+});
+document.getElementById('adminFeedbackList').addEventListener('change', function (e) {
+    if (e.target && e.target.classList.contains('fb-item-check')) updateAdminFbSelected();
+});
+document.getElementById('adminFeedbackList').addEventListener('click', function (e) {
+    var del = e.target.closest ? e.target.closest('.fb-del') : null;
+    if (del) deleteAdminFb([del.getAttribute('data-id')], true);
+});
 
 /* 每日签到积分管理 */
 function loadPointsConfig() {
@@ -2891,7 +3163,6 @@ document.getElementById('saveConfigBtn').addEventListener('click', function () {
         sunday:    parseInt(document.getElementById('cfgSunday').value)    || 0,
         updated_at: new Date().toISOString()
     };
-
     supabaseClient.from('checkin_config').upsert(data, { onConflict: 'id' })
         .then(function (res) {
             btn.disabled = false;
@@ -2905,26 +3176,27 @@ function loadPoints() {
 
     var body = document.getElementById('pointsBody');
     var badge = document.getElementById('badgePoints');
-    body.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
 
     supabaseClient.from('profiles')
-        .select('id, email, full_name, avatar_url, points, checkin_streak, last_checkin_date')
+        .select('id, uid, email, full_name, avatar_url, points, checkin_streak, last_checkin_date')
         .order('points', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                body.innerHTML = '<tr><td colspan="5" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                body.innerHTML = '<tr><td colspan="6" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
                 return;
             }
             var data = res.data || [];
             badge.textContent = data.length + ' 人';
             if (data.length === 0) {
-                body.innerHTML = '<tr><td colspan="5" class="empty">暂无数据</td></tr>';
+                body.innerHTML = '<tr><td colspan="6" class="empty">暂无数据</td></tr>';
                 return;
             }
             var html = '';
             data.forEach(function (item) {
                 var avatar = item.avatar_url || DEFAULT_AVATAR;
                 html += '<tr>' +
+                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '未分配') + '</strong></td>' +
                     '<td><div class="user-cell">' +
                         '<img class="user-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
                         '<div style="display:flex;flex-direction:column;">' +
@@ -2992,6 +3264,7 @@ document.getElementById('pointsConfirmBtn').addEventListener('click', function (
         loadPoints();
     });
 });
+
 /* 忘记密码申请 */
 function loadForgotRequests() {
     var body = document.getElementById('forgotBody');
@@ -3041,16 +3314,17 @@ document.getElementById('refreshForgotBtn').addEventListener('click', function (
     loadForgotRequests();
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
+
 /* 注册用户列表 */
 function loadProfiles() {
     var body = document.getElementById('profilesBody');
     var badge = document.getElementById('badgeProfiles');
-    body.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+    body.innerHTML = '<tr><td colspan="7" class="loading">加载中...</td></tr>';
     supabaseClient.from('profiles').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                body.innerHTML = '<tr><td colspan="6" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                body.innerHTML = '<tr><td colspan="7" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
                 return;
             }
             var data = res.data || [];
@@ -3058,7 +3332,7 @@ function loadProfiles() {
             badge.textContent = data.length + ' 人';
             updateManageSelect();
             if (data.length === 0) {
-                body.innerHTML = '<tr><td colspan="6" class="empty">暂无用户</td></tr>';
+                body.innerHTML = '<tr><td colspan="7" class="empty">暂无用户</td></tr>';
                 return;
             }
             var html = '';
@@ -3077,6 +3351,8 @@ function loadProfiles() {
                     if (rt) remain = '<span class="remaining-tag">剩余：' + escapeHtml(rt) + '</span>';
                 }
                 html += '<tr>' +
+                    /* ★ UID 列 ★ */
+                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '未分配') + '</strong></td>' +
                     '<td><div class="user-cell">' +
                         '<img class="user-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
                         '<span>' + escapeHtml(item.email) + '</span>' +
@@ -3142,7 +3418,7 @@ function bindProfileActions() {
         });
     });
 }
-/* 封禁弹窗 */
+
 function updateBanPreview() {
     var d = parseInt(document.getElementById('banDays').value) || 0;
     var h = parseInt(document.getElementById('banHours').value) || 0;
@@ -3178,7 +3454,6 @@ document.getElementById('banConfirmBtn').addEventListener('click', function () {
     var h = parseInt(document.getElementById('banHours').value)   || 0;
     var m = parseInt(document.getElementById('banMinutes').value) || 0;
 
-    /* 精确到秒。全填 0 = 永久封禁（传 0） */
     var totalSeconds = 0;
     if (d !== 0 || h !== 0 || m !== 0) {
         totalSeconds = d * 86400 + h * 3600 + m * 60;
@@ -3203,13 +3478,15 @@ document.getElementById('banConfirmBtn').addEventListener('click', function () {
         loadProfiles();
     });
 });
+
 /* 用户管理 */
 function updateManageSelect() {
     var sel = document.getElementById('manageUserSelect');
     var cur = sel.value;
     var html = '<option value="">-- 请选择用户 --</option>';
     allProfiles.forEach(function (p) {
-        html += '<option value="' + p.id + '">' + escapeHtml((p.email || '未知') + ' （' + (p.full_name || '未设置昵称') + '）') + '</option>';
+        var uidTag = p.uid ? ('[UID ' + p.uid + '] ') : '';
+        html += '<option value="' + p.id + '">' + escapeHtml(uidTag + (p.email || '未知') + ' （' + (p.full_name || '未设置昵称') + '）') + '</option>';
     });
     sel.innerHTML = html;
     if (cur) sel.value = cur;
@@ -3219,6 +3496,8 @@ document.getElementById('manageUserSelect').addEventListener('change', function 
     if (!id) { clearManageForm(); updatePreview(null); return; }
     var user = allProfiles.find(function (p) { return p.id === id; });
     if (!user) { clearManageForm(); updatePreview(null); return; }
+    /* ★ 回填 UID ★ */
+    document.getElementById('manageUid').value = user.uid != null ? String(user.uid) : '';
     document.getElementById('manageName').value = user.full_name || '';
     document.getElementById('managePhone').value = user.phone || '';
     document.getElementById('manageEmail').value = user.email || '';
@@ -3252,6 +3531,7 @@ function updatePreview(user) {
 }
 
 function clearManageForm() {
+    document.getElementById('manageUid').value = '';
     document.getElementById('manageName').value = '';
     document.getElementById('managePhone').value = '';
     document.getElementById('manageEmail').value = '';
@@ -3270,6 +3550,8 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
     var user = allProfiles.find(function (p) { return p.id === userId; });
     if (!user) { alert('找不到该用户信息'); return; }
 
+    /* ★ 读取表单里的 UID ★ */
+    var newUid   = document.getElementById('manageUid').value.trim();
     var newName  = document.getElementById('manageName').value.trim();
     var newPhone = document.getElementById('managePhone').value.trim();
     var newEmail = document.getElementById('manageEmail').value.trim();
@@ -3277,6 +3559,33 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
 
     var tasks = [];
     var messages = [];
+
+    /* ★ UID 校验 & 任务 ★ */
+    var oldUid = user.uid != null ? String(user.uid) : '';
+    if (newUid !== oldUid) {
+        if (newUid === '') {
+            alert('UID 不能为空');
+            return;
+        }
+        if (!/^\d{5,9}$/.test(newUid)) {
+            alert('UID 必须是 5 到 9 位的纯数字！');
+            return;
+        }
+        tasks.push(
+            supabaseClient.from('profiles').update({ uid: parseInt(newUid, 10) }).eq('id', userId)
+                .then(function (r) {
+                    if (r.error) {
+                        if (r.error.code === '23505') {
+                            return { ok: false, field: 'UID', err: { message: '该 UID 已被其他用户占用，请更换' } };
+                        }
+                        return { ok: false, field: 'UID', err: r.error };
+                    }
+                    return { ok: true, field: 'UID' };
+                })
+        );
+        messages.push('UID');
+    }
+
     var nameChanged  = newName  !== (user.full_name || '');
     var phoneChanged = newPhone !== (user.phone || '');
 
@@ -3335,11 +3644,7 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
     });
 });
 
-/* ============================================================
- *  管理端积分商城
- * ============================================================ */
-
-/* 限购开关逻辑 */
+/* 管理端积分商城 */
 function bindLimitToggle(toggleId, inputId) {
     var t = document.getElementById(toggleId);
     var i = document.getElementById(inputId);
@@ -3413,7 +3718,6 @@ function loadAdminShop() {
             });
             grid.innerHTML = html;
 
-            // 删除商品
             grid.querySelectorAll('.btn-del').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var id = this.getAttribute('data-id');
@@ -3426,7 +3730,6 @@ function loadAdminShop() {
                 });
             });
 
-            // 编辑商品（弹窗）
             grid.querySelectorAll('.btn-edit').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var id = this.getAttribute('data-id');
@@ -3443,7 +3746,6 @@ function loadAdminShop() {
                     document.getElementById('editShopImage').value  = it.image_url || '';
                     document.getElementById('editShopIcon').value   = it.icon || '🎁';
 
-                    // 限购回填
                     var editToggle = document.getElementById('editLimitToggle');
                     var editLimitInput = document.getElementById('editShopLimit');
                     if (it.per_user_limit != null && it.per_user_limit > 0) {
@@ -3472,7 +3774,6 @@ document.getElementById('refreshShopBtn').addEventListener('click', function () 
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
 
-/* 上架商品 */
 document.getElementById('addShopBtn').addEventListener('click', function () {
     var name   = document.getElementById('addShopName').value.trim();
     var price  = parseInt(document.getElementById('addShopPrice').value, 10) || 0;
@@ -3514,7 +3815,6 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
         });
         document.getElementById('addShopStock').value = '10';
         document.getElementById('addShopIcon').value  = '🎁';
-        // 重置限购
         var addToggle = document.getElementById('addLimitToggle');
         var addLimitInput = document.getElementById('addShopLimit');
         addToggle.dataset.on = 'false';
@@ -3526,7 +3826,6 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
     });
 });
 
-/* 保存编辑商品 */
 document.getElementById('editShopSaveBtn').addEventListener('click', function () {
     var id = currentEditShopId;
     if (!id) return;
@@ -3576,9 +3875,7 @@ document.getElementById('editShopModal').addEventListener('click', function (e) 
     }
 });
 
-/* ============================================================
- *  兑换记录（按用户折叠）
- * ============================================================ */
+/* 兑换记录 */
 function loadPurchases() {
     var listEl = document.getElementById('purchaseUsersList');
     var badge  = document.getElementById('badgePurchases');
@@ -3600,7 +3897,6 @@ function loadPurchases() {
                 return;
             }
 
-            /* 按用户分组 */
             var groups = {};
             records.forEach(function (r) {
                 var uid = r.user_id || 'unknown';
@@ -3612,9 +3908,8 @@ function loadPurchases() {
 
             var userIds = Object.keys(groups);
 
-            /* 查询这些用户的 profile */
             supabaseClient.from('profiles')
-                .select('id, email, full_name, avatar_url')
+                .select('id, uid, email, full_name, avatar_url')
                 .in('id', userIds)
                 .then(function (pRes) {
                     var profiles = {};
@@ -3632,6 +3927,7 @@ function loadPurchases() {
                         var name = u.full_name || u.email || '未知用户';
                         var email = u.email || '';
                         var avatar = u.avatar_url || DEFAULT_AVATAR;
+                        var uidTag = u.uid ? ('UID ' + u.uid + ' · ') : '';
 
                         var recordsHtml = '';
                         recs.forEach(function (r) {
@@ -3653,7 +3949,7 @@ function loadPurchases() {
                                     '<img class="pu-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
                                     '<div class="pu-info">' +
                                         '<div class="pu-name">' + escapeHtml(name) + '</div>' +
-                                        '<div class="pu-email">' + escapeHtml(email) + '</div>' +
+                                        '<div class="pu-email">' + escapeHtml(uidTag + email) + '</div>' +
                                     '</div>' +
                                     '<span class="pu-count">' + recs.length + ' 件</span>' +
                                     '<span class="pu-last">最近：' + lastTime + '</span>' +
@@ -3665,7 +3961,6 @@ function loadPurchases() {
 
                     listEl.innerHTML = html;
 
-                    /* 绑定折叠/展开：点击一个用户时，其他用户自动折叠 */
                     listEl.querySelectorAll('.purchase-user-head').forEach(function (head) {
                         head.addEventListener('click', function () {
                             var card = this.parentElement;
@@ -3756,8 +4051,6 @@ function myToDateStr(d) {
     var dd = String(d.getDate()).padStart(2, '0');
     return y + '-' + m + '-' + dd;
 }
-
-/* 签到日期统一按 Asia/Shanghai（北京时间）计算，与服务端 do_checkin 保持一致 */
 function myShanghaiNow() {
     var now = new Date();
     return new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000);
@@ -3847,8 +4140,7 @@ function myRefreshCheckinUI() {
         if (hasCheckedToday) {
             btn.textContent = '✓ 今日已签到';
             btn.disabled = true;
-            document.getElementById('myTodayReward').textContent =
-                '+' + (todayRow.points || 0);
+            document.getElementById('myTodayReward').textContent = '+' + (todayRow.points || 0);
         } else {
             btn.textContent = '签 到';
             btn.disabled = false;
@@ -3918,10 +4210,6 @@ document.getElementById('myCheckinBtn').addEventListener('click', function () {
 });
 
 /* 我的好友 */
-var myFriendsCache = [];
-var myCurrentChatFriend = null;
-var myChatPollTimer = null;
-
 function myLoadFriends() {
     if (!currentAdmin) return;
 
@@ -4105,8 +4393,6 @@ document.getElementById('myAddFriendBtn').addEventListener('click', function () 
         });
 });
 
-var myLastMsgTs = null;
-
 function myOpenChat(friend) {
     myCurrentChatFriend = friend;
     myLastMsgTs = null;
@@ -4256,7 +4542,6 @@ document.getElementById('myChatInput').addEventListener('keydown', function (e) 
         }
     });
 })();
-
 </script>
 
 <script src="other/theme.js"></script>

@@ -3,6 +3,7 @@
  *  - 每 5 秒轮询一次未读消息
  *  - 有新消息 → 播放提示音 + 显示右上角提示框
  *  - 点击提示框 → 跳到"我的好友"
+ *  ⭐ 修复：初始 lastSeenTs 往前推 10 秒，避免漏消息
  *  依赖：window.supabaseClient、window.LoginSound
  * ============================================================ */
 (function () {
@@ -13,31 +14,30 @@
         return;
     }
 
-    var POLL_INTERVAL = 5000;      // 5 秒轮询
-    var lastSeenTs    = null;      // 上次已处理的消息时间
+    var POLL_INTERVAL = 5000;
+    var INITIAL_LOOKBACK = 10 * 1000;   // 初始回溯 10 秒
+
+    var lastSeenTs    = null;
     var currentUserId = null;
     var pollTimer     = null;
 
-    /* ---------- 启动 ---------- */
     window.supabaseClient.auth.getSession().then(function (res) {
         var session = res.data && res.data.session;
         if (!session) return;
 
         currentUserId = session.user.id;
 
-        /* 页面打开时，把 lastSeenTs 设为"现在"，只处理后续新消息 */
-        lastSeenTs = new Date().toISOString();
+        // ⭐ 往前推 10 秒，避免时钟误差漏消息
+        lastSeenTs = new Date(Date.now() - INITIAL_LOOKBACK).toISOString();
 
         if (pollTimer) clearInterval(pollTimer);
         pollTimer = setInterval(checkNewMessages, POLL_INTERVAL);
 
-        /* 立即查一次（避免刚进页面就错过） */
         checkNewMessages();
 
         console.log('[消息通知] 已启动，用户 =', currentUserId);
     });
 
-    /* ---------- 轮询未读消息 ---------- */
     function checkNewMessages() {
         if (!currentUserId) return;
 
@@ -56,22 +56,18 @@
                 var data = r.data || [];
                 if (data.length === 0) return;
 
-                /* 更新 lastSeenTs 到最新一条 */
                 lastSeenTs = data[data.length - 1].created_at;
 
-                /* 播放提示音 */
                 if (window.LoginSound && window.LoginSound.playMessageIfEnabled) {
                     window.LoginSound.playMessageIfEnabled();
                 }
 
-                /* 显示提示框 */
                 showToast(data.length);
 
                 console.log('[消息通知] 收到 ' + data.length + ' 条新消息');
             });
     }
 
-    /* ---------- 显示右上角提示框 ---------- */
     function showToast(count) {
         var old = document.getElementById('msgNotifyToast');
         if (old) old.remove();
@@ -111,13 +107,11 @@
 
         document.body.appendChild(el);
 
-        /* 入场动画 */
         requestAnimationFrame(function () {
             el.style.opacity = '1';
             el.style.transform = 'translateY(0)';
         });
 
-        /* 点击 → 跳到"我的好友" */
         el.addEventListener('click', function () {
             var tab =
                 document.querySelector('.nav-item[data-tab="friends"]') ||
@@ -126,7 +120,6 @@
             el.remove();
         });
 
-        /* 5 秒后自动消失 */
         setTimeout(function () {
             el.style.opacity = '0';
             el.style.transform = 'translateY(-12px)';

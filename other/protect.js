@@ -27,8 +27,8 @@
         // action = 'redirect' 时跳转的地址
         redirectUrl: 'about:blank',
 
-        // 循环检测间隔（毫秒）
-        interval: 1000,
+        // 循环检测间隔（毫秒）—— 3 秒一次，降低性能开销
+        interval: 3000,
 
         // 是否拦截键盘快捷键（F12 / Ctrl+Shift+I / J / C / U / S）
         blockShortcuts: true,
@@ -36,7 +36,7 @@
         // 是否禁用右键菜单
         blockContextMenu: true,
 
-        // ⭐ 修复：放宽到 220，避免非最大化窗口被误判
+        // 窗口内外尺寸差阈值
         sizeThreshold: 220,
 
         // 遮罩提示文字
@@ -47,9 +47,6 @@
      *  二、基础工具
      * ======================================================== */
 
-    /**
-     * 显示全屏遮罩警告
-     */
     function showWarnOverlay() {
         if (document.getElementById('__protect_overlay__')) return;
 
@@ -57,10 +54,8 @@
         overlay.id = '__protect_overlay__';
         overlay.style.cssText = [
             'position: fixed',
-            'top: 0',
-            'left: 0',
-            'width: 100vw',
-            'height: 100vh',
+            'top: 0', 'left: 0',
+            'width: 100vw', 'height: 100vh',
             'background: rgba(0,0,0,0.92)',
             'color: #ff6b3d',
             'display: flex',
@@ -93,35 +88,20 @@
         document.body.appendChild(overlay);
     }
 
-    /**
-     * 关闭遮罩
-     */
     function removeWarnOverlay() {
         var el = document.getElementById('__protect_overlay__');
         if (el && el.parentNode) el.parentNode.removeChild(el);
     }
 
-    /**
-     * 清空页面
-     */
     function clearPage() {
         document.body.innerHTML = '';
     }
 
-    /**
-     * 检测到异常时的统一处理
-     */
     function handleDetected() {
         switch (CONFIG.action) {
-            case 'warn':
-                showWarnOverlay();
-                break;
-            case 'redirect':
-                location.replace(CONFIG.redirectUrl);
-                break;
-            case 'clear':
-                clearPage();
-                break;
+            case 'warn':     showWarnOverlay(); break;
+            case 'redirect': location.replace(CONFIG.redirectUrl); break;
+            case 'clear':    clearPage(); break;
             case 'none':
             default:
                 try { console.clear(); } catch (e) {}
@@ -129,15 +109,12 @@
         }
     }
 
-    /**
-     * 恢复正常时的处理
-     */
     function handleSafe() {
         if (CONFIG.action === 'warn') removeWarnOverlay();
     }
 
     /* ========================================================
-     *  三、三种检测手段
+     *  三、两种检测手段（去掉 debugger 陷阱）
      * ======================================================== */
 
     /**
@@ -151,37 +128,21 @@
     }
 
     /**
-     * 检测 2：debugger 计时
-     * 未打开调试器时，debugger 是空语句，几乎无耗时；
-     * 打开调试器时会被暂停，耗时明显变大
-     */
-    function debuggerCheck() {
-        var t0 = performance.now();
-        // eslint-disable-next-line no-debugger
-        debugger;
-        var t1 = performance.now();
-        return (t1 - t0) > 100;
-    }
-
-    /**
-     * 检测 3：console 陷阱
+     * 检测 2：console 陷阱
      * 在 console.log 一个自定义 toString 的对象时，
      * 只有开发者工具打开，浏览器才会调用 toString
      */
     var consoleCheck = (function () {
         var opened = false;
-
         var probe = function () {};
         probe.toString = function () {
             opened = true;
             return 'function () { [native code] }';
         };
-
         try {
             console.log(probe);
             try { console.clear(); } catch (e) {}
         } catch (e) {}
-
         return function () {
             var result = opened;
             opened = false;
@@ -199,25 +160,21 @@
             var ctrl  = e.ctrlKey || e.metaKey;
             var shift = e.shiftKey;
 
-            // F12
             if (k === 'F12') {
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
             }
-            // Ctrl + Shift + I / J / C（开发者工具 / 控制台 / 元素选择）
             if (ctrl && shift && /^(I|J|C|i|j|c)$/.test(k)) {
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
             }
-            // Ctrl + U（查看源码）
             if (ctrl && /^(U|u)$/.test(k)) {
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
             }
-            // Ctrl + S（保存页面）
             if (ctrl && /^(S|s)$/.test(k)) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -237,7 +194,7 @@
      *  五、循环检测
      * ======================================================== */
     function loopCheck() {
-        var detected = sizeCheck() || consoleCheck() || debuggerCheck();
+        var detected = sizeCheck() || consoleCheck();
         if (detected) {
             handleDetected();
         } else {
@@ -245,14 +202,12 @@
         }
     }
 
-    // 首次执行
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', loopCheck);
     } else {
         loopCheck();
     }
 
-    // 循环执行
     setInterval(loopCheck, CONFIG.interval);
 
     /* ========================================================

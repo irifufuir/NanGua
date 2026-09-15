@@ -2,6 +2,7 @@
  * 主题系统 · 独立模块（Supabase 同步版）
  * 支持：主题配色 / 字号 / 圆角 / 动效 的保存与同步
  * 主题切换带"从左到右扫描"效果
+ * ⭐ 修复：连点防抖 + 清理旧 overlay
  * ============================================================ */
 
 (function () {
@@ -87,13 +88,25 @@
     }
 
     /* ============================================================
-     * 主题切换 —— 带"从左到右扫描"效果
+     * 主题切换 —— 带"从左到右扫描"效果（含防抖）
      * ============================================================ */
+    var lastSwitchTs = 0;
+    var SWITCH_COOLDOWN = 900;   // 与动画时长一致
+
     function switchThemeWithScan(themeCode) {
+        var now = Date.now();
+        if (now - lastSwitchTs < SWITCH_COOLDOWN) return;
+        lastSwitchTs = now;
+
+        // 清掉所有旧的扫描层
+        document.querySelectorAll('.theme-scan-overlay').forEach(function (o) {
+            if (o.parentNode) o.parentNode.removeChild(o);
+        });
+
         var html = document.documentElement;
         var prevTheme = html.getAttribute('data-theme') || 'default';
 
-        // 1. 临时应用目标主题，读取目标背景色
+        // 1. 临时切到目标，读取背景色
         if (themeCode === 'default') {
             html.removeAttribute('data-theme');
         } else {
@@ -103,33 +116,33 @@
         var bgStart = cs.getPropertyValue('--theme-bg-start').trim() || '#131519';
         var bgEnd   = cs.getPropertyValue('--theme-bg-end').trim()   || '#101216';
 
-        // 2. 恢复原主题（稍后正式切换）
+        // 2. 恢复原主题
         if (prevTheme === 'default') {
             html.removeAttribute('data-theme');
         } else {
             html.setAttribute('data-theme', prevTheme);
         }
 
-        // 3. 创建扫描 overlay
+        // 3. 建 overlay
         var overlay = document.createElement('div');
         overlay.className = 'theme-scan-overlay';
         overlay.style.background = 'linear-gradient(160deg, ' + bgStart + ' 0%, ' + bgEnd + ' 100%)';
         document.body.appendChild(overlay);
 
-        // 4. 动画中点切换主题
+        // 4. 动画中点正式切
         setTimeout(function () {
             setLocal('theme', themeCode);
             applyAll(readPrefs());
             saveToSupabase('theme', themeCode);
         }, 400);
 
-        // 5. 动画结束移除 overlay
+        // 5. 结束移除
         setTimeout(function () {
             if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
         }, 900);
     }
 
-    /* ---------- 其他设置保存 ---------- */
+    /* ---------- 保存到 Supabase ---------- */
     function saveToSupabase(key, value) {
         var sb = window.supabaseClient;
         if (!sb || !sb.auth) return;
