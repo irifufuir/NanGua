@@ -227,7 +227,6 @@
     var i18n = window.I18N;
     var currentLang = 'zh';
 
-    /* ★ i18n 快捷取值：支持 "common.cancel" 这种深路径 */
     function t(key, fallback) {
         var dict = (i18n && i18n[currentLang]) || (i18n && i18n.zh) || {};
         var parts = String(key).split('.');
@@ -337,7 +336,6 @@
         return msg;
     }
 
-    /* ★ 让封禁弹窗的静态文字跟着语言变 */
     function refreshBanModalLabels() {
         var banTitleEl  = document.querySelector('.ban-title');
         var banDescEl   = document.querySelector('.ban-desc');
@@ -352,7 +350,7 @@
     }
 
     function showBanModal(email, bannedUntil) {
-        refreshBanModalLabels();   /* ★ 弹窗前刷新静态文案 */
+        refreshBanModalLabels();
         banModal.style.display = 'flex';
         banUntilDate.textContent = t('banQuerying');
         banRemaining.textContent = t('banQuerying');
@@ -508,6 +506,9 @@
         backLoginLink.textContent = dict.backLogin;
         registerBtn.textContent = dict.registerBtn;
 
+        /* ★ 新增：已注册标签 */
+        regExistsTag.textContent = dict.tipRegExists || '用户已注册';
+
         forgotTitle.textContent      = dict.forgotTitle;
         forgotEmailLabel.textContent = dict.forgotEmailLabel;
         forgotEmail.placeholder      = dict.forgotEmailPlaceholder;
@@ -518,10 +519,8 @@
         forgotSubmitBtn.textContent  = dict.forgotSubmit;
         forgotCancelBtn.textContent  = dict.forgotCancel;
 
-        /* ★ 补丁：封禁弹窗 */
         refreshBanModalLabels();
 
-        /* ★ 补丁：设备提示 */
         var deviceHintEl = document.getElementById('deviceHint');
         if (deviceHintEl && dict.deviceHintPrefix) {
             deviceHintEl.innerHTML = dict.deviceHintPrefix +
