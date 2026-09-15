@@ -5,6 +5,14 @@ window.I18N = {
 
     /* ============ 简体中文 ============ */
     zh: {
+        /* ===== 封禁弹窗 ===== */
+        banTitle: '账号已被封禁',
+        banDesc: '您的账号已被管理员封禁，暂时无法登录。',
+        banUntilLabel: '解封时间',
+        banRemainLabel: '剩余时间',
+        banCloseBtn: '我知道了',
+        banHoursShort: '小时',
+
         /* ===== 登录页动态提示 ===== */
         deviceHintPrefix: '💻 当前设备：',
         deviceDetecting: '检测中...',
@@ -88,7 +96,10 @@ window.I18N = {
             admin: '管理员', user: '普通用户',
             submit: '提交', search: '搜索', reset: '清空',
             close: '关闭', back: '返回', yes: '是', no: '否',
-            apply: '应用', ok: '好的', success: '操作成功', fail: '操作失败'
+            apply: '应用', ok: '好的', success: '操作成功', fail: '操作失败',
+            themeFontSmall: '小', themeFontMedium: '标准', themeFontLarge: '大', themeFontXl: '特大',
+            themeRadiusSmall: '直角', themeRadiusMedium: '标准', themeRadiusLarge: '圆润',
+            themeAnimOn: '开启', themeAnimOff: '关闭'
         },
 
         userDash: {
@@ -226,6 +237,8 @@ window.I18N = {
             managePassword: '新密码', managePasswordHint: '留空则不修改',
             manageSave: '💾 保存修改', manageReset: '清空',
             manageNoUser: '未选择用户', manageSelectHint: '请从右侧下拉框选择',
+            manageHint1: '修改后点击右侧「保存修改」',
+            manageHint2: '昵称、手机号、邮箱、密码、UID 将实时同步',
 
             shopMgrTitle: '🛒 积分商城管理',
             shopAddName: '① 商品名称', shopAddPrice: '② 积分价格', shopAddStock: '③ 库存',
@@ -298,6 +311,14 @@ window.I18N = {
     },
     /* ============ English ============ */
     en: {
+        /* ===== 封禁弹窗 ===== */
+        banTitle: 'Account Banned',
+        banDesc: 'Your account has been banned by the admin. You cannot log in for now.',
+        banUntilLabel: 'Unban Time',
+        banRemainLabel: 'Remaining',
+        banCloseBtn: 'Got it',
+        banHoursShort: 'h',
+
         /* ===== 登录页动态提示 ===== */
         deviceHintPrefix: '💻 Current device: ',
         deviceDetecting: 'Detecting...',
@@ -384,7 +405,10 @@ window.I18N = {
             admin: 'Admin', user: 'User',
             submit: 'Submit', search: 'Search', reset: 'Clear',
             close: 'Close', back: 'Back', yes: 'Yes', no: 'No',
-            apply: 'Apply', ok: 'OK', success: 'Success', fail: 'Failed'
+            apply: 'Apply', ok: 'OK', success: 'Success', fail: 'Failed',
+            themeFontSmall: 'Small', themeFontMedium: 'Medium', themeFontLarge: 'Large', themeFontXl: 'XL',
+            themeRadiusSmall: 'Sharp', themeRadiusMedium: 'Medium', themeRadiusLarge: 'Rounded',
+            themeAnimOn: 'On', themeAnimOff: 'Off'
         },
 
         userDash: {
@@ -522,6 +546,8 @@ window.I18N = {
             managePassword: 'New Password', managePasswordHint: 'Leave blank to keep',
             manageSave: '💾 Save', manageReset: 'Clear',
             manageNoUser: 'No user selected', manageSelectHint: 'Select from the dropdown',
+            manageHint1: 'Click "Save" on the right after editing',
+            manageHint2: 'Nickname, phone, email, password, UID sync in real time',
 
             shopMgrTitle: '🛒 Shop Manager',
             shopAddName: '① Item Name', shopAddPrice: '② Points Price', shopAddStock: '③ Stock',
@@ -594,6 +620,14 @@ window.I18N = {
     },
     /* ============ 日本語 ============ */
     ja: {
+        /* ===== 封禁弹窗 ===== */
+        banTitle: 'アカウント停止中',
+        banDesc: '管理者によりアカウントが停止されました。現在ログインできません。',
+        banUntilLabel: '解除予定',
+        banRemainLabel: '残り時間',
+        banCloseBtn: '了解しました',
+        banHoursShort: '時間',
+
         /* ===== 登录页动态提示 ===== */
         deviceHintPrefix: '💻 現在のデバイス：',
         deviceDetecting: '検出中...',
@@ -680,7 +714,10 @@ window.I18N = {
             admin: '管理者', user: '一般ユーザー',
             submit: '送信', search: '検索', reset: 'クリア',
             close: '閉じる', back: '戻る', yes: 'はい', no: 'いいえ',
-            apply: '適用', ok: 'OK', success: '成功', fail: '失敗'
+            apply: '適用', ok: 'OK', success: '成功', fail: '失敗',
+            themeFontSmall: '小', themeFontMedium: '標準', themeFontLarge: '大', themeFontXl: '特大',
+            themeRadiusSmall: '直角', themeRadiusMedium: '標準', themeRadiusLarge: '丸み',
+            themeAnimOn: 'オン', themeAnimOff: 'オフ'
         },
 
         userDash: {
@@ -818,6 +855,8 @@ window.I18N = {
             managePassword: '新しいパスワード', managePasswordHint: '空欄なら変更なし',
             manageSave: '💾 保存', manageReset: 'クリア',
             manageNoUser: 'ユーザー未選択', manageSelectHint: '右のドロップダウンから選択',
+            manageHint1: '編集後、右側の「保存」をクリック',
+            manageHint2: 'ニックネーム・電話・メール・パスワード・UIDが即時同期されます',
 
             shopMgrTitle: '🛒 ショップ管理',
             shopAddName: '① 商品名', shopAddPrice: '② ポイント価格', shopAddStock: '③ 在庫',
@@ -890,6 +929,14 @@ window.I18N = {
     },
     /* ============ 한국어 ============ */
     ko: {
+        /* ===== 封禁弹窗 ===== */
+        banTitle: '계정이 차단되었습니다',
+        banDesc: '관리자에 의해 계정이 차단되었습니다. 현재 로그인할 수 없습니다.',
+        banUntilLabel: '차단 해제 시간',
+        banRemainLabel: '남은 시간',
+        banCloseBtn: '확인',
+        banHoursShort: '시간',
+
         /* ===== 登录页动态提示 ===== */
         deviceHintPrefix: '💻 현재 기기: ',
         deviceDetecting: '감지 중...',
@@ -976,7 +1023,10 @@ window.I18N = {
             admin: '관리자', user: '일반 사용자',
             submit: '제출', search: '검색', reset: '초기화',
             close: '닫기', back: '뒤로', yes: '예', no: '아니오',
-            apply: '적용', ok: '확인', success: '성공', fail: '실패'
+            apply: '적용', ok: '확인', success: '성공', fail: '실패',
+            themeFontSmall: '작게', themeFontMedium: '보통', themeFontLarge: '크게', themeFontXl: '특대',
+            themeRadiusSmall: '직각', themeRadiusMedium: '보통', themeRadiusLarge: '둥글게',
+            themeAnimOn: '켜기', themeAnimOff: '끄기'
         },
 
         userDash: {
@@ -1114,6 +1164,8 @@ window.I18N = {
             managePassword: '새 비밀번호', managePasswordHint: '비우면 변경 안 함',
             manageSave: '💾 저장', manageReset: '지우기',
             manageNoUser: '사용자 미선택', manageSelectHint: '오른쪽 드롭다운에서 선택',
+            manageHint1: '편집 후 오른쪽 "저장"을 클릭하세요',
+            manageHint2: '닉네임·전화·이메일·비밀번호·UID가 실시간 동기화됩니다',
 
             shopMgrTitle: '🛒 샵 관리',
             shopAddName: '① 상품명', shopAddPrice: '② 포인트 가격', shopAddStock: '③ 재고',
@@ -1186,6 +1238,14 @@ window.I18N = {
     },
     /* ============ Français ============ */
     fr: {
+        /* ===== 封禁弹窗 ===== */
+        banTitle: 'Compte banni',
+        banDesc: 'Votre compte a été banni par l\'administrateur. Connexion impossible pour le moment.',
+        banUntilLabel: 'Déblocage',
+        banRemainLabel: 'Restant',
+        banCloseBtn: 'Compris',
+        banHoursShort: 'h',
+
         /* ===== 登录页动态提示 ===== */
         deviceHintPrefix: '💻 Appareil actuel : ',
         deviceDetecting: 'Détection...',
@@ -1272,7 +1332,10 @@ window.I18N = {
             admin: 'Admin', user: 'Utilisateur',
             submit: 'Envoyer', search: 'Rechercher', reset: 'Effacer',
             close: 'Fermer', back: 'Retour', yes: 'Oui', no: 'Non',
-            apply: 'Appliquer', ok: 'OK', success: 'Succès', fail: 'Échec'
+            apply: 'Appliquer', ok: 'OK', success: 'Succès', fail: 'Échec',
+            themeFontSmall: 'Petit', themeFontMedium: 'Standard', themeFontLarge: 'Grand', themeFontXl: 'Très grand',
+            themeRadiusSmall: 'Droit', themeRadiusMedium: 'Standard', themeRadiusLarge: 'Arrondi',
+            themeAnimOn: 'Activé', themeAnimOff: 'Désactivé'
         },
 
         userDash: {
@@ -1410,6 +1473,8 @@ window.I18N = {
             managePassword: 'Nouveau mot de passe', managePasswordHint: 'Laisser vide pour ne pas changer',
             manageSave: '💾 Enregistrer', manageReset: 'Effacer',
             manageNoUser: 'Aucun utilisateur sélectionné', manageSelectHint: 'Sélectionnez dans la liste',
+            manageHint1: 'Cliquez sur « Enregistrer » à droite après modification',
+            manageHint2: 'Pseudo, téléphone, e-mail, mot de passe et UID synchronisés en temps réel',
 
             shopMgrTitle: '🛒 Gestion de la boutique',
             shopAddName: '① Nom', shopAddPrice: '② Prix en points', shopAddStock: '③ Stock',
@@ -1482,6 +1547,14 @@ window.I18N = {
     },
     /* ============ Español ============ */
     es: {
+        /* ===== 封禁弹窗 ===== */
+        banTitle: 'Cuenta bloqueada',
+        banDesc: 'Tu cuenta ha sido bloqueada por el administrador. No puedes iniciar sesión por ahora.',
+        banUntilLabel: 'Desbloqueo',
+        banRemainLabel: 'Restante',
+        banCloseBtn: 'Entendido',
+        banHoursShort: 'h',
+
         /* ===== 登录页动态提示 ===== */
         deviceHintPrefix: '💻 Dispositivo actual: ',
         deviceDetecting: 'Detectando...',
@@ -1568,7 +1641,10 @@ window.I18N = {
             admin: 'Administrador', user: 'Usuario',
             submit: 'Enviar', search: 'Buscar', reset: 'Limpiar',
             close: 'Cerrar', back: 'Volver', yes: 'Sí', no: 'No',
-            apply: 'Aplicar', ok: 'OK', success: 'Éxito', fail: 'Error'
+            apply: 'Aplicar', ok: 'OK', success: 'Éxito', fail: 'Error',
+            themeFontSmall: 'Pequeño', themeFontMedium: 'Estándar', themeFontLarge: 'Grande', themeFontXl: 'Extra grande',
+            themeRadiusSmall: 'Recto', themeRadiusMedium: 'Estándar', themeRadiusLarge: 'Redondeado',
+            themeAnimOn: 'Activado', themeAnimOff: 'Desactivado'
         },
 
         userDash: {
@@ -1706,6 +1782,8 @@ window.I18N = {
             managePassword: 'Nueva contraseña', managePasswordHint: 'Dejar vacío para no cambiar',
             manageSave: '💾 Guardar', manageReset: 'Limpiar',
             manageNoUser: 'Sin usuario seleccionado', manageSelectHint: 'Selecciona en el menú',
+            manageHint1: 'Haz clic en « Guardar » a la derecha después de editar',
+            manageHint2: 'Apodo, teléfono, correo, contraseña y UID se sincronizan en tiempo real',
 
             shopMgrTitle: '🛒 Gestión de tienda',
             shopAddName: '① Nombre', shopAddPrice: '② Precio en puntos', shopAddStock: '③ Stock',

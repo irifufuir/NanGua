@@ -137,24 +137,23 @@
             <div class="ban-icon-wrap">
                 <div class="ban-icon">🔒</div>
             </div>
-            <h3 class="ban-title">账号已被封禁</h3>
-            <p class="ban-desc">您的账号已被管理员封禁，暂时无法登录。</p>
+            <h3 class="ban-title" data-i18n-static="banTitle">账号已被封禁</h3>
+            <p class="ban-desc" data-i18n-static="banDesc">您的账号已被管理员封禁，暂时无法登录。</p>
             <div class="ban-time-box">
                 <div class="ban-time-row">
-                    <span class="ban-time-label">解封时间</span>
+                    <span class="ban-time-label" data-i18n-static="banUntilLabel">解封时间</span>
                     <span class="ban-time-value" id="banUntilDate">查询中...</span>
                 </div>
                 <div class="ban-time-row">
-                    <span class="ban-time-label">剩余时间</span>
+                    <span class="ban-time-label" data-i18n-static="banRemainLabel">剩余时间</span>
                     <span class="ban-time-value highlight" id="banRemaining">—</span>
                 </div>
             </div>
-            <button type="button" class="ban-close-btn" id="banCloseBtn">我知道了</button>
+            <button type="button" class="ban-close-btn" id="banCloseBtn" data-i18n-static="banCloseBtn">我知道了</button>
         </div>
     </div>
 
 <script type="text/javascript" src="other/backgrounds.js"></script>
-
 <script type="text/javascript">
 
     var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
@@ -188,7 +187,6 @@
     var loginView      = document.getElementById('loginView');
     var registerView   = document.getElementById('registerView');
 
-    /* ★ 两个独立的 tip 元素 */
     var loginTipEl     = document.getElementById('loginTip');
     var regTipEl       = document.getElementById('regTip');
 
@@ -228,6 +226,18 @@
 
     var i18n = window.I18N;
     var currentLang = 'zh';
+
+    /* ★ i18n 快捷取值：支持 "common.cancel" 这种深路径 */
+    function t(key, fallback) {
+        var dict = (i18n && i18n[currentLang]) || (i18n && i18n.zh) || {};
+        var parts = String(key).split('.');
+        var cur = dict;
+        for (var i = 0; i < parts.length; i++) {
+            if (cur == null || typeof cur !== 'object') { cur = null; break; }
+            cur = cur[parts[i]];
+        }
+        return (cur != null) ? cur : (fallback != null ? fallback : key);
+    }
 
     var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
     var PHONE_RE = /^[\d\s\-+()]{6,20}$/;
@@ -296,38 +306,56 @@
     }
 
     function translateAuthError(msg) {
-        if (!msg) return '未知错误';
+        if (!msg) return t('errUnknown');
         var m = String(msg).toLowerCase();
 
-        if (m.indexOf('invalid login credentials') !== -1)  return '邮箱或密码错误';
-        if (m.indexOf('email not confirmed') !== -1)        return '邮箱未验证，请先到邮箱点击确认链接';
-        if (m.indexOf('user is banned') !== -1)             return '该账号已被封禁';
-        if (m.indexOf('user_banned') !== -1)                return '该账号已被封禁';
-        if (m.indexOf('email rate limit exceeded') !== -1)  return '操作过于频繁，请稍后再试';
-        if (m.indexOf('for security purposes') !== -1)      return '出于安全考虑，请稍后再试';
+        if (m.indexOf('invalid login credentials') !== -1)  return t('errInvalidCredentials');
+        if (m.indexOf('email not confirmed') !== -1)        return t('errEmailNotConfirmed');
+        if (m.indexOf('user is banned') !== -1)             return t('errUserBanned');
+        if (m.indexOf('user_banned') !== -1)                return t('errUserBanned');
+        if (m.indexOf('email rate limit exceeded') !== -1)  return t('errRateLimit');
+        if (m.indexOf('for security purposes') !== -1)      return t('errSecurity');
 
-        if (m.indexOf('user already registered') !== -1)    return '该邮箱已被注册，请直接登录';
+        if (m.indexOf('user already registered') !== -1)    return t('errAlreadyRegistered');
         if (m.indexOf('password should be at least') !== -1) {
             var match = msg.match(/at least (\d+)/);
-            return match ? '密码长度至少 ' + match[1] + ' 位' : '密码太短';
+            if (match) {
+                return t('errPwdAtLeastPrefix') + match[1] + t('errPwdAtLeastSuffix');
+            }
+            return t('errPwdTooShort');
         }
-        if (m.indexOf('unable to validate email address') !== -1) return '邮箱格式不正确';
-        if (m.indexOf('signups not allowed') !== -1)        return '当前不允许注册';
-        if (m.indexOf('signup is disabled') !== -1)         return '注册功能已关闭';
-        if (m.indexOf('email address not authorized') !== -1) return '该邮箱不被允许注册';
-        if (m.indexOf('user not found') !== -1)             return '该用户不存在';
+        if (m.indexOf('unable to validate email address') !== -1) return t('errEmailInvalid');
+        if (m.indexOf('signups not allowed') !== -1)        return t('errSignupsNotAllowed');
+        if (m.indexOf('signup is disabled') !== -1)         return t('errSignupDisabled');
+        if (m.indexOf('email address not authorized') !== -1) return t('errEmailNotAuthorized');
+        if (m.indexOf('user not found') !== -1)             return t('errUserNotFound');
 
-        if (m.indexOf('failed to fetch') !== -1)            return '网络错误，请检查网络连接';
-        if (m.indexOf('network') !== -1)                    return '网络错误，请稍后再试';
-        if (m.indexOf('timeout') !== -1)                    return '请求超时，请稍后再试';
+        if (m.indexOf('failed to fetch') !== -1)            return t('errNetwork');
+        if (m.indexOf('network') !== -1)                    return t('errNetworkRetry');
+        if (m.indexOf('timeout') !== -1)                    return t('errTimeout');
 
         return msg;
     }
 
+    /* ★ 让封禁弹窗的静态文字跟着语言变 */
+    function refreshBanModalLabels() {
+        var banTitleEl  = document.querySelector('.ban-title');
+        var banDescEl   = document.querySelector('.ban-desc');
+        var banLabels   = document.querySelectorAll('.ban-time-label');
+        var banCloseEl  = document.getElementById('banCloseBtn');
+
+        if (banTitleEl)   banTitleEl.textContent   = t('banTitle', '账号已被封禁');
+        if (banDescEl)    banDescEl.textContent    = t('banDesc', '您的账号已被管理员封禁，暂时无法登录。');
+        if (banLabels[0]) banLabels[0].textContent = t('banUntilLabel', '解封时间');
+        if (banLabels[1]) banLabels[1].textContent = t('banRemainLabel', '剩余时间');
+        if (banCloseEl)   banCloseEl.textContent   = t('banCloseBtn', '我知道了');
+    }
+
     function showBanModal(email, bannedUntil) {
+        refreshBanModalLabels();   /* ★ 弹窗前刷新静态文案 */
         banModal.style.display = 'flex';
-        banUntilDate.textContent = '查询中...';
-        banRemaining.textContent = '查询中...';
+        banUntilDate.textContent = t('banQuerying');
+        banRemaining.textContent = t('banQuerying');
 
         if (bannedUntil) {
             renderBanTime(bannedUntil);
@@ -338,7 +366,7 @@
             body: { action: 'get_ban_info', email: email }
         }).then(function (res) {
             if (res.error || !res.data || !res.data.success) {
-                banUntilDate.textContent = '请联系管理员';
+                banUntilDate.textContent = t('banContactAdmin');
                 banRemaining.textContent = '—';
                 return;
             }
@@ -346,12 +374,12 @@
             if (data.banned_until) {
                 renderBanTime(data.banned_until);
             } else {
-                banUntilDate.textContent = '永久封禁';
+                banUntilDate.textContent = t('banPermanent');
                 banRemaining.textContent = '—';
             }
         }).catch(function () {
-            banUntilDate.textContent = '查询失败';
-            banRemaining.textContent = '请联系管理员';
+            banUntilDate.textContent = t('banQueryFailed');
+            banRemaining.textContent = t('banContactAdmin');
         });
     }
 
@@ -361,7 +389,7 @@
 
         var diff = until.getTime() - Date.now();
         if (diff <= 0) {
-            banRemaining.textContent = '即将解封';
+            banRemaining.textContent = t('banUnlockingSoon');
             return;
         }
         var totalMin = Math.floor(diff / 60000);
@@ -369,10 +397,10 @@
         var hours = Math.floor((totalMin % 1440) / 60);
         var mins  = totalMin % 60;
         var parts = [];
-        if (days > 0)  parts.push(days + ' 天');
-        if (hours > 0) parts.push(hours + ' 小时');
-        if (days === 0 && mins > 0) parts.push(mins + ' 分钟');
-        banRemaining.textContent = parts.join(' ') || '不到 1 分钟';
+        if (days > 0)  parts.push(days + t('banDaysUnit'));
+        if (hours > 0) parts.push(hours + t('banHoursUnit'));
+        if (days === 0 && mins > 0) parts.push(mins + t('banMinutesUnit'));
+        banRemaining.textContent = parts.join(' ') || t('banLessThanMinute');
     }
 
     function closeBanModal() {
@@ -383,9 +411,6 @@
         if (e.target === banModal) closeBanModal();
     });
 
-    /* ============================================================
-     *  登录页提示（#loginTip）
-     * ============================================================ */
     var loginTipTimer = null;
     function showTip(key, ok) {
         var dict = i18n[currentLang] || i18n.zh;
@@ -405,9 +430,6 @@
         loginTipTimer = setTimeout(function () { loginTipEl.classList.remove('show'); }, 3000);
     }
 
-    /* ============================================================
-     *  注册页提示（#regTip）
-     * ============================================================ */
     var regTipTimer = null;
     function showRegTip(key, ok) {
         var dict = i18n[currentLang] || i18n.zh;
@@ -496,6 +518,16 @@
         forgotSubmitBtn.textContent  = dict.forgotSubmit;
         forgotCancelBtn.textContent  = dict.forgotCancel;
 
+        /* ★ 补丁：封禁弹窗 */
+        refreshBanModalLabels();
+
+        /* ★ 补丁：设备提示 */
+        var deviceHintEl = document.getElementById('deviceHint');
+        if (deviceHintEl && dict.deviceHintPrefix) {
+            deviceHintEl.innerHTML = dict.deviceHintPrefix +
+                '<span id="deviceHintName">' + getDeviceName() + '</span>';
+        }
+
         refreshBgCategoryLabels();
     }
 
@@ -538,7 +570,6 @@
         });
     }
 
-    /* ---------- 卡片打开动画 ---------- */
     function playBoxOpen() {
         if (!boxEl) return;
         boxEl.classList.remove('is-closing');
@@ -550,7 +581,6 @@
         });
     }
 
-    /* ---------- 收起 ---------- */
     function collapseBox() {
         if (!boxEl || boxEl.classList.contains('collapsed')) return;
         boxEl.classList.remove('is-opening');
@@ -558,16 +588,15 @@
         setTimeout(function () {
             if (boxEl.classList.contains('collapsed')) {
                 boxToggle.textContent = '+';
-                boxToggle.title = '展开';
+                boxToggle.title = t('boxExpand', '展开');
             }
         }, 220);
     }
 
-    /* ---------- 展开 ---------- */
     function expandBox() {
         if (!boxEl || !boxEl.classList.contains('collapsed')) return;
         boxToggle.textContent = '−';
-        boxToggle.title = '收起 / 展开';
+        boxToggle.title = t('boxCollapse', '收起 / 展开');
         boxEl.classList.remove('collapsed');
     }
 
@@ -576,21 +605,21 @@
         if (!email) return;
 
         if (!isValidEmail(email)) {
-            showTipMsg('邮箱异常', false);
+            showTipMsg(t('tipEmailInvalid'), false);
             return;
         }
-        showTipMsg('✓ 邮箱正常', true);
+        showTipMsg(t('tipEmailOk'), true);
 
-        loginTipEl.textContent = '检查邮箱中...';
+        loginTipEl.textContent = t('tipChecking');
         loginTipEl.style.color = 'rgba(255,255,255,0.55)';
         loginTipEl.classList.add('show');
         clearTimeout(loginTipTimer);
 
         checkEmailExists(email).then(function (exists) {
             if (exists === false) {
-                showTipMsg('该邮箱尚未注册，请先注册账号', false);
+                showTipMsg(t('tipEmailNotRegistered'), false);
             } else if (exists === true) {
-                showTipMsg('✓ 邮箱后缀正常', true);
+                showTipMsg(t('tipEmailSuffixOk'), true);
             } else {
                 loginTipEl.classList.remove('show');
             }
@@ -607,7 +636,7 @@
         }
 
         var ok = isValidEmail(email);
-        regEmailSuffixTag.textContent = ok ? '邮箱后缀可用' : '邮箱后缀不可用';
+        regEmailSuffixTag.textContent = ok ? t('tipEmailSuffixUsable') : t('tipEmailSuffixUnusable');
         regEmailSuffixTag.classList.toggle('ok',  ok);
         regEmailSuffixTag.classList.toggle('bad', !ok);
         regEmailSuffixTag.classList.add('show');
@@ -644,23 +673,23 @@
         var pwd   = loginPwd.value;
 
         if (!isValidEmail(email)) {
-            showTipMsg('邮箱后缀异常，请检查邮箱地址', false);
+            showTipMsg(t('tipEmailInvalid'), false);
             loginEmail.focus();
             return;
         }
         if (!pwd) {
-            showTipMsg('请输入密码', false); loginPwd.focus(); return;
+            showTipMsg(t('tipPwdRequired'), false); loginPwd.focus(); return;
         }
 
         loginBtn.disabled = true;
-        loginBtn.textContent = '检查中...';
+        loginBtn.textContent = t('btnChecking');
 
         checkEmailExists(email).then(function (exists) {
             loginBtn.disabled = false;
             loginBtn.textContent = i18n[currentLang].loginBtn;
 
             if (exists === false) {
-                showTipMsg('该邮箱未注册，请先注册账号', false);
+                showTipMsg(t('tipEmailNotRegistered'), false);
                 loginEmail.focus();
                 return;
             }
@@ -670,7 +699,7 @@
 
     function actuallyLogin(email, pwd) {
         loginBtn.disabled = true;
-        loginBtn.textContent = '登录中...';
+        loginBtn.textContent = t('btnLoggingIn');
 
         var currentUser = null;
 
@@ -723,7 +752,7 @@
 
             var role = currentUser.app_metadata && currentUser.app_metadata.role;
 
-                        setTimeout(function () {
+            setTimeout(function () {
                 try { sessionStorage.setItem('nangua_fresh_login', '1'); } catch (e) {}
 
                 var langQS = '';
@@ -746,7 +775,7 @@
 
             var raw = (err && err.message) ? err.message : String(err);
             var msg = (err && err.__translated) ? raw : translateAuthError(raw);
-            showTipMsg('登录失败：' + msg, false);
+            showTipMsg(t('submitFailed') + msg, false);
         });
     }
 
@@ -765,7 +794,7 @@
         var pwd2  = regPwd2.value;
 
         if (!isValidEmail(email)) {
-            showRegTipMsg('邮箱后缀异常，请检查邮箱地址', false);
+            showRegTipMsg(t('tipEmailInvalid'), false);
             regEmail.focus();
             return;
         }
@@ -783,7 +812,7 @@
         }
 
         registerBtn.disabled = true;
-        registerBtn.textContent = '检查邮箱中...';
+        registerBtn.textContent = t('btnChecking');
 
         checkEmailExists(email).then(function (exists) {
             if (exists === true) {
@@ -799,7 +828,7 @@
 
     function actuallyRegister(email, name, phone, pwd) {
         registerBtn.disabled = true;
-        registerBtn.textContent = '注册中...';
+        registerBtn.textContent = t('btnRegistering');
 
         var newUserId = null;
 
@@ -818,7 +847,7 @@
                 e.__translated = false;
                 throw e;
             }
-            if (!res.data || !res.data.user) throw new Error('注册失败，请重试');
+            if (!res.data || !res.data.user) throw new Error(t('registerFailedRetry'));
             newUserId = res.data.user.id;
             return res.data.session;
         }).then(function (session) {
@@ -860,7 +889,7 @@
 
             var raw = (err && err.message) ? err.message : String(err);
             var msg = (err && err.__translated) ? raw : translateAuthError(raw);
-            showRegTipMsg('注册失败：' + msg, false);
+            showRegTipMsg(t('submitFailed') + msg, false);
         });
     }
     registerBtn.addEventListener('click', doRegister);
@@ -918,7 +947,7 @@
         }
 
         forgotSubmitBtn.disabled = true;
-        forgotSubmitBtn.textContent = '提交中...';
+        forgotSubmitBtn.textContent = t('btnSubmitting');
 
         supabaseClient
             .from('forgot_requests')
@@ -956,7 +985,7 @@
     langDropdown.addEventListener('click', function (e) {
         e.stopPropagation();
     });
-      document.querySelectorAll('#langDropdown a').forEach(function (link) {
+    document.querySelectorAll('#langDropdown a').forEach(function (link) {
         link.addEventListener('click', function (e) {
             e.preventDefault();
             var code = this.getAttribute('data-lang');
@@ -1025,8 +1054,8 @@
     function refreshBgCategoryLabels() {
         var labels = CATEGORY_LABELS_I18N[currentLang] || CATEGORY_LABELS_I18N.zh;
         bgDropdown.querySelectorAll('.bg-category').forEach(function (catEl) {
-            var t = catEl.querySelector('.bg-cat-title');
-            if (t) t.textContent = labels[catEl.dataset.cat];
+            var t2 = catEl.querySelector('.bg-cat-title');
+            if (t2) t2.textContent = labels[catEl.dataset.cat];
         });
     }
 
@@ -1076,24 +1105,29 @@
     });
 
     buildBgMenu();
-    applyLanguage('zh');
+
+    (function initLang() {
+        var saved = null;
+        try { saved = localStorage.getItem('nangua_lang'); } catch (e) {}
+        var supported = ['zh','en','ja','ko','fr','es'];
+        if (!saved || supported.indexOf(saved) === -1) saved = 'zh';
+        applyLanguage(saved);
+    })();
+
     showLoginView();
     bindBoxToggle();
     playBoxOpen();
 
-    /* ============================================================
-     *  当前设备名检测 + 填充到 UI
-     * ============================================================ */
     function getDeviceName() {
         var ua = navigator.userAgent || '';
-        var platform = '未知设备';
+        var platform = t('deviceUnknown', '未知设备');
         if (/Windows/i.test(ua))                  platform = 'Windows';
         else if (/Macintosh|Mac OS X/i.test(ua))  platform = 'Mac';
         else if (/Android/i.test(ua))             platform = 'Android';
         else if (/iPhone|iPad|iPod/i.test(ua))    platform = 'iOS';
         else if (/Linux/i.test(ua))               platform = 'Linux';
 
-        var browser = '浏览器';
+        var browser = t('deviceBrowser', '浏览器');
         if (/Edg\//i.test(ua))                    browser = 'Edge';
         else if (/OPR\/|Opera/i.test(ua))         browser = 'Opera';
         else if (/Chrome\//i.test(ua))            browser = 'Chrome';
