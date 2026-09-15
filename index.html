@@ -723,13 +723,19 @@
 
             var role = currentUser.app_metadata && currentUser.app_metadata.role;
 
-            setTimeout(function () {
+                        setTimeout(function () {
                 try { sessionStorage.setItem('nangua_fresh_login', '1'); } catch (e) {}
 
+                var langQS = '';
+                try {
+                    var curLang = localStorage.getItem('nangua_lang');
+                    if (curLang) langQS = '?lang=' + encodeURIComponent(curLang);
+                } catch (e) {}
+
                 if (role === 'admin') {
-                    location.href = 'admin-dashboard.html';
+                    location.href = 'admin-dashboard.html' + langQS;
                 } else {
-                    location.href = 'user-dashboard.html';
+                    location.href = 'user-dashboard.html' + langQS;
                 }
             }, 800);
         }).catch(function (err) {

@@ -1,0 +1,120 @@
+/* ============================================================
+   语言切换器 · 全站共享样式
+   - 三页（index / admin / user）共用同一份
+   - 与登录页原本的 .lang-switcher / .lang-btn / .lang-dropdown 一致
+   ============================================================ */
+
+.lang-switcher {
+    position: relative;
+    z-index: 2;
+}
+
+.lang-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    width: 130px;
+    height: 36px;
+    padding: 0;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+
+    color: var(--text-dim, var(--theme-text-dim, #8b9099));
+    background: rgba(24, 27, 32, 0.55);
+    border: 1px solid var(--input-border, var(--theme-border-soft, rgba(255,255,255,0.08)));
+    border-radius: 10px;
+
+    outline: none;
+    cursor: pointer;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    transition:
+        background-color 0.30s cubic-bezier(0.4,0,0.2,1),
+        border-color     0.30s cubic-bezier(0.4,0,0.2,1),
+        color            0.30s cubic-bezier(0.4,0,0.2,1),
+        box-shadow       0.30s cubic-bezier(0.4,0,0.2,1);
+}
+
+.lang-btn:hover {
+    color: var(--text, var(--theme-text, #e9ebef));
+    border-color: var(--input-border-hover, rgba(255,255,255,0.14));
+    background: rgba(30, 34, 40, 0.75);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.20), 0 2px 6px rgba(0,0,0,0.16);
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    min-width: 130px;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    background: rgba(22, 25, 30, 0.92);
+    border: 1px solid var(--card-border-hi, var(--theme-border, rgba(255,255,255,0.10)));
+    border-radius: 10px;
+
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.22), 0 12px 32px rgba(0,0,0,0.24);
+
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    z-index: 2000;
+
+    transition:
+        max-height 0.55s cubic-bezier(0.4,0,0.2,1),
+        opacity    0.30s cubic-bezier(0.4,0,0.2,1),
+        transform  0.55s cubic-bezier(0.4,0,0.2,1);
+}
+
+.lang-dropdown.show {
+    max-height: 500px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.lang-dropdown a {
+    padding: 4px 8px;
+    font-size: 13px;
+    color: var(--text-dim, var(--theme-text-dim, #8b9099));
+    text-decoration: none;
+    text-align: left;
+    white-space: nowrap;
+    transition: background-color 0.30s ease, color 0.30s ease;
+}
+
+.lang-dropdown a:hover,
+.lang-dropdown a.active {
+    background: var(--accent-soft, var(--theme-accent-soft, rgba(124,174,224,0.12)));
+    color: var(--accent, var(--theme-accent, #7caee0));
+}
+
+/* dashboard 页：把整个切换器固定到右上角 */
+.lang-switcher-fixed {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+}
+
+@media (max-width: 480px) {
+    .lang-switcher-fixed { top: 12px; right: 12px; }
+    .lang-btn { width: 100px; height: 32px; font-size: 12px; border-radius: 8px; }
+    .lang-dropdown { min-width: 110px; margin-top: 6px; }
+    .lang-dropdown a { padding: 10px 14px; font-size: 12.5px; }
+}

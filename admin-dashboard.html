@@ -36,6 +36,39 @@
     <link rel="stylesheet" href="other/admin-dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="other/i18n.js"></script>
+
+    <!-- ★ 语言来源兜底：URL 参数 > localStorage > 默认 zh -->
+    <script>
+    (function () {
+        var SUPPORTED = ['zh','en','ja','ko','fr','es'];
+        var lang = null;
+
+        try {
+            var m = location.search.match(/[?&]lang=([a-zA-Z-]+)/);
+            if (m && SUPPORTED.indexOf(m[1]) !== -1) {
+                lang = m[1];
+            }
+        } catch (e) {}
+
+        if (!lang) {
+            try {
+                var saved = localStorage.getItem('nangua_lang');
+                if (saved && SUPPORTED.indexOf(saved) !== -1) {
+                    lang = saved;
+                }
+            } catch (e) {}
+        }
+
+        if (!lang) lang = 'zh';
+
+        try { localStorage.setItem('nangua_lang', lang); } catch (e) {}
+
+        window.__NANGUA_LANG__ = lang;
+
+        document.documentElement.setAttribute('data-lang', lang);
+    })();
+    </script>
+
     <script src="other/lang-helper.js" defer></script>
 </head>
 <body>
@@ -292,15 +325,18 @@
                         <div class="preview-name" id="previewName" data-i18n="adminDash.manageNoUser">未选择用户</div>
                         <div class="preview-email" id="previewEmail" data-i18n="adminDash.manageSelectHint">请从右侧下拉框选择</div>
                         <span class="preview-status" id="previewStatus" style="display:none;">正常</span>
-                        <div class="preview-divider"></div>
-                        <div class="preview-hint">修改后点击右侧「保存修改」<br>昵称、手机号、邮箱、密码、UID 将实时同步</div>
+                                                <div class="preview-divider"></div>
+                                                <div class="preview-hint">
+                            <span data-i18n="adminDash.manageHint1">修改后点击右侧「保存修改」</span><br>
+                            <span data-i18n="adminDash.manageHint2">昵称、手机号、邮箱、密码、UID 将实时同步</span>
+                        </div>
                     </div>
                     <div class="manage-form">
                         <div class="form-section-title" data-i18n="adminDash.manageStep1">① 选择目标用户</div>
                         <div class="form-group">
                             <label data-i18n="adminDash.manageStep1">用户</label>
-                            <select id="manageUserSelect">
-                                <option value="">-- 请选择用户 --</option>
+                                                        <select id="manageUserSelect">
+                                <option value="" data-i18n="adminDash.manageSelectPlaceholder">-- 请选择用户 --</option>
                             </select>
                         </div>
                         <div class="form-section-title" data-i18n="adminDash.manageStep2">② 修改用户资料</div>
@@ -483,11 +519,11 @@
                         <span class="setting-title" data-i18n="adminDash.themeFontTitle">字号大小</span>
                         <span class="setting-desc" data-i18n="adminDash.themeFontDesc">调整界面文字和间距的大小</span>
                     </div>
-                    <div class="setting-options" data-setting="fontSize">
-                        <button class="setting-btn" data-value="small">小</button>
-                        <button class="setting-btn" data-value="medium">标准</button>
-                        <button class="setting-btn" data-value="large">大</button>
-                        <button class="setting-btn" data-value="xl">特大</button>
+                        <div class="setting-options" data-setting="fontSize">
+                        <button class="setting-btn" data-value="small" data-i18n="common.themeFontSmall">小</button>
+                        <button class="setting-btn" data-value="medium" data-i18n="common.themeFontMedium">标准</button>
+                        <button class="setting-btn" data-value="large" data-i18n="common.themeFontLarge">大</button>
+                        <button class="setting-btn" data-value="xl" data-i18n="common.themeFontXl">特大</button>
                     </div>
                 </div>
                 <div class="setting-group">
@@ -495,10 +531,10 @@
                         <span class="setting-title" data-i18n="adminDash.themeRadiusTitle">圆角风格</span>
                         <span class="setting-desc" data-i18n="adminDash.themeRadiusDesc">调整卡片、输入框和按钮的圆润程度</span>
                     </div>
-                    <div class="setting-options" data-setting="radius">
-                        <button class="setting-btn" data-value="small">直角</button>
-                        <button class="setting-btn" data-value="medium">标准</button>
-                        <button class="setting-btn" data-value="large">圆润</button>
+                        <div class="setting-options" data-setting="radius">
+                        <button class="setting-btn" data-value="small" data-i18n="common.themeRadiusSmall">直角</button>
+                        <button class="setting-btn" data-value="medium" data-i18n="common.themeRadiusMedium">标准</button>
+                        <button class="setting-btn" data-value="large" data-i18n="common.themeRadiusLarge">圆润</button>
                     </div>
                 </div>
                 <div class="setting-group">
@@ -506,9 +542,9 @@
                         <span class="setting-title" data-i18n="adminDash.themeAnimTitle">过渡动效</span>
                         <span class="setting-desc" data-i18n="adminDash.themeAnimDesc">关闭后切换页面和主题时不再有动画</span>
                     </div>
-                    <div class="setting-options" data-setting="animations">
-                        <button class="setting-btn" data-value="on">开启</button>
-                        <button class="setting-btn" data-value="off">关闭</button>
+                        <div class="setting-options" data-setting="animations">
+                        <button class="setting-btn" data-value="on" data-i18n="common.themeAnimOn">开启</button>
+                        <button class="setting-btn" data-value="off" data-i18n="common.themeAnimOff">关闭</button>
                     </div>
                 </div>
                 <div class="setting-reset-row">

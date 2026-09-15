@@ -31,11 +31,42 @@
         });
     })();
     </script>
-
     <link rel="stylesheet" href="other/theme.css">
     <link rel="stylesheet" href="other/user-dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="other/i18n.js"></script>
+
+    <!-- ★ 语言来源兜底：URL 参数 > localStorage > 默认 zh -->
+    <script>
+    (function () {
+        var SUPPORTED = ['zh','en','ja','ko','fr','es'];
+        var lang = null;
+
+        try {
+            var m = location.search.match(/[?&]lang=([a-zA-Z-]+)/);
+            if (m && SUPPORTED.indexOf(m[1]) !== -1) {
+                lang = m[1];
+            }
+        } catch (e) {}
+
+        if (!lang) {
+            try {
+                var saved = localStorage.getItem('nangua_lang');
+                if (saved && SUPPORTED.indexOf(saved) !== -1) {
+                    lang = saved;
+                }
+            } catch (e) {}
+        }
+
+        if (!lang) lang = 'zh';
+
+        try { localStorage.setItem('nangua_lang', lang); } catch (e) {}
+
+        window.__NANGUA_LANG__ = lang;
+        document.documentElement.setAttribute('data-lang', lang);
+    })();
+    </script>
+
     <script src="other/lang-helper.js" defer></script>
 </head>
 <body>
@@ -249,11 +280,11 @@
                         <span class="setting-title" data-i18n="userDash.themeFontTitle">字号大小</span>
                         <span class="setting-desc" data-i18n="userDash.themeFontDesc">调整界面文字和间距的大小</span>
                     </div>
-                    <div class="setting-options" data-setting="fontSize">
-                        <button class="setting-btn" data-value="small">小</button>
-                        <button class="setting-btn" data-value="medium">标准</button>
-                        <button class="setting-btn" data-value="large">大</button>
-                        <button class="setting-btn" data-value="xl">特大</button>
+                        <div class="setting-options" data-setting="fontSize">
+                        <button class="setting-btn" data-value="small" data-i18n="common.themeFontSmall">小</button>
+                        <button class="setting-btn" data-value="medium" data-i18n="common.themeFontMedium">标准</button>
+                        <button class="setting-btn" data-value="large" data-i18n="common.themeFontLarge">大</button>
+                        <button class="setting-btn" data-value="xl" data-i18n="common.themeFontXl">特大</button>
                     </div>
                 </div>
                 <div class="setting-group">
@@ -261,10 +292,10 @@
                         <span class="setting-title" data-i18n="userDash.themeRadiusTitle">圆角风格</span>
                         <span class="setting-desc" data-i18n="userDash.themeRadiusDesc">调整卡片、输入框和按钮的圆润程度</span>
                     </div>
-                    <div class="setting-options" data-setting="radius">
-                        <button class="setting-btn" data-value="small">直角</button>
-                        <button class="setting-btn" data-value="medium">标准</button>
-                        <button class="setting-btn" data-value="large">圆润</button>
+                        <div class="setting-options" data-setting="radius">
+                        <button class="setting-btn" data-value="small" data-i18n="common.themeRadiusSmall">直角</button>
+                        <button class="setting-btn" data-value="medium" data-i18n="common.themeRadiusMedium">标准</button>
+                        <button class="setting-btn" data-value="large" data-i18n="common.themeRadiusLarge">圆润</button>
                     </div>
                 </div>
                 <div class="setting-group">
@@ -272,9 +303,9 @@
                         <span class="setting-title" data-i18n="userDash.themeAnimTitle">过渡动效</span>
                         <span class="setting-desc" data-i18n="userDash.themeAnimDesc">关闭后切换页面和主题时不再有动画</span>
                     </div>
-                    <div class="setting-options" data-setting="animations">
-                        <button class="setting-btn" data-value="on">开启</button>
-                        <button class="setting-btn" data-value="off">关闭</button>
+                        <div class="setting-options" data-setting="animations">
+                        <button class="setting-btn" data-value="on" data-i18n="common.themeAnimOn">开启</button>
+                        <button class="setting-btn" data-value="off" data-i18n="common.themeAnimOff">关闭</button>
                     </div>
                 </div>
                 <div class="setting-reset-row">
