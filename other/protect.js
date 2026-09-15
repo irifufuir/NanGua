@@ -22,7 +22,7 @@
          *   'clear'    → 直接清空页面
          *   'none'     → 只在控制台警告，不做视觉处理
          */
-        action: 'warn',
+        action: 'none',
 
         // action = 'redirect' 时跳转的地址
         redirectUrl: 'about:blank',

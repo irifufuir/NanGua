@@ -35,6 +35,8 @@
     <link rel="stylesheet" href="other/theme.css">
     <link rel="stylesheet" href="other/user-dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="other/i18n.js"></script>
+    <script src="other/lang-helper.js" defer></script>
 </head>
 <body>
     <aside class="sidebar">
@@ -45,48 +47,48 @@
             </div>
             <div class="user-details">
                 <div class="user-name-row">
-                    <span class="role">普通用户</span>
+                    <span class="role" data-i18n="common.user">普通用户</span>
                     <span class="email" id="userEmail">加载中...</span>
                 </div>
                 <div class="user-action-row">
-                    <button class="avatar-change-btn" id="avatarChangeBtn" title="更换头像">📷 换头像</button>
-                    <button class="logout-btn-mini" id="logoutBtn">退出</button>
+                    <button class="avatar-change-btn" id="avatarChangeBtn" title="更换头像" data-i18n-title="common.changeAvatar" data-i18n="common.changeAvatar">📷 换头像</button>
+                    <button class="logout-btn-mini" id="logoutBtn" data-i18n="common.logout">退出</button>
                 </div>
             </div>
         </div>
 
         <nav class="nav-menu">
             <div class="nav-item active" data-tab="home" id="homeNavItem">
-                <span class="nav-text">🏠 我的主页</span>
+                <span class="nav-text" data-i18n="userDash.navHome">🏠 我的主页</span>
                 <span class="nav-arrow" id="profileArrow" title="展开 / 收起资料">▾</span>
             </div>
 
             <div class="nav-group" id="msgGroup" data-group="msg">
-                <span class="nav-text">📬 消息通知</span>
+                <span class="nav-text" data-i18n="userDash.navMsg">📬 消息通知</span>
                 <span class="nav-arrow" id="msgArrow">▾</span>
             </div>
             <div class="nav-sub" id="msgSub" data-sub="msg">
-                <div class="nav-sub-item" data-tab="announce">📢 公告栏</div>
+                <div class="nav-sub-item" data-tab="announce" data-i18n="userDash.navAnnounce">📢 公告栏</div>
             </div>
 
             <div class="nav-item" data-tab="checkin">
-                <span class="nav-text">📅 每日签到</span>
+                <span class="nav-text" data-i18n="userDash.navCheckin">📅 每日签到</span>
             </div>
 
             <div class="nav-item" data-tab="shop">
-                <span class="nav-text">🛒 积分商城</span>
+                <span class="nav-text" data-i18n="userDash.navShop">🛒 积分商城</span>
             </div>
 
             <div class="nav-item" data-tab="friends">
-                <span class="nav-text">👥 我的好友</span>
+                <span class="nav-text" data-i18n="userDash.navFriends">👥 我的好友</span>
             </div>
 
             <div class="nav-item" data-tab="theme">
-                <span class="nav-text">🎨 外观设置</span>
+                <span class="nav-text" data-i18n="userDash.navTheme">🎨 外观设置</span>
             </div>
 
             <div class="nav-item" data-tab="feedback">
-                <span class="nav-text">📝 使用反馈</span>
+                <span class="nav-text" data-i18n="userDash.navFeedback">📝 使用反馈</span>
             </div>
         </nav>
     </aside>
@@ -98,41 +100,42 @@
                 <div class="welcome-card">
                     <img id="welcomeAvatar" class="welcome-avatar"
                          src="image/default-avatar.png" alt="头像">
-                    <div class="welcome-title" id="welcomeTitle">欢迎回来</div>
-                    <div class="welcome-hint" id="welcomeBio">这里是你的个人主页</div>
+                    <div class="welcome-title" id="welcomeTitle" data-i18n="userDash.homeWelcome">欢迎回来</div>
+                    <div class="welcome-hint" id="welcomeBio" data-i18n="userDash.homeBioDefault">这里是你的个人主页</div>
                 </div>
 
                 <div class="profile-panel" id="profilePanel">
                     <div class="profile-panel-inner">
-                        <div class="profile-panel-title">👤 我的资料</div>
+                        <div class="profile-panel-title" data-i18n="userDash.homeMyProfile">👤 我的资料</div>
                         <div class="info-grid">
                             <div class="info-box">
-                                <span class="label">邮箱</span>
+                                <span class="label" data-i18n="userDash.homeInfoEmail">邮箱</span>
                                 <span class="value" id="infoEmail">—</span>
                             </div>
                             <div class="info-box">
-                                <span class="label">昵称</span>
-                                <span class="value" id="infoName">—</span>
+                                <span class="label" data-i18n="userDash.homeInfoName">昵称</span>
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                                    <span class="value" id="infoName" style="flex:1; word-break:break-all;">—</span>
+                                    <button id="editNameBtn" data-i18n="userDash.homeSetName">设置</button>
+                                </div>
                             </div>
                             <div class="info-box">
-                                <span class="label">手机号</span>
+                                <span class="label" data-i18n="userDash.homeInfoPhone">手机号</span>
                                 <span class="value" id="infoPhone">—</span>
                             </div>
                             <div class="info-box">
-                                <span class="label">注册时间</span>
+                                <span class="label" data-i18n="userDash.homeInfoCreated">注册时间</span>
                                 <span class="value" id="infoCreated">—</span>
                             </div>
-                            <!-- ★ UID -->
                             <div class="info-box">
-                                <span class="label">UID</span>
+                                <span class="label" data-i18n="userDash.homeInfoUid">UID</span>
                                 <span class="value" id="infoUid">—</span>
                             </div>
-                            <!-- ★ 个人简介 + 设置按钮 -->
                             <div class="info-box">
-                                <span class="label">个人简介</span>
+                                <span class="label" data-i18n="userDash.homeInfoBio">个人简介</span>
                                 <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
                                     <span class="value" id="infoBio" style="flex:1; font-size:0.9em; word-break:break-all;">—</span>
-                                    <button id="editBioBtn">设置</button>
+                                    <button id="editBioBtn" data-i18n="userDash.homeSetBio">设置</button>
                                 </div>
                             </div>
                         </div>
@@ -142,101 +145,109 @@
 
             <div class="card" id="cardAnnounce">
                 <div class="card-head">
-                    <h2>📢 公告栏</h2>
+                    <h2 data-i18n="userDash.announceTitle">📢 公告栏</h2>
                     <span class="badge" id="badgeAnnounce">—</span>
                 </div>
                 <div class="announce-list" id="announceList">
-                    <div class="empty-state">加载中...</div>
+                    <div class="empty-state" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>
 
             <div class="card" id="cardCheckin">
                 <div class="card-head">
-                    <h2>📅 每日签到</h2>
-                    <span class="badge">每天签到，积分累积</span>
+                    <h2 data-i18n="userDash.checkinTitle">📅 每日签到</h2>
+                    <span class="badge" data-i18n="userDash.checkinSubtitle">每天签到，积分累积</span>
                 </div>
                 <div class="checkin-hero">
                     <div class="checkin-points">
                         <span class="num" id="myPoints">0</span>
-                        <span class="lbl">我的积分</span>
+                        <span class="lbl" data-i18n="userDash.checkinMyPoints">我的积分</span>
                     </div>
-                    <button class="checkin-btn" id="checkinBtn">签 到</button>
+                    <button class="checkin-btn" id="checkinBtn" data-i18n="userDash.checkinBtn">签 到</button>
                     <div class="checkin-calendar" id="checkinCalendar"></div>
                     <div class="checkin-stats" style="grid-template-columns: 1fr 1fr 1fr; max-width: 520px;">
                         <div class="checkin-stat">
                             <span class="v" id="myStreak">0</span>
-                            <span class="k">连续签到</span>
+                            <span class="k" data-i18n="userDash.checkinStreak">连续签到</span>
                         </div>
                         <div class="checkin-stat">
                             <span class="v" id="todayReward">—</span>
-                            <span class="k">今日奖励</span>
+                            <span class="k" data-i18n="userDash.checkinTodayReward">今日奖励</span>
                         </div>
                         <div class="checkin-stat">
                             <span class="v" id="myRank">—</span>
-                            <span class="k">积分排名</span>
+                            <span class="k" data-i18n="userDash.checkinRank">积分排名</span>
                         </div>
                     </div>
+                </div>
+
+                <div class="shop-section-title" style="margin-top:28px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <span data-i18n="userDash.checkinLogsTitle">📜 我的积分明细</span>
+                    <button class="refresh-btn-mini" id="refreshMyPointLogsBtn" title="刷新" type="button">🔄</button>
+                </div>
+                <div class="point-logs" id="myPointLogs">
+                    <div class="empty-state" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>
 
             <div class="card" id="cardShop">
                 <div class="card-head">
-                    <h2>🛒 积分商城</h2>
+                    <h2 data-i18n="userDash.shopTitle">🛒 积分商城</h2>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <span class="badge" id="shopMyPoints">积分：—</span>
                         <button class="refresh-btn-mini" id="refreshUserShopBtn" title="刷新">🔄</button>
                     </div>
                 </div>
-                <div class="shop-hint">用积分兑换心仪的商品，兑换后积分立即扣除。</div>
+                <div class="shop-hint" data-i18n="userDash.shopHint">用积分兑换心仪的商品，兑换后积分立即扣除。</div>
                 <div class="shop-grid" id="shopGrid">
-                    <div class="empty-state">加载中...</div>
+                    <div class="empty-state" data-i18n="common.loading">加载中...</div>
                 </div>
-                <div class="shop-section-title">🎁 我的兑换记录</div>
+                <div class="shop-section-title" data-i18n="userDash.shopHistoryTitle">🎁 我的兑换记录</div>
                 <div class="shop-history" id="shopHistory">
-                    <div class="empty-state">暂无记录</div>
+                    <div class="empty-state" data-i18n="userDash.shopHistoryEmpty">暂无记录</div>
                 </div>
             </div>
 
             <div class="card" id="cardFriends">
                 <div class="card-head">
-                    <h2>👥 我的好友</h2>
+                    <h2 data-i18n="userDash.friendsTitle">👥 我的好友</h2>
                     <span class="badge" id="badgeFriends">—</span>
                 </div>
                 <div class="add-friend-box">
-                    <input type="email" id="friendEmailInput" placeholder="输入对方邮箱以添加好友..."/>
-                    <button id="addFriendBtn">➕ 添加好友</button>
+                    <input type="email" id="friendEmailInput" placeholder="输入对方邮箱以添加好友..." data-i18n-placeholder="userDash.friendsAddPlaceholder"/>
+                    <button id="addFriendBtn" data-i18n="userDash.friendsAddBtn">➕ 添加好友</button>
                 </div>
                 <div class="friend-section">
-                    <div class="friend-section-title">待处理的好友请求</div>
+                    <div class="friend-section-title" data-i18n="userDash.friendsPendingTitle">待处理的好友请求</div>
                     <div class="friend-list" id="pendingList">
-                        <div class="empty-state">加载中...</div>
+                        <div class="empty-state" data-i18n="common.loading">加载中...</div>
                     </div>
                 </div>
                 <div class="friend-section">
-                    <div class="friend-section-title">我的好友</div>
+                    <div class="friend-section-title" data-i18n="userDash.friendsMyFriendsTitle">我的好友</div>
                     <div class="friend-list" id="friendList">
-                        <div class="empty-state">加载中...</div>
+                        <div class="empty-state" data-i18n="common.loading">加载中...</div>
                     </div>
                 </div>
             </div>
 
             <div class="card" id="cardTheme">
                 <div class="card-head">
-                    <h2>🎨 外观设置</h2>
-                    <span class="badge">跟账号同步</span>
+                    <h2 data-i18n="userDash.themeTitle">🎨 外观设置</h2>
+                    <span class="badge" data-i18n="userDash.themeBadge">跟账号同步</span>
                 </div>
-                <div class="theme-section-hint">所有设置都会保存到你的账号，换设备登录时自动同步。</div>
+                <div class="theme-section-hint" data-i18n="userDash.themeHint">所有设置都会保存到你的账号，换设备登录时自动同步。</div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">主题配色</span>
-                        <span class="setting-desc">选择你喜欢的界面主色调</span>
+                        <span class="setting-title" data-i18n="userDash.themeColorTitle">主题配色</span>
+                        <span class="setting-desc" data-i18n="userDash.themeColorDesc">选择你喜欢的界面主色调</span>
                     </div>
                     <div id="themeSwitcherContainer"></div>
                 </div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">字号大小</span>
-                        <span class="setting-desc">调整界面文字和间距的大小</span>
+                        <span class="setting-title" data-i18n="userDash.themeFontTitle">字号大小</span>
+                        <span class="setting-desc" data-i18n="userDash.themeFontDesc">调整界面文字和间距的大小</span>
                     </div>
                     <div class="setting-options" data-setting="fontSize">
                         <button class="setting-btn" data-value="small">小</button>
@@ -247,8 +258,8 @@
                 </div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">圆角风格</span>
-                        <span class="setting-desc">调整卡片、输入框和按钮的圆润程度</span>
+                        <span class="setting-title" data-i18n="userDash.themeRadiusTitle">圆角风格</span>
+                        <span class="setting-desc" data-i18n="userDash.themeRadiusDesc">调整卡片、输入框和按钮的圆润程度</span>
                     </div>
                     <div class="setting-options" data-setting="radius">
                         <button class="setting-btn" data-value="small">直角</button>
@@ -258,8 +269,8 @@
                 </div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">过渡动效</span>
-                        <span class="setting-desc">关闭后切换页面和主题时不再有动画</span>
+                        <span class="setting-title" data-i18n="userDash.themeAnimTitle">过渡动效</span>
+                        <span class="setting-desc" data-i18n="userDash.themeAnimDesc">关闭后切换页面和主题时不再有动画</span>
                     </div>
                     <div class="setting-options" data-setting="animations">
                         <button class="setting-btn" data-value="on">开启</button>
@@ -267,63 +278,73 @@
                     </div>
                 </div>
                 <div class="setting-reset-row">
-                    <button class="setting-reset-btn" id="resetAppearanceBtn">↺ 恢复默认设置</button>
+                    <button class="setting-reset-btn" id="resetAppearanceBtn" data-i18n="userDash.themeResetBtn">↺ 恢复默认设置</button>
                 </div>
             </div>
 
             <div class="card" id="cardFeedback">
                 <div class="card-head">
-                    <h2>📝 使用反馈</h2>
+                    <h2 data-i18n="userDash.feedbackTitle">📝 使用反馈</h2>
                     <button class="refresh-btn-mini" id="refreshFeedbackBtn" title="刷新">🔄</button>
                 </div>
 
                 <div class="feedback-form">
                     <div class="feedback-form-title">
-                        <span>💭 告诉我们你的想法</span>
-                        <span class="feedback-form-sub">你的反馈会直达管理员</span>
+                        <span data-i18n="userDash.feedbackFormTitle">💭 告诉我们你的想法</span>
+                        <span class="feedback-form-sub" data-i18n="userDash.feedbackFormSub">你的反馈会直达管理员</span>
                     </div>
-                    <textarea id="feedbackContent" placeholder="请描述你遇到的问题或建议..." rows="4"></textarea>
+                    <textarea id="feedbackContent" placeholder="请描述你遇到的问题或建议..." rows="4" data-i18n-placeholder="userDash.feedbackFormPlaceholder"></textarea>
                     <div class="feedback-form-row">
                         <button class="primary-btn" id="submitFeedbackBtn">
-                            <span class="btn-icon">📤</span> 提交反馈
+                            <span class="btn-icon">📤</span> <span data-i18n="userDash.feedbackSubmitBtn">提交反馈</span>
                         </button>
-                        <span class="feedback-hint">提交后管理员会尽快处理</span>
+                        <span class="feedback-hint" data-i18n="userDash.feedbackSubmitHint">提交后管理员会尽快处理</span>
                     </div>
                 </div>
 
                 <div class="card-head" style="margin-top:24px;">
-                    <h2>📋 我的反馈记录</h2>
+                    <h2 data-i18n="userDash.feedbackListTitle">📋 我的反馈记录</h2>
                     <span class="badge" id="badgeFeedback">—</span>
                 </div>
 
                 <div class="fb-toolbar">
-                    <label class="fb-select-all"><input type="checkbox" id="fbSelectAll"><span>全选</span></label>
+                    <label class="fb-select-all"><input type="checkbox" id="fbSelectAll"><span data-i18n="userDash.feedbackSelectAll">全选</span></label>
                     <span class="fb-selected-count" id="fbSelectedCount">已选 0 条</span>
-                    <button class="fb-del-btn" id="fbDeleteSelected" disabled>🗑 删除选中</button>
+                    <button class="fb-del-btn" id="fbDeleteSelected" disabled data-i18n="userDash.feedbackDeleteSelected">🗑 删除选中</button>
                 </div>
 
                 <div class="feedback-list" id="myFeedbackList">
-                    <div class="empty-state">加载中...</div>
+                    <div class="empty-state" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>
 
         </main>
     </div>
 
-    <!-- ★ 编辑个人简介弹窗 -->
     <div class="modal-mask" id="bioModal" style="display:none;">
         <div class="modal-box">
-            <h3>设置个人简介</h3>
+            <h3 data-i18n="userDash.homeBioTitle">设置个人简介</h3>
             <textarea id="bioInput" rows="3" maxlength="50"
-                placeholder="介绍一下自己吧（最多50字）..."></textarea>
+                placeholder="介绍一下自己吧（最多50字）..." data-i18n-placeholder="userDash.homeBioPlaceholder"></textarea>
             <div class="bio-actions">
-                <button id="bioCancelBtn">取消</button>
-                <button id="bioSaveBtn">保存</button>
+                <button id="bioCancelBtn" data-i18n="common.cancel">取消</button>
+                <button id="bioSaveBtn" data-i18n="common.save">保存</button>
             </div>
         </div>
     </div>
 
-    <!-- 商品详情弹窗 -->
+    <div class="modal-mask" id="nameModal" style="display:none;">
+        <div class="modal-box">
+            <h3 data-i18n="userDash.homeNameTitle">修改昵称</h3>
+            <input type="text" id="nameInput" maxlength="20"
+                placeholder="请输入新昵称（2-20 个字）" data-i18n-placeholder="userDash.homeNamePlaceholder"/>
+            <div class="bio-actions">
+                <button id="nameCancelBtn" data-i18n="common.cancel">取消</button>
+                <button id="nameSaveBtn" data-i18n="common.save">保存</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-mask" id="itemDetailModal" style="display:none;">
         <div class="item-detail-box">
             <div class="item-detail-left">
@@ -332,28 +353,28 @@
                 <div id="detailIconFallback" style="display:none;">🎁</div>
             </div>
             <div class="item-detail-right">
-                <h3 id="detailName">商品名称</h3>
+                <h3 id="detailName" data-i18n="userDash.detailName">商品名称</h3>
                 <div class="detail-info-row">
-                    <span class="label">消耗积分</span>
+                    <span class="label" data-i18n="userDash.detailPrice">消耗积分</span>
                     <span class="value highlight" id="detailPrice">-0</span>
                 </div>
                 <div class="detail-info-row">
-                    <span class="label">兑换时间</span>
+                    <span class="label" data-i18n="userDash.detailTime">兑换时间</span>
                     <span class="value" id="detailTime">—</span>
                 </div>
                 <div class="detail-info-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
-                    <span class="label" style="margin-bottom:4px;">商品详情</span>
+                    <span class="label" style="margin-bottom:4px;" data-i18n="userDash.detailDesc">商品详情</span>
                     <span class="value" id="detailDesc"
                           style="text-align:left; font-size:0.85em; line-height:1.6;
                                  color:var(--theme-text-dim); white-space:pre-wrap;
                                  word-break:break-word;">—</span>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:auto;">
-                    <button class="item-detail-close" id="detailCloseBtn" style="flex:1;">关 闭</button>
+                    <button class="item-detail-close" id="detailCloseBtn" style="flex:1;" data-i18n="userDash.detailClose">关 闭</button>
                     <button class="item-detail-close" id="detailDeleteBtn"
                             style="flex:1; background:rgba(214,139,139,.15);
                                    border-color:rgba(214,139,139,.45);
-                                   color:var(--danger);">删除记录</button>
+                                   color:var(--danger);" data-i18n="userDash.detailDelete">删除记录</button>
                 </div>
             </div>
         </div>
@@ -367,20 +388,20 @@
                 <button class="chat-close-btn" id="chatCloseBtn">✕</button>
             </div>
             <div class="chat-body" id="chatBody">
-                <div class="empty-state">加载中...</div>
+                <div class="empty-state" data-i18n="common.loading">加载中...</div>
             </div>
             <div class="chat-input-box">
-                <input type="text" id="chatInput" placeholder="输入消息..."/>
-                <button id="chatSendBtn">发送</button>
+                <input type="text" id="chatInput" placeholder="输入消息..." data-i18n-placeholder="userDash.chatInputPlaceholder"/>
+                <button id="chatSendBtn" data-i18n="userDash.chatSend">发送</button>
             </div>
         </div>
     </div>
 
     <script src="other/user-dashboard.js"></script>
-
     <script src="other/theme.js"></script>
     <script src="other/sound.js"></script>
     <script src="other/message-notify.js"></script>
     <script src="other/ban-guard.js"></script>
+    <script src="other/session-guard.js"></script>
 </body>
 </html>

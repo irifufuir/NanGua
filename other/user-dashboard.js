@@ -1,6 +1,29 @@
 /* ============================================================
- *  user-dashboard.html 主逻辑
+ *  user-dashboard.html 主逻辑（多语言版）
  * ============================================================ */
+
+/* ============================================================
+ *  语言辅助：t() 和 applyLang()
+ * ============================================================ */
+function t(key, fallback) {
+    if (window.LangHelper && window.LangHelper.t) {
+        return window.LangHelper.t(key, fallback);
+    }
+    return fallback != null ? fallback : key;
+}
+function getLang() {
+    return (window.LangHelper && window.LangHelper.getLang) ? window.LangHelper.getLang() : 'zh';
+}
+function applyLang() {
+    if (window.LangHelper && window.LangHelper.apply) {
+        window.LangHelper.apply();
+    }
+    // 更新页面动态内容
+    if (typeof refreshDynamicText === 'function') {
+        try { refreshDynamicText(); } catch (e) {}
+    }
+}
+window.__udLangChanged = applyLang;   // 语言切换后 hook
 
 /* ============================================================
  *  移动端导航分组
@@ -114,11 +137,11 @@
         document.addEventListener('DOMContentLoaded', build);
     } else { build(); }
 
-    var t = null;
+    var t2 = null;
     var lastMode = isMobile();
     window.addEventListener('resize', function () {
-        clearTimeout(t);
-        t = setTimeout(function () {
+        clearTimeout(t2);
+        t2 = setTimeout(function () {
             var now = isMobile();
             if (now !== lastMode) { lastMode = now; build(); }
             else if (now && window.syncMobileSubRow) { window.syncMobileSubRow(); }
@@ -165,7 +188,7 @@ function bootUser(user) {
             var entry = document.createElement('div');
             entry.id = 'adminEntry';
             entry.className = 'nav-item';
-            entry.innerHTML = '<span class="nav-text">🔧 进入管理后台</span>';
+            entry.innerHTML = '<span class="nav-text">' + t('userDash.navAdmin', '🔧 进入管理后台') + '</span>';
             entry.addEventListener('click', function () {
                 location.href = 'admin-dashboard.html';
             });
@@ -173,10 +196,9 @@ function bootUser(user) {
             mainRow.appendChild(entry);
         }
         var roleBadge = document.querySelector('.user-name-row .role');
-        if (roleBadge) roleBadge.textContent = '管理员';
+        if (roleBadge) roleBadge.textContent = t('common.admin', '管理员');
     }
 
-    /* ★ 第一次赋值：优先 user_metadata.full_name，其次邮箱 */
     userEmailEl.textContent =
         (user.user_metadata && user.user_metadata.full_name) ||
         user.email || '未知';
@@ -191,24 +213,23 @@ function bootUser(user) {
             myProfile = profileRes.data || {};
             var profile = myProfile;
 
-            /* ★ 关键改动：profiles 加载成功后，用真实昵称覆盖侧边栏 */
             userEmailEl.textContent = profile.full_name || user.email || '未知';
 
             welcomeTitle.textContent = profile.full_name
-                ? '欢迎回来，' + profile.full_name : '欢迎回来';
+                ? t('userDash.homeWelcomeName', '欢迎回来，') + profile.full_name
+                : t('userDash.homeWelcome', '欢迎回来');
 
             infoEmail.textContent = user.email || '—';
-            infoName.textContent  = profile.full_name || '未设置';
-            infoPhone.textContent = profile.phone || '未设置';
+            infoName.textContent  = profile.full_name || t('userDash.homeNotSet', '未设置');
+            infoPhone.textContent = profile.phone || t('userDash.homeNotSet', '未设置');
             infoCreated.textContent = profile.created_at
                 ? new Date(profile.created_at).toLocaleString('zh-CN', { hour12: false })
                 : '—';
 
-            /* ====== ★ UID + 个人简介 ====== */
             var userBio = profile.bio || '';
-            document.getElementById('infoUid').textContent = profile.uid || '未分配';
-            document.getElementById('infoBio').textContent = userBio || '暂无简介';
-            document.getElementById('welcomeBio').textContent = userBio || '这里是你的个人主页';
+            document.getElementById('infoUid').textContent = profile.uid || t('userDash.homeUidUnassigned', '未分配');
+            document.getElementById('infoBio').textContent = userBio || t('userDash.homeNoBio', '暂无简介');
+            document.getElementById('welcomeBio').textContent = userBio || t('userDash.homeBioDefault', '这里是你的个人主页');
 
             document.getElementById('editBioBtn').addEventListener('click', function () {
                 document.getElementById('bioInput').value = userBio;
@@ -221,18 +242,67 @@ function bootUser(user) {
 
             document.getElementById('bioSaveBtn').addEventListener('click', function () {
                 var newBio = document.getElementById('bioInput').value.trim();
-                if (newBio.length > 50) { alert('个人简介不能超过50个字'); return; }
+                if (newBio.length > 50) { alert(t('userDash.homeBioTooLong', '个人简介不能超过50个字')); return; }
 
                 supabaseClient.from('profiles').update({ bio: newBio }).eq('id', user.id).then(function (res) {
-                    if (res.error) { alert('保存失败：' + res.error.message); return; }
+                    if (res.error) { alert(t('common.fail', '操作失败') + '：' + res.error.message); return; }
                     userBio = newBio;
-                    document.getElementById('infoBio').textContent = newBio || '暂无简介';
-                    document.getElementById('welcomeBio').textContent = newBio || '这里是你的个人主页';
+                    document.getElementById('infoBio').textContent = newBio || t('userDash.homeNoBio', '暂无简介');
+                    document.getElementById('welcomeBio').textContent = newBio || t('userDash.homeBioDefault', '这里是你的个人主页');
                     document.getElementById('bioModal').style.display = 'none';
-                    alert('个人简介已更新！');
+                    alert(t('userDash.homeBioUpdated', '个人简介已更新！'));
                 });
             });
-            /* ====== ★ UID + 个人简介 结束 ====== */
+
+            document.getElementById('editNameBtn').addEventListener('click', function () {
+                document.getElementById('nameInput').value = profile.full_name || '';
+                document.getElementById('nameModal').style.display = 'flex';
+                setTimeout(function () {
+                    document.getElementById('nameInput').focus();
+                    document.getElementById('nameInput').select();
+                }, 50);
+            });
+
+            document.getElementById('nameCancelBtn').addEventListener('click', function () {
+                document.getElementById('nameModal').style.display = 'none';
+            });
+
+            document.getElementById('nameModal').addEventListener('click', function (e) {
+                if (e.target === this) this.style.display = 'none';
+            });
+
+            document.getElementById('nameSaveBtn').addEventListener('click', function () {
+                var newName = document.getElementById('nameInput').value.trim();
+                if (newName.length < 2) { alert(t('userDash.homeNameTooShort', '昵称至少 2 个字')); return; }
+                if (newName.length > 20) { alert(t('userDash.homeNameTooLong', '昵称最多 20 个字')); return; }
+
+                var btn = this;
+                btn.disabled = true;
+                btn.textContent = t('common.loading', '加载中...');
+
+                supabaseClient.from('profiles').update({ full_name: newName }).eq('id', user.id)
+                    .then(function (res) {
+                        if (res.error) throw new Error(res.error.message);
+                        return supabaseClient.auth.updateUser({ data: { full_name: newName } });
+                    })
+                    .then(function () {
+                        btn.disabled = false;
+                        btn.textContent = t('common.save', '保存');
+
+                        profile.full_name = newName;
+                        document.getElementById('infoName').textContent = newName;
+                        document.getElementById('welcomeTitle').textContent = t('userDash.homeWelcomeName', '欢迎回来，') + newName;
+                        userEmailEl.textContent = newName;
+
+                        document.getElementById('nameModal').style.display = 'none';
+                        alert(t('userDash.homeNameUpdated', '昵称已更新！'));
+                    })
+                    .catch(function (err) {
+                        btn.disabled = false;
+                        btn.textContent = t('common.save', '保存');
+                        alert(t('common.fail', '操作失败') + '：' + ((err && err.message) || err));
+                    });
+            });
 
             document.getElementById('myPoints').textContent = profile.points || 0;
             document.getElementById('myStreak').textContent = profile.checkin_streak || 0;
@@ -246,7 +316,7 @@ function bootUser(user) {
                 .then(function (ckRes) {
                     if (ckRes.data) {
                         var btn = document.getElementById('checkinBtn');
-                        btn.textContent = '✓ 今日已签到';
+                        btn.textContent = t('userDash.checkinDone', '✓ 今日已签到');
                         btn.disabled = true;
                         document.getElementById('todayReward').textContent =
                             '+' + (ckRes.data.points || 0);
@@ -255,6 +325,7 @@ function bootUser(user) {
 
             loadCheckinCalendar();
             loadMyRank(user.id);
+            loadMyPointLogs();
         });
 }
 
@@ -303,7 +374,7 @@ function switchTab(tab) {
     });
 
     if (tab === 'announce') loadAnnouncements();
-        if (tab === 'feedback') {
+    if (tab === 'feedback') {
         loadMyFeedbacks();
         if (currentUser) {
             supabaseClient.from('profiles')
@@ -318,7 +389,7 @@ function switchTab(tab) {
                 });
         }
     }
-    if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); }
+    if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); loadMyPointLogs(); }
     if (tab === 'shop')     loadShop();
     if (tab === 'friends')  loadFriends();
 
@@ -339,6 +410,7 @@ document.querySelectorAll('.nav-sub-item[data-tab]').forEach(function (el) {
         switchTab(this.getAttribute('data-tab'));
     });
 });
+
 function toDateStr(d) {
     var y = d.getFullYear();
     var m = String(d.getMonth() + 1).padStart(2, '0');
@@ -382,7 +454,11 @@ function loadCheckinCalendar() {
 }
 
 function renderCalendar(monday, cfg, checked) {
-    var names = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    var names = [
+        t('adminDash.pointsMon', '周一'), t('adminDash.pointsTue', '周二'), t('adminDash.pointsWed', '周三'),
+        t('adminDash.pointsThu', '周四'), t('adminDash.pointsFri', '周五'), t('adminDash.pointsSat', '周六'),
+        t('adminDash.pointsSun', '周日')
+    ];
     var keys  = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
     var todayStr = toDateStr(shanghaiNow());
 
@@ -412,20 +488,20 @@ function renderCalendar(monday, cfg, checked) {
 function loadAnnouncements() {
     var listEl = document.getElementById('announceList');
     var badge  = document.getElementById('badgeAnnounce');
-    listEl.innerHTML = '<div class="empty-state">加载中...</div>';
+    listEl.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('announcements').select('*')
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                listEl.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                listEl.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
                 return;
             }
             var data = res.data || [];
-            badge.textContent = data.length + ' 条';
+            badge.textContent = data.length + ' ' + (getLang() === 'zh' ? '条' : '');
             if (data.length === 0) {
-                listEl.innerHTML = '<div class="empty-state">暂无公告</div>';
+                listEl.innerHTML = '<div class="empty-state">' + t('userDash.announceEmpty', '暂无公告') + '</div>';
                 return;
             }
             var html = '';
@@ -433,7 +509,7 @@ function loadAnnouncements() {
                 var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
                 html += '<div class="announce-item">' +
                     '<div class="announce-head">' +
-                        (item.is_pinned ? '<span class="announce-pinned">📌 置顶</span>' : '') +
+                        (item.is_pinned ? '<span class="announce-pinned">' + t('userDash.announcePinned', '📌 置顶') + '</span>' : '') +
                         '<span class="announce-title">' + escapeHtml(item.title) + '</span>' +
                         '<span class="announce-time">' + time + '</span>' +
                     '</div>' +
@@ -444,12 +520,14 @@ function loadAnnouncements() {
         });
 }
 
-/* ========== 使用反馈 ========== */
+/* ============================================================
+ *  使用反馈
+ * ============================================================ */
 function loadMyFeedbacks() {
     var listEl = document.getElementById('myFeedbackList');
     var badge  = document.getElementById('badgeFeedback');
     if (!listEl || !currentUser) return;
-    listEl.innerHTML = '<div class="empty-state">加载中...</div>';
+    listEl.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('feedbacks')
         .select('*')
@@ -457,34 +535,38 @@ function loadMyFeedbacks() {
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                listEl.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                listEl.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
                 return;
             }
             var data = res.data || [];
-            badge.textContent = data.length + ' 条';
+            badge.textContent = data.length + ' ' + (getLang() === 'zh' ? '条' : '');
             if (data.length === 0) {
-                listEl.innerHTML = '<div class="empty-state">📭 暂无反馈记录</div>';
+                listEl.innerHTML = '<div class="empty-state">' + t('userDash.feedbackListEmpty', '📭 暂无反馈记录') + '</div>';
                 resetFbSelection();
                 return;
             }
-            var statusMap = { pending: '⏳ 待处理', processing: '🔄 处理中', resolved: '✅ 已解决' };
+            var statusMap = {
+                pending:    t('userDash.feedbackStatusPending', '⏳ 待处理'),
+                processing: t('userDash.feedbackStatusProcessing', '🔄 处理中'),
+                resolved:   t('userDash.feedbackStatusResolved', '✅ 已解决')
+            };
             var html = '';
             data.forEach(function (item) {
                 var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
                 html += '<div class="feedback-item">' +
-                    '<label class="fb-check" title="选择这条反馈"><input type="checkbox" class="fb-item-check" data-id="' + item.id + '"></label>' +
+                    '<label class="fb-check" title="Select"><input type="checkbox" class="fb-item-check" data-id="' + item.id + '"></label>' +
                     '<div class="fb-main">' +
                         '<div class="feedback-head">' +
                             '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
                             ((item.reward_points && item.reward_points > 0)
-                                ? '<span class="feedback-reward-tag">+' + item.reward_points + ' 积分</span>'
+                                ? '<span class="feedback-reward-tag">+' + item.reward_points + ' ' + (getLang() === 'zh' ? '积分' : 'pts') + '</span>'
                                 : '') +
                             '<span class="feedback-time">' + time + '</span>' +
                         '</div>' +
                         '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
-                        (item.reply ? '<div class="feedback-reply">💬 <b>管理员回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
+                        (item.reply ? '<div class="feedback-reply">💬 <b>' + t('userDash.feedbackAdminReply', '💬 管理员回复：') + '</b>' + escapeHtml(item.reply) + '</div>' : '') +
                         '<div class="feedback-actions">' +
-                            '<button class="fb-del-btn fb-del" data-id="' + item.id + '">🗑 删除</button>' +
+                            '<button class="fb-del-btn fb-del" data-id="' + item.id + '">' + t('userDash.feedbackDeleteBtn', '🗑 删除') + '</button>' +
                         '</div>' +
                     '</div>' +
                 '</div>';
@@ -496,12 +578,11 @@ function loadMyFeedbacks() {
 
 document.getElementById('submitFeedbackBtn').addEventListener('click', function () {
     var content = document.getElementById('feedbackContent').value.trim();
-    if (!content) { showToast('请填写反馈内容', 'error'); return; }
+    if (!content) { showToast(t('userDash.feedbackSubmitEmpty', '请填写反馈内容'), 'error'); return; }
     if (!currentUser) { showToast('请先登录', 'error'); return; }
 
     var btn = this;
     btn.disabled = true;
-    btn.innerHTML = '<span class="btn-icon">📤</span> 提交中...';
 
     supabaseClient.from('feedbacks').insert([{
         user_id: currentUser.id,
@@ -509,10 +590,9 @@ document.getElementById('submitFeedbackBtn').addEventListener('click', function 
         content: content
     }]).then(function (res) {
         btn.disabled = false;
-        btn.innerHTML = '<span class="btn-icon">📤</span> 提交反馈';
-        if (res.error) { showToast('提交失败：' + res.error.message, 'error'); return; }
+        if (res.error) { showToast(t('userDash.feedbackSubmitFail', '提交失败：') + res.error.message, 'error'); return; }
         document.getElementById('feedbackContent').value = '';
-        showToast('反馈提交成功，感谢你的反馈！', 'success');
+        showToast(t('userDash.feedbackSubmitSuccess', '反馈提交成功，感谢你的反馈！'), 'success');
         loadMyFeedbacks();
     });
 });
@@ -539,7 +619,7 @@ function updateFbSelected() {
     var cnt = document.getElementById('fbSelectedCount');
     var sa  = document.getElementById('fbSelectAll');
     if (btn) btn.disabled = ids.length === 0;
-    if (cnt) cnt.textContent = '已选 ' + ids.length + ' 条';
+    if (cnt) cnt.textContent = t('userDash.feedbackSelectedCountTpl', '已选 ') + ids.length + t('userDash.feedbackSelectedCountUnit', ' 条');
     if (sa) {
         var total = document.querySelectorAll('#myFeedbackList .fb-item-check').length;
         sa.checked = total > 0 && ids.length === total;
@@ -547,7 +627,9 @@ function updateFbSelected() {
 }
 function deleteFbRecords(ids, single) {
     if (!ids.length) return;
-    var msg = single ? '确定删除这条反馈吗？删除后不可恢复。' : '确定删除选中的 ' + ids.length + ' 条反馈吗？删除后不可恢复。';
+    var msg = single
+        ? t('userDash.feedbackDeleteConfirm', '确定删除这条反馈吗？删除后不可恢复。')
+        : t('userDash.feedbackDeleteConfirmMulti', '确定删除选中的 ') + ids.length + t('userDash.feedbackDeleteConfirmMulti2', ' 条反馈吗？删除后不可恢复。');
     confirmFb(msg).then(function (ok) {
         if (!ok) return;
         var q = supabaseClient.from('feedbacks').delete().select();
@@ -555,7 +637,7 @@ function deleteFbRecords(ids, single) {
         q.then(function (res) {
             if (res.error) { showToast('删除失败：' + res.error.message, 'error'); return; }
             if (!res.data || res.data.length === 0) {
-                showToast('删除未生效：反馈表缺少删除权限（RLS 策略），请先在 Supabase 中添加 delete 策略', 'error');
+                showToast('删除未生效：反馈表缺少删除权限（RLS 策略）', 'error');
                 loadMyFeedbacks();
                 return;
             }
@@ -566,19 +648,19 @@ function deleteFbRecords(ids, single) {
 }
 
 function showToast(msg, type) {
-    var t = document.getElementById('fbToast');
-    if (!t) {
-        t = document.createElement('div');
-        t.id = 'fbToast';
-        t.className = 'fb-toast';
-        document.body.appendChild(t);
+    var toast = document.getElementById('fbToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'fbToast';
+        toast.className = 'fb-toast';
+        document.body.appendChild(toast);
     }
-    t.className = 'fb-toast ' + (type === 'success' ? 'fb-toast-success' : type === 'error' ? 'fb-toast-error' : '');
-    t.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ') + msg;
-    void t.offsetWidth;
-    t.classList.add('show');
-    clearTimeout(t._t);
-    t._t = setTimeout(function () { t.classList.remove('show'); }, 2600);
+    toast.className = 'fb-toast ' + (type === 'success' ? 'fb-toast-success' : type === 'error' ? 'fb-toast-error' : '');
+    toast.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ') + msg;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { toast.classList.remove('show'); }, 2600);
 }
 var fbPendingResolve = null;
 function confirmFb(message) {
@@ -588,7 +670,7 @@ function confirmFb(message) {
             mask = document.createElement('div');
             mask.id = 'fbModalMask';
             mask.className = 'fb-modal-mask';
-            mask.innerHTML = '<div class="fb-modal"><div class="fb-modal-title">⚠️ 确认删除</div><div class="fb-modal-msg"></div><div class="fb-modal-actions"><button class="fb-btn" data-act="cancel">取消</button><button class="fb-btn fb-btn-ok" data-act="ok">确定删除</button></div></div>';
+            mask.innerHTML = '<div class="fb-modal"><div class="fb-modal-title">⚠️ ' + t('common.confirm', '确定') + '</div><div class="fb-modal-msg"></div><div class="fb-modal-actions"><button class="fb-btn" data-act="cancel">' + t('common.cancel', '取消') + '</button><button class="fb-btn fb-btn-ok" data-act="ok">' + t('common.confirm', '确定') + '</button></div></div>';
             mask.addEventListener('click', function (e) {
                 if (e.target === mask || (e.target.getAttribute && e.target.getAttribute('data-act') === 'cancel')) {
                     mask.classList.remove('show');
@@ -645,11 +727,11 @@ function refreshCheckinUI() {
 
         var btn = document.getElementById('checkinBtn');
         if (hasCheckedToday) {
-            btn.textContent = '✓ 今日已签到';
+            btn.textContent = t('userDash.checkinDone', '✓ 今日已签到');
             btn.disabled = true;
             document.getElementById('todayReward').textContent = '+' + (todayRow.points || 0);
         } else {
-            btn.textContent = '签 到';
+            btn.textContent = t('userDash.checkinBtn', '签 到');
             btn.disabled = false;
             document.getElementById('todayReward').textContent = '—';
         }
@@ -686,13 +768,13 @@ function loadMyRank(userId) {
 document.getElementById('checkinBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '签到中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.rpc('do_checkin').then(function (res) {
         if (res.error) {
-            alert('签到失败：' + res.error.message);
+            alert(t('userDash.checkinFail', '签到失败：') + res.error.message);
             btn.disabled = false;
-            btn.textContent = '签 到';
+            btn.textContent = t('userDash.checkinBtn', '签 到');
             return;
         }
         var data = res.data || {};
@@ -702,20 +784,129 @@ document.getElementById('checkinBtn').addEventListener('click', function () {
             loadCheckinCalendar();
             return;
         }
-        btn.textContent = '✓ 今日已签到';
+        btn.textContent = t('userDash.checkinDone', '✓ 今日已签到');
         document.getElementById('myPoints').textContent =
             (parseInt(document.getElementById('myPoints').textContent) || 0) + (data.points || 0);
         document.getElementById('myStreak').textContent = data.streak || 0;
         document.getElementById('todayReward').textContent = '+' + (data.points || 0);
         loadCheckinCalendar();
-        alert('签到成功！\n获得 ' + data.points + ' 积分\n连续签到 ' + data.streak + ' 天');
+
+        var _newBal = parseInt(document.getElementById('myPoints').textContent) || 0;
+        addPointLog(currentUser.id, data.points, '每日签到', null, _newBal);
+        loadMyPointLogs();
+
+        alert(t('userDash.checkinSuccess', '签到成功！') + '\n' +
+              t('userDash.checkinGotPoints', '获得 ') + data.points + t('userDash.checkinPointsUnit', ' 积分') + '\n' +
+              t('userDash.checkinStreakDay', '连续签到 ') + data.streak + t('userDash.checkinStreakDayUnit', ' 天'));
     }).catch(function (err) {
-        alert('签到失败：' + (err.message || err));
+        alert(t('userDash.checkinFail', '签到失败：') + (err.message || err));
         btn.disabled = false;
-        btn.textContent = '签 到';
+        btn.textContent = t('userDash.checkinBtn', '签 到');
     });
 });
 
+/* ============================================================
+ *  积分明细
+ * ============================================================ */
+function addPointLog(userId, changeAmount, reason, relatedId, balanceAfter) {
+    if (!userId || !changeAmount) return Promise.resolve();
+    return supabaseClient.from('point_logs').insert([{
+        user_id: userId,
+        change_amount: changeAmount,
+        reason: reason || '积分变化',
+        balance_after: balanceAfter != null ? balanceAfter : 0,
+        related_id: relatedId || null
+    }]).then(function (r) {
+        if (r.error) console.warn('[积分日志] 写入失败：', r.error.message);
+    });
+}
+
+function loadMyPointLogs() {
+    var listEl = document.getElementById('myPointLogs');
+    if (!listEl || !currentUser) return;
+    listEl.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
+
+    supabaseClient.from('point_logs')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(30)
+        .then(function (res) {
+            if (res.error) {
+                listEl.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
+                return;
+            }
+            var data = res.data || [];
+            if (data.length === 0) {
+                listEl.innerHTML = '<div class="empty-state">' + t('userDash.checkinLogsEmpty', '📭 暂无积分记录') + '</div>';
+                return;
+            }
+            var html = '';
+            data.forEach(function (log) {
+                var isPlus = log.change_amount > 0;
+                var icon = isPlus ? '📈' : '📉';
+                var sign = isPlus ? '+' : '';
+                var time = new Date(log.created_at).toLocaleString('zh-CN', { hour12: false });
+                html += '<div class="point-log-item">' +
+                    '<div class="pl-icon ' + (isPlus ? 'plus' : 'minus') + '">' + icon + '</div>' +
+                    '<div class="pl-info">' +
+                        '<div class="pl-reason">' + escapeHtml(log.reason) + '</div>' +
+                        '<div class="pl-time">' + time + '</div>' +
+                    '</div>' +
+                    '<div class="pl-change ' + (isPlus ? 'plus' : 'minus') + '">' +
+                        sign + log.change_amount +
+                    '</div>' +
+                '</div>';
+            });
+            listEl.innerHTML = html;
+        });
+}
+
+/* 刷新按钮 */
+(function () {
+    var btn = document.getElementById('refreshMyPointLogsBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.classList.add('spinning');
+        loadMyPointLogs();
+        setTimeout(function () {
+            btn.disabled = false;
+            btn.classList.remove('spinning');
+        }, 800);
+    });
+})();
+
+/* ============================================================
+ *  语言切换 hook（LangHelper 触发后调用）
+ * ============================================================ */
+function refreshDynamicText() {
+    // 刷新签到日历里的星期名
+    try { loadCheckinCalendar(); } catch (e) {}
+    // 若当前是商城/好友页面，重新加载列表
+    try {
+        var shopCard = document.getElementById('cardShop');
+        if (shopCard && shopCard.classList.contains('active')) loadShop();
+        var friendsCard = document.getElementById('cardFriends');
+        if (friendsCard && friendsCard.classList.contains('active')) loadFriends();
+        var annCard = document.getElementById('cardAnnounce');
+        if (annCard && annCard.classList.contains('active')) loadAnnouncements();
+        var fbCard = document.getElementById('cardFeedback');
+        if (fbCard && fbCard.classList.contains('active')) loadMyFeedbacks();
+        var logEl = document.getElementById('myPointLogs');
+        if (logEl) loadMyPointLogs();
+    } catch (e) {}
+}
+window.refreshDynamicText = refreshDynamicText;
+
+/* escapeHtml 提前定义，后面用到 */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 /* ============================================================
  *  积分商城
  * ============================================================ */
@@ -725,11 +916,11 @@ function loadShop() {
     supabaseClient.from('profiles').select('points').eq('id', currentUser.id).maybeSingle()
         .then(function (r) {
             var p = (r.data && r.data.points) || 0;
-            document.getElementById('shopMyPoints').textContent = '积分：' + p;
+            document.getElementById('shopMyPoints').textContent = t('userDash.shopMyPoints', '积分：') + p;
         });
 
     var grid = document.getElementById('shopGrid');
-    grid.innerHTML = '<div class="empty-state">加载中...</div>';
+    grid.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('shop_items').select('*')
         .eq('is_active', true)
@@ -737,12 +928,12 @@ function loadShop() {
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                grid.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                grid.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
                 return;
             }
             var items = res.data || [];
             if (items.length === 0) {
-                grid.innerHTML = '<div class="empty-state">暂时没有商品</div>';
+                grid.innerHTML = '<div class="empty-state">' + t('userDash.shopEmpty', '暂时没有商品') + '</div>';
                 return;
             }
 
@@ -750,12 +941,12 @@ function loadShop() {
             items.forEach(function (it) {
                 var soldOut = (it.stock === 0);
                 var stockTag = '';
-                if (it.stock > 0) stockTag = '<span class="shop-item-stock">仅剩 ' + it.stock + '</span>';
-                else if (it.stock === 0) stockTag = '<span class="shop-item-stock">已售罄</span>';
+                if (it.stock > 0) stockTag = '<span class="shop-item-stock">' + t('userDash.shopStockLeft', '仅剩 ') + it.stock + '</span>';
+                else if (it.stock === 0) stockTag = '<span class="shop-item-stock">' + t('userDash.shopSoldOut', '已售罄') + '</span>';
 
                 var limitTag = '';
                 if (it.per_user_limit != null && it.per_user_limit > 0) {
-                    limitTag = '<div class="shop-item-limit">每人限购 ' + it.per_user_limit + ' 份</div>';
+                    limitTag = '<div class="shop-item-limit">' + t('userDash.shopLimitPerUser', '每人限购 ') + it.per_user_limit + t('userDash.shopLimitUnit', ' 份') + '</div>';
                 }
 
                 html +=
@@ -765,9 +956,9 @@ function loadShop() {
                         '<div class="shop-item-name">' + escapeHtml(it.name) + '</div>' +
                         '<div class="shop-item-desc">' + escapeHtml(it.description || '') + '</div>' +
                         limitTag +
-                        '<div class="shop-item-price">' + it.price + ' 积分</div>' +
+                        '<div class="shop-item-price">' + it.price + t('userDash.shopPointsUnit', ' 积分') + '</div>' +
                         '<button class="shop-buy-btn" data-id="' + it.id + '" data-name="' + escapeHtml(it.name) + '" data-price="' + it.price + '"' + (soldOut ? ' disabled' : '') + '>' +
-                            (soldOut ? '已售罄' : '立即兑换') +
+                            (soldOut ? t('userDash.shopSoldOut', '已售罄') : t('userDash.shopBuyNow', '立即兑换')) +
                         '</button>' +
                     '</div>';
             });
@@ -784,7 +975,7 @@ function loadShop() {
         });
 
     var hist = document.getElementById('shopHistory');
-    hist.innerHTML = '<div class="empty-state">加载中...</div>';
+    hist.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('user_purchases').select('*')
         .eq('user_id', currentUser.id)
@@ -792,30 +983,30 @@ function loadShop() {
         .limit(20)
         .then(function (res) {
             if (res.error) {
-                hist.innerHTML = '<div class="empty-state">加载失败</div>';
+                hist.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + '</div>';
                 return;
             }
             var list = res.data || [];
             if (list.length === 0) {
-                hist.innerHTML = '<div class="empty-state">暂无记录</div>';
+                hist.innerHTML = '<div class="empty-state">' + t('userDash.shopHistoryEmpty', '暂无记录') + '</div>';
                 return;
             }
             var h = '';
             list.forEach(function (p) {
-                var t = new Date(p.created_at).toLocaleString('zh-CN', { hour12: false });
+                var time = new Date(p.created_at).toLocaleString('zh-CN', { hour12: false });
                 h +=
                     '<div class="shop-history-item" style="cursor:pointer;" ' +
                         'data-id="'     + p.id + '" ' +
-                        'data-name="'   + escapeHtml(p.item_name  || '未知商品') + '" ' +
+                        'data-name="'   + escapeHtml(p.item_name  || t('userDash.detailUnknown', '未知商品')) + '" ' +
                         'data-icon="'   + escapeHtml(p.item_icon  || '🎁')      + '" ' +
                         'data-image="'  + escapeHtml(p.item_image || '')        + '" ' +
-                        'data-detail="' + escapeHtml(p.item_detail || '暂无详情') + '" ' +
+                        'data-detail="' + escapeHtml(p.item_detail || t('userDash.detailNoDetail', '暂无详情')) + '" ' +
                         'data-price="'  + (p.price_paid || 0) + '" ' +
-                        'data-time="'   + t + '">' +
+                        'data-time="'   + time + '">' +
                         '<span class="h-icon">' + escapeHtml(p.item_icon || '🎁') + '</span>' +
                         '<div class="h-info">' +
-                            '<div class="h-name">' + escapeHtml(p.item_name || '未知商品') + '</div>' +
-                            '<div class="h-time">' + t + '</div>' +
+                            '<div class="h-name">' + escapeHtml(p.item_name || t('userDash.detailUnknown', '未知商品')) + '</div>' +
+                            '<div class="h-time">' + time + '</div>' +
                         '</div>' +
                         '<span class="h-price">-' + (p.price_paid || 0) + '</span>' +
                     '</div>';
@@ -862,16 +1053,17 @@ function doPurchase(itemId, itemName, price) {
     var topPointsEl = document.getElementById('shopMyPoints');
     var currentPoints = parseInt((topPointsEl.textContent || '').replace(/\D/g, ''), 10) || 0;
     if (currentPoints < price) {
-        alert('积分不足，还差 ' + (price - currentPoints) + ' 分');
+        alert(t('userDash.shopInsufficientPoints', '积分不足，还差 ') + (price - currentPoints) + t('userDash.shopPointUnit', ' 分'));
         return;
     }
 
-    if (!confirm('确定用 ' + price + ' 积分兑换「' + itemName + '」吗？')) return;
+    var confirmMsg = t('userDash.shopConfirmBuy', '确定用 ') + price + t('userDash.shopConfirmBuy2', ' 积分兑换「') + itemName + t('userDash.shopConfirmBuy3', '」吗？');
+    if (!confirm(confirmMsg)) return;
 
     supabaseClient.rpc('purchase_item', { p_item_id: itemId })
         .then(function (res) {
             if (res.error) {
-                alert('兑换失败：' + res.error.message);
+                alert(t('userDash.shopBuyFail', '兑换失败：') + res.error.message);
                 return;
             }
             var data = res.data || {};
@@ -880,18 +1072,24 @@ function doPurchase(itemId, itemName, price) {
                 return;
             }
             if (typeof data.newPoints === 'number') {
-                topPointsEl.textContent = '积分：' + data.newPoints;
+                topPointsEl.textContent = t('userDash.shopMyPoints', '积分：') + data.newPoints;
                 var myPts = document.getElementById('myPoints');
                 if (myPts) myPts.textContent = data.newPoints;
             }
-            alert('兑换成功！\n消耗 ' + data.points + ' 积分\n剩余 ' + data.newPoints + ' 积分');
+
+            addPointLog(currentUser.id, -data.points, t('adminDash.purchasesTitle', '兑换：') + itemName, null, data.newPoints);
+
+            alert(t('userDash.shopBuySuccess', '兑换成功！') + '\n' +
+                  t('userDash.shopCost', '消耗 ') + data.points + t('userDash.shopPointsUnit', ' 积分') + '\n' +
+                  t('userDash.shopRemain', '剩余 ') + data.newPoints + t('userDash.shopPointsUnit', ' 积分'));
             loadShop();
         })
         .catch(function (err) {
-            alert('兑换失败：' + (err.message || err));
+            alert(t('userDash.shopBuyFail', '兑换失败：') + (err.message || err));
         });
 }
 
+/* 刷新商城 */
 (function () {
     var b = document.getElementById('refreshUserShopBtn');
     if (!b) return;
@@ -916,15 +1114,15 @@ function loadFriends() {
     var friendList  = document.getElementById('friendList');
     var badge       = document.getElementById('badgeFriends');
 
-    pendingList.innerHTML = '<div class="empty-state">加载中...</div>';
-    friendList.innerHTML  = '<div class="empty-state">加载中...</div>';
+    pendingList.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
+    friendList.innerHTML  = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('friendships').select('*')
         .or('user_id.eq.' + currentUser.id + ',friend_id.eq.' + currentUser.id)
         .then(function (res) {
             if (res.error) {
-                pendingList.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
-                friendList.innerHTML  = '<div class="empty-state">加载失败</div>';
+                pendingList.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
+                friendList.innerHTML  = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + '</div>';
                 return;
             }
 
@@ -940,12 +1138,12 @@ function loadFriends() {
                 }
             });
 
-            badge.textContent = friendIds.length + ' 位好友';
+            badge.textContent = friendIds.length + t('userDash.friendsBadge', ' 位好友');
 
             var allIds = friendIds.concat(pendingFromOthers.map(function (f) { return f.user_id; }));
             if (allIds.length === 0) {
-                pendingList.innerHTML = '<div class="empty-state">暂无待处理的请求</div>';
-                friendList.innerHTML  = '<div class="empty-state">还没有好友，输入邮箱添加吧~</div>';
+                pendingList.innerHTML = '<div class="empty-state">' + t('userDash.friendsPendingEmpty', '暂无待处理的请求') + '</div>';
+                friendList.innerHTML  = '<div class="empty-state">' + t('userDash.friendsEmpty', '还没有好友，输入邮箱添加吧~') + '</div>';
                 return;
             }
 
@@ -955,7 +1153,7 @@ function loadFriends() {
                     (pRes.data || []).forEach(function (p) { map[p.id] = p; });
 
                     if (pendingFromOthers.length === 0) {
-                        pendingList.innerHTML = '<div class="empty-state">暂无待处理的请求</div>';
+                        pendingList.innerHTML = '<div class="empty-state">' + t('userDash.friendsPendingEmpty', '暂无待处理的请求') + '</div>';
                     } else {
                         var ph = '';
                         pendingFromOthers.forEach(function (f) {
@@ -968,7 +1166,7 @@ function loadFriends() {
 
                     friendsCache = friendIds.map(function (id) { return map[id]; }).filter(Boolean);
                     if (friendsCache.length === 0) {
-                        friendList.innerHTML = '<div class="empty-state">还没有好友，输入邮箱添加吧~</div>';
+                        friendList.innerHTML = '<div class="empty-state">' + t('userDash.friendsEmpty', '还没有好友，输入邮箱添加吧~') + '</div>';
                     } else {
                         var fh = '';
                         friendsCache.forEach(function (u) {
@@ -993,8 +1191,8 @@ function renderFriendItem(user, fsId, isPending) {
                 '<div class="friend-email">' + escapeHtml(email) + '</div>' +
             '</div>' +
             '<div class="friend-actions">' +
-                '<button class="accept-btn">同意</button>' +
-                '<button class="reject-btn">拒绝</button>' +
+                '<button class="accept-btn">' + t('userDash.friendsAccept', '同意') + '</button>' +
+                '<button class="reject-btn">' + t('userDash.friendsReject', '拒绝') + '</button>' +
             '</div>' +
         '</div>';
     }
@@ -1014,15 +1212,15 @@ function bindPendingActions() {
         item.querySelector('.accept-btn').addEventListener('click', function () {
             supabaseClient.from('friendships').update({ status: 'accepted' }).eq('id', fsId)
                 .then(function (r) {
-                    if (r.error) { alert('操作失败：' + r.error.message); return; }
+                    if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
                     loadFriends();
                 });
         });
         item.querySelector('.reject-btn').addEventListener('click', function () {
-            if (!confirm('确定拒绝该好友请求吗？')) return;
+            if (!confirm(t('userDash.friendsRejectConfirm', '确定拒绝该好友请求吗？'))) return;
             supabaseClient.from('friendships').delete().eq('id', fsId)
                 .then(function (r) {
-                    if (r.error) { alert('操作失败：' + r.error.message); return; }
+                    if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
                     loadFriends();
                 });
         });
@@ -1045,20 +1243,20 @@ document.getElementById('addFriendBtn').addEventListener('click', function () {
     var email = input.value.trim().toLowerCase();
     if (!email) { alert('请输入对方邮箱'); return; }
     if (email === (currentUser.email || '').toLowerCase()) {
-        alert('不能添加自己为好友');
+        alert(t('userDash.friendsAddSelf', '不能添加自己为好友'));
         return;
     }
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '添加中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.from('profiles').select('id, email, full_name').eq('email', email).maybeSingle()
         .then(function (res) {
             if (res.error || !res.data) {
                 btn.disabled = false;
-                btn.textContent = '➕ 添加好友';
-                alert('找不到这个邮箱的用户');
+                btn.textContent = t('userDash.friendsAddBtn', '➕ 添加好友');
+                alert(t('userDash.friendsAddNoUser', '找不到这个邮箱的用户'));
                 return;
             }
 
@@ -1070,10 +1268,10 @@ document.getElementById('addFriendBtn').addEventListener('click', function () {
                 .then(function (fRes) {
                     if (fRes.data) {
                         btn.disabled = false;
-                        btn.textContent = '➕ 添加好友';
-                        if (fRes.data.status === 'accepted') alert('你们已经是好友了');
-                        else if (fRes.data.user_id === currentUser.id) alert('已发送过请求，等待对方同意');
-                        else alert('对方已经向你发起了请求，去"待处理"里同意吧');
+                        btn.textContent = t('userDash.friendsAddBtn', '➕ 添加好友');
+                        if (fRes.data.status === 'accepted') alert(t('userDash.friendsAddAlready', '你们已经是好友了'));
+                        else if (fRes.data.user_id === currentUser.id) alert(t('userDash.friendsAddSent', '已发送过请求，等待对方同意'));
+                        else alert(t('userDash.friendsAddCameIn', '对方已经向你发起了请求，去"待处理"里同意吧'));
                         return;
                     }
 
@@ -1083,10 +1281,10 @@ document.getElementById('addFriendBtn').addEventListener('click', function () {
                         status: 'pending'
                     }]).then(function (iRes) {
                         btn.disabled = false;
-                        btn.textContent = '➕ 添加好友';
-                        if (iRes.error) { alert('添加失败：' + iRes.error.message); return; }
+                        btn.textContent = t('userDash.friendsAddBtn', '➕ 添加好友');
+                        if (iRes.error) { alert(t('userDash.friendsAddFail', '添加失败：') + iRes.error.message); return; }
                         input.value = '';
-                        alert('好友请求已发送！');
+                        alert(t('userDash.friendsAddSuccess', '好友请求已发送！'));
                         loadFriends();
                     });
                 });
@@ -1099,7 +1297,7 @@ function openChat(friend) {
     document.getElementById('chatFriendName').textContent = friend.full_name || friend.email;
     document.getElementById('chatFriendAvatar').src = friend.avatar_url || DEFAULT_AVATAR;
     document.getElementById('chatModal').style.display = 'flex';
-    document.getElementById('chatBody').innerHTML = '<div class="empty-state">加载中...</div>';
+    document.getElementById('chatBody').innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
     loadMessages();
 
     if (chatPollTimer) clearInterval(chatPollTimer);
@@ -1133,7 +1331,7 @@ function loadMessages() {
             var body = document.getElementById('chatBody');
 
             if (data.length === 0) {
-                body.innerHTML = '<div class="empty-state">还没有聊天记录，说点什么吧~</div>';
+                body.innerHTML = '<div class="empty-state">' + t('userDash.chatEmpty', '还没有聊天记录，说点什么吧~') + '</div>';
                 return;
             }
 
@@ -1190,7 +1388,7 @@ function sendMessage() {
         content: content
     }]).then(function (res) {
         btn.disabled = false;
-        if (res.error) { alert('发送失败：' + res.error.message); return; }
+        if (res.error) { alert(t('userDash.chatSendFail', '发送失败：') + res.error.message); return; }
         input.value = '';
         loadMessages();
     });
@@ -1201,6 +1399,9 @@ document.getElementById('chatInput').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') sendMessage();
 });
 
+/* ============================================================
+ *  头像上传
+ * ============================================================ */
 document.getElementById('avatarChangeBtn').addEventListener('click', function () {
     document.getElementById('avatarInput').click();
 });
@@ -1224,7 +1425,7 @@ avatarInput.addEventListener('change', function (e) {
             var oneHour = 60 * 60 * 1000;
             if (elapsed < oneHour) {
                 var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
-                alert('头像修改过于频繁\n请 ' + (remainingMin >= 60 ? Math.floor(remainingMin/60)+' 小时 '+(remainingMin%60)+' 分钟' : remainingMin+' 分钟') + ' 后再试');
+                alert('头像修改过于频繁\n请 ' + remainingMin + ' 分钟后再试');
                 inputEl.value = '';
                 return;
             }
@@ -1250,17 +1451,23 @@ avatarInput.addEventListener('change', function (e) {
                         localStorage.setItem(storageKey, Date.now().toString());
                         avatarImg.src = signedUrl;
                         welcomeAvatar.src = signedUrl;
-                        alert('头像更新成功！\n下次修改需等待 1 小时');
+                        alert('头像更新成功！');
                     });
             });
     });
 });
 
+/* ============================================================
+ *  退出登录
+ * ============================================================ */
 logoutBtn.addEventListener('click', function () {
     if (chatPollTimer) clearInterval(chatPollTimer);
     supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
 });
 
+/* ============================================================
+ *  兑换记录详情弹窗 + 删除
+ * ============================================================ */
 (function () {
     var modal     = document.getElementById('itemDetailModal');
     var btnClose  = document.getElementById('detailCloseBtn');
@@ -1280,7 +1487,7 @@ logoutBtn.addEventListener('click', function () {
         btnDelete.addEventListener('click', function () {
             var id = this.dataset.purchaseId;
             if (!id) return;
-            if (!confirm('确定删除这条兑换记录吗？删除后不可恢复。')) return;
+            if (!confirm(t('userDash.detailDeleteConfirm', '确定删除这条兑换记录吗？删除后不可恢复。'))) return;
 
             supabaseClient.from('user_purchases').delete().eq('id', id)
                 .then(function (r) {
@@ -1292,9 +1499,9 @@ logoutBtn.addEventListener('click', function () {
     }
 })();
 
-function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
+/* ============================================================
+ *  初次加载 + 应用语言
+ * ============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(applyLang, 100);
+});

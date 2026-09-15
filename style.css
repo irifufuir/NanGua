@@ -172,9 +172,9 @@ body {
     justify-content: center;
     align-items: center;
 
-    width: 380px;
+    width: 310px;
     min-height: 0;
-    padding: var(--s-5) var(--s-6);
+    padding: var(--s-4) var(--s-4);
 
     background: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -307,8 +307,8 @@ body {
    注册视图 · 桌面端两列布局
    ============================================================ */
 .box.box-wide {
-    width: 600px;
-    max-width: calc(100vw - 32px);
+    width: 500px;
+    max-width: calc(85vw - 32px);
     overflow: hidden;
 }
 
@@ -402,6 +402,9 @@ body {
     margin-top: var(--s-1);
     margin-bottom: var(--s-3);
     min-height: 22px;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
 }
 
 .reg-inline-tip {
@@ -547,6 +550,8 @@ body {
     align-items: center;
     gap: var(--s-3);
     width: 100%;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .box .btn-box > div > button {
@@ -745,7 +750,7 @@ body {
 }
 
 .lang-dropdown a {
-    padding: var(--s-3) var(--s-4);
+    padding: var(--s-1) var(--s-2);
     font-size: 13px;
     color: var(--text-dim);
     text-decoration: none;
@@ -1716,4 +1721,192 @@ body.dragging-active * {
     font-size: 12px;
     cursor: pointer;
 }
-/* （注：内容由AI生成） */
+/* ============================================================
+   登录页 · 当前设备提示
+   ============================================================ */
+.box .device-hint {
+    width: 100%;
+    margin-top: -12px;
+    margin-bottom: 24px;
+    font-size: 11.5px;
+    color: var(--text-mute);
+    text-align: center;
+    letter-spacing: 0.02em;
+    user-select: none;
+    line-height: 1.5;
+    transition: color var(--dur-base) var(--ease);
+}
+
+.box .device-hint span {
+    color: var(--text-faint);
+    font-weight: 500;
+    transition: color var(--dur-base) var(--ease);
+}
+
+/* 收起状态下隐藏设备提示 */
+.box.collapsed .device-hint {
+    display: none;
+}
+
+/* 移动端稍微调整 */
+@media (max-width: 480px) {
+    .box .device-hint {
+        font-size: 11px;
+        margin-top: 8px;
+    }
+}
+/* 强制注册页底部行与按钮右对齐 */
+#registerView .btn-box > .reg-bottom-row {
+    width: 100% !important;
+    padding: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    justify-content: flex-end !important;
+    box-sizing: border-box !important;
+}
+
+#registerView .btn-box > div {
+    width: 100% !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+/* ============================================================
+   注册页 · 底部行内提示（和"用户已注册"并排）
+   ============================================================ */
+.reg-tip-inline {
+    flex: 1;                     /* 占满中间剩余空间 */
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: right;           /* 文字靠右，贴"返回登录" */
+    opacity: 0;
+    transition: opacity var(--dur-base) var(--ease);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reg-tip-inline.show {
+    opacity: 1;
+}
+
+/* 移动端适配 */
+@media (max-width: 660px) {
+    .reg-tip-inline {
+        font-size: 11.5px;
+    }
+}
+/* ============================================================
+   登录页 · 底部行（提示 + 忘记密码 同一行）
+   ============================================================ */
+#loginView .login-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    width: 100%;
+    min-width: 0;
+    margin-top: var(--s-3);
+    margin-bottom: var(--s-5);
+    min-height: 20px;
+}
+
+/* 登录提示：默认不占位，显示时占据左侧 */
+#loginView .login-top-row .tip {
+    display: inline-block;
+    flex: 0 0 0;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transition:
+        flex-basis 0.25s var(--ease),
+        max-width 0.25s var(--ease),
+        opacity var(--dur-base) var(--ease);
+}
+
+#loginView .login-top-row .tip.show {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+    opacity: 1;
+}
+
+/* 忘记密码 链接 */
+#loginView .login-top-row > a {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-dim);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dur-base) var(--ease);
+}
+
+#loginView .login-top-row > a:hover {
+    color: var(--accent);
+}
+
+/* 覆盖旧规则（因为 忘记密码 已不在 .btn-box 里） */
+#loginView .btn-box > a {
+    display: none;
+}
+/* ============================================================
+   注册页 · 「返回登录」小按钮（深蓝色）
+   ============================================================ */
+.back-login-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    /* 字号比原来大 1/2：原 13px → 约 19.5px */
+    font-size: 1.5em;
+    font-weight: 500;
+    line-height: 1;
+
+    padding: 6px 16px;
+    border-radius: var(--r-md);
+
+    /* 深蓝色边框 + 深蓝色底 + 深蓝文字 */
+    border: 1px solid #1e3a5f;
+    background: #0f2942;
+    color: #4a9eff;
+
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    outline: none;
+
+    transition:
+        background-color var(--dur-base) var(--ease),
+        border-color var(--dur-base) var(--ease),
+        color var(--dur-base) var(--ease),
+        transform var(--dur-fast) var(--ease);
+}
+
+.back-login-btn:hover {
+    background: #16395c;
+    border-color: #2a5a8a;
+    color: #7bb8ff;
+}
+
+.back-login-btn:active {
+    transform: scale(0.96);
+}
+
+/* 覆盖旧的 #backLoginLink 相关样式（如果前面定义过） */
+#backLoginLink {
+    font-size: inherit;
+    color: inherit;
+    text-decoration: none;
+}

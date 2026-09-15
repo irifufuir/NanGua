@@ -1144,6 +1144,90 @@ body {
 }
 #bioSaveBtn:hover { border-color: var(--theme-accent); }
 
+/* ========== 修改昵称弹窗 ========== */
+#nameModal .modal-box {
+    width: 340px;
+    max-width: 92vw;
+    padding: 24px 22px;
+    border-radius: var(--radius-lg);
+    background: var(--theme-card);
+    border: 1px solid var(--theme-border);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+}
+#nameModal h3 {
+    margin: 0 0 14px;
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--theme-text);
+    text-align: center;
+}
+#nameInput {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border-radius: var(--radius-md);
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text);
+    font-family: inherit;
+    font-size: 0.95em;
+    outline: none;
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+#nameInput:focus {
+    border-color: var(--theme-accent);
+    box-shadow: 0 0 0 3px var(--theme-accent-soft);
+}
+#nameModal .bio-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+}
+#nameModal .bio-actions button {
+    flex: 1;
+    height: 42px;
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.95em;
+    cursor: pointer;
+    outline: none;
+    transition: all var(--transition-base);
+}
+#nameCancelBtn {
+    background: transparent;
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text-dim);
+}
+#nameCancelBtn:hover {
+    background: var(--theme-info-box);
+    color: var(--theme-text);
+}
+#nameSaveBtn {
+    background: var(--theme-accent-soft);
+    border: 1px solid var(--theme-accent-border);
+    color: var(--theme-accent);
+    font-weight: 500;
+}
+#nameSaveBtn:hover { border-color: var(--theme-accent); }
+
+/* 昵称设置按钮（跟 editBioBtn 样式一致） */
+#editNameBtn {
+    background: var(--theme-accent-soft);
+    border: 1px solid var(--theme-accent-border);
+    color: var(--theme-accent);
+    padding: 3px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.78em;
+    font-family: inherit;
+    white-space: nowrap;
+    outline: none;
+    transition: all var(--transition-base);
+}
+#editNameBtn:hover { border-color: var(--theme-accent); }
+
 #editBioBtn {
     background: var(--theme-accent-soft);
     border: 1px solid var(--theme-accent-border);
@@ -1385,4 +1469,132 @@ body {
     .checkin-calendar { grid-template-columns: repeat(4, 1fr); gap: 3px; }
     .checkin-stat { padding: 8px 3px; }
     .shop-grid { grid-template-columns: 1fr; }
+}
+/* ============ 积分明细 ============ */
+.point-logs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+    max-width: 560px;
+    margin-top: var(--space-3);
+}
+.point-log-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-md);
+    font-size: 0.9em;
+    transition: all var(--transition-base);
+}
+.point-log-item:hover {
+    border-color: var(--theme-border);
+}
+.point-log-item .pl-icon {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1em;
+}
+.point-log-item .pl-icon.plus {
+    background: rgba(130, 200, 150, 0.12);
+    color: #8cc8a0;
+}
+.point-log-item .pl-icon.minus {
+    background: rgba(214, 139, 139, 0.12);
+    color: var(--danger);
+}
+.point-log-item .pl-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.point-log-item .pl-reason {
+    font-size: 0.95em;
+    color: var(--theme-text);
+    font-weight: 500;
+    word-break: break-word;
+}
+.point-log-item .pl-time {
+    font-size: 0.76em;
+    color: var(--theme-text-faint);
+}
+.point-log-item .pl-change {
+    font-size: 0.95em;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.point-log-item .pl-change.plus { color: #8cc8a0; }
+.point-log-item .pl-change.minus { color: var(--danger); }
+/* ============================================================
+   语言切换器（侧边栏顶部）
+   ============================================================ */
+.lang-switcher-box {
+    position: relative;
+    padding: 0 var(--space-5) var(--space-4);
+    margin-bottom: var(--space-2);
+}
+.lang-switcher-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-md);
+    color: var(--theme-text);
+    font-family: inherit;
+    font-size: 0.9em;
+    cursor: pointer;
+    outline: none;
+    transition: all var(--transition-base);
+}
+.lang-switcher-btn:hover {
+    border-color: var(--theme-accent-border);
+}
+.lang-switcher-btn .lang-arrow {
+    font-size: 0.8em;
+    color: var(--theme-text-faint);
+    transition: transform 0.3s ease;
+}
+.lang-switcher-dropdown {
+    position: absolute;
+    top: 100%;
+    left: var(--space-5);
+    right: var(--space-5);
+    margin-top: 4px;
+    background: var(--theme-elevated);
+    border: 1px solid var(--theme-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    display: none;
+    flex-direction: column;
+    z-index: 100;
+    overflow: hidden;
+}
+.lang-switcher-dropdown.show {
+    display: flex;
+}
+.lang-switcher-dropdown a {
+    padding: 10px 14px;
+    color: var(--theme-text-dim);
+    text-decoration: none;
+    font-size: 0.88em;
+    transition: all var(--transition-base);
+}
+.lang-switcher-dropdown a:hover,
+.lang-switcher-dropdown a.active {
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
 }

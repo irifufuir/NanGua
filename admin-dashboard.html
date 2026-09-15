@@ -35,6 +35,8 @@
     <link rel="stylesheet" href="other/theme.css">
     <link rel="stylesheet" href="other/admin-dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="other/i18n.js"></script>
+    <script src="other/lang-helper.js" defer></script>
 </head>
 <body>
 
@@ -46,12 +48,12 @@
             </div>
             <div class="user-details">
                 <div class="user-name-row">
-                    <span class="role">管理员</span>
+                    <span class="role" data-i18n="common.admin">管理员</span>
                     <span class="email" id="adminEmail">加载中...</span>
                 </div>
                 <div class="user-action-row">
-                    <button class="avatar-change-btn" id="avatarChangeBtn" title="更换头像">📷 换头像</button>
-                    <button class="logout-btn-mini" id="logoutBtn">退出</button>
+                    <button class="avatar-change-btn" id="avatarChangeBtn" data-i18n="common.changeAvatar">📷 换头像</button>
+                    <button class="logout-btn-mini" id="logoutBtn" data-i18n="common.logout">退出</button>
                 </div>
             </div>
         </div>
@@ -59,53 +61,54 @@
         <nav class="nav-menu">
 
             <div class="nav-group" data-group="msg">
-                <span class="nav-text">📬 消息通知</span>
+                <span class="nav-text" data-i18n="adminDash.navMsg">📬 消息通知</span>
                 <span class="nav-arrow" data-arrow="msg">▾</span>
             </div>
             <div class="nav-sub" data-sub="msg">
-                <div class="nav-sub-item" data-tab="announce">📢 公告管理</div>
-                <div class="nav-sub-item" data-tab="forgot">📝 忘记密码</div>
-                <div class="nav-sub-item" data-tab="feedback">💬 用户反馈</div>
+                <div class="nav-sub-item" data-tab="announce" data-i18n="adminDash.navAnnounceMgr">📢 公告管理</div>
+                <div class="nav-sub-item" data-tab="forgot" data-i18n="adminDash.navForgot">📝 忘记密码</div>
+                <div class="nav-sub-item" data-tab="feedback" data-i18n="adminDash.navFeedback">💬 用户反馈</div>
             </div>
 
             <div class="nav-group" data-group="pointsGroup">
-                <span class="nav-text">📊 积分管理</span>
+                <span class="nav-text" data-i18n="adminDash.navPoints">📊 积分管理</span>
                 <span class="nav-arrow" data-arrow="pointsGroup">▾</span>
             </div>
             <div class="nav-sub" data-sub="pointsGroup">
-                <div class="nav-sub-item" data-tab="points">📅 每日签到管理</div>
-                <div class="nav-sub-item" data-tab="shop">🛍️ 积分商城</div>
-                <div class="nav-sub-item" data-tab="purchases">📋 兑换记录</div>
+                <div class="nav-sub-item" data-tab="points" data-i18n="adminDash.navCheckinMgr">📅 每日签到管理</div>
+                <div class="nav-sub-item" data-tab="pointLogs" data-i18n="adminDash.navPointLogs">📜 积分明细</div>
+                <div class="nav-sub-item" data-tab="shop" data-i18n="adminDash.navShopMgr">🛍️ 积分商城</div>
+                <div class="nav-sub-item" data-tab="purchases" data-i18n="adminDash.navPurchases">📋 兑换记录</div>
             </div>
 
             <div class="nav-group" data-group="users">
-                <span class="nav-text">👥 注册用户列表</span>
+                <span class="nav-text" data-i18n="adminDash.navUsers">👥 注册用户列表</span>
                 <span class="nav-arrow" data-arrow="users">▾</span>
             </div>
             <div class="nav-sub" data-sub="users">
-                <div class="nav-sub-item" data-tab="profiles">📋 用户列表</div>
-                <div class="nav-sub-item" data-tab="manage">⚙️ 用户管理</div>
+                <div class="nav-sub-item" data-tab="profiles" data-i18n="adminDash.navUserList">📋 用户列表</div>
+                <div class="nav-sub-item" data-tab="manage" data-i18n="adminDash.navUserManage">⚙️ 用户管理</div>
             </div>
 
             <div class="nav-item" data-tab="server">
-                <span class="nav-text">📊 服务端信息</span>
+                <span class="nav-text" data-i18n="adminDash.navServer">📊 服务端信息</span>
             </div>
 
             <div class="nav-item" data-tab="myCheckin">
-                <span class="nav-text">📅 我的签到</span>
+                <span class="nav-text" data-i18n="adminDash.navMyCheckin">📅 我的签到</span>
             </div>
 
             <div class="nav-item" data-tab="myFriends">
-                <span class="nav-text">💬 我的好友</span>
+                <span class="nav-text" data-i18n="adminDash.navMyFriends">💬 我的好友</span>
             </div>
 
             <div class="nav-group" data-group="theme">
-                <span class="nav-text">🎨 外观设置</span>
+                <span class="nav-text" data-i18n="adminDash.navThemeGroup">🎨 外观设置</span>
                 <span class="nav-arrow" data-arrow="theme">▾</span>
             </div>
             <div class="nav-sub" data-sub="theme">
-                <div class="nav-sub-item" data-tab="theme">🎨 主题设置</div>
-                <div class="nav-sub-item" data-tab="sound">🔊 音效设置</div>
+                <div class="nav-sub-item" data-tab="theme" data-i18n="adminDash.navTheme">🎨 主题设置</div>
+                <div class="nav-sub-item" data-tab="sound" data-i18n="adminDash.navSound">🔊 音效设置</div>
             </div>
 
         </nav>
@@ -117,7 +120,7 @@
             <!-- 公告管理 -->
             <div class="card" id="cardAnnounce">
                 <div class="card-head">
-                    <h2>📢 公告管理</h2>
+                    <h2 data-i18n="adminDash.announceTitle">📢 公告管理</h2>
                     <div class="head-actions">
                         <span class="badge" id="badgeAnnounce">—</span>
                         <button class="refresh-btn-mini" id="refreshAnnounceBtn" title="刷新">🔄</button>
@@ -125,28 +128,30 @@
                 </div>
                 <form class="announce-form" autocomplete="off" onsubmit="return false;">
                     <input type="text" id="announceTitle" name="notice_title_field"
-                           placeholder="公告标题" autocomplete="off" autocorrect="off" spellcheck="false"/>
+                           placeholder="公告标题" data-i18n-placeholder="adminDash.announceFormTitlePlaceholder"
+                           autocomplete="off" autocorrect="off" spellcheck="false"/>
                     <textarea id="announceContent" name="notice_content_field" rows="3"
-                              placeholder="公告内容……" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+                              placeholder="公告内容……" data-i18n-placeholder="adminDash.announceFormContentPlaceholder"
+                              autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
                     <div class="announce-form-row">
                         <label>
                             <input type="checkbox" id="announcePinned"/>
-                            置顶显示
+                            <span data-i18n="adminDash.announceFormPinned">置顶显示</span>
                         </label>
-                        <button class="btn-save" id="createAnnounceBtn" style="flex:0 0 auto; padding: 0 24px; width: auto;">
+                        <button class="btn-save" id="createAnnounceBtn" style="flex:0 0 auto; padding: 0 24px; width: auto;" data-i18n="adminDash.announceFormSubmit">
                             ✚ 发布公告
                         </button>
                     </div>
                 </form>
                 <div class="announce-list" id="announceList">
-                    <div class="empty">加载中...</div>
+                    <div class="empty" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>
 
             <!-- 每日签到积分管理 -->
             <div class="card" id="cardPoints">
                 <div class="card-head">
-                    <h2>📅 每日签到积分管理</h2>
+                    <h2 data-i18n="adminDash.pointsTitle">📅 每日签到积分管理</h2>
                     <div class="head-actions">
                         <span class="badge" id="badgePoints">—</span>
                         <button class="refresh-btn-mini" id="refreshPointsBtn" title="刷新">🔄</button>
@@ -154,47 +159,74 @@
                 </div>
 
                 <div class="config-section">
-                    <div class="config-title">每周签到积分配置</div>
+                    <div class="config-title" data-i18n="adminDash.pointsConfigTitle">每周签到积分配置</div>
                     <div class="config-grid">
-                        <div class="config-field"><label>周一</label><input type="number" id="cfgMonday" min="0" max="9999" value="1"/></div>
-                        <div class="config-field"><label>周二</label><input type="number" id="cfgTuesday" min="0" max="9999" value="1"/></div>
-                        <div class="config-field"><label>周三</label><input type="number" id="cfgWednesday" min="0" max="9999" value="2"/></div>
-                        <div class="config-field"><label>周四</label><input type="number" id="cfgThursday" min="0" max="9999" value="2"/></div>
-                        <div class="config-field"><label>周五</label><input type="number" id="cfgFriday" min="0" max="9999" value="3"/></div>
-                        <div class="config-field"><label>周六</label><input type="number" id="cfgSaturday" min="0" max="9999" value="5"/></div>
-                        <div class="config-field"><label>周日</label><input type="number" id="cfgSunday" min="0" max="9999" value="5"/></div>
+                        <div class="config-field"><label data-i18n="adminDash.pointsMon">周一</label><input type="number" id="cfgMonday" min="0" max="9999" value="1"/></div>
+                        <div class="config-field"><label data-i18n="adminDash.pointsTue">周二</label><input type="number" id="cfgTuesday" min="0" max="9999" value="1"/></div>
+                        <div class="config-field"><label data-i18n="adminDash.pointsWed">周三</label><input type="number" id="cfgWednesday" min="0" max="9999" value="2"/></div>
+                        <div class="config-field"><label data-i18n="adminDash.pointsThu">周四</label><input type="number" id="cfgThursday" min="0" max="9999" value="2"/></div>
+                        <div class="config-field"><label data-i18n="adminDash.pointsFri">周五</label><input type="number" id="cfgFriday" min="0" max="9999" value="3"/></div>
+                        <div class="config-field"><label data-i18n="adminDash.pointsSat">周六</label><input type="number" id="cfgSaturday" min="0" max="9999" value="5"/></div>
+                        <div class="config-field"><label data-i18n="adminDash.pointsSun">周日</label><input type="number" id="cfgSunday" min="0" max="9999" value="5"/></div>
                     </div>
                     <div class="config-actions">
-                        <button class="btn-save" id="saveConfigBtn">💾 保存配置</button>
+                        <button class="btn-save" id="saveConfigBtn" data-i18n="adminDash.pointsSaveConfigBtn">💾 保存配置</button>
                     </div>
                 </div>
 
                 <div class="config-section">
-                    <div class="config-title">用户积分排行</div>
+                    <div class="config-title" data-i18n="adminDash.pointsRankTitle">用户积分排行</div>
                     <div class="table-wrap">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>UID</th>
-                                    <th>用户</th>
-                                    <th>积分</th>
-                                    <th>连续签到</th>
-                                    <th>最后签到日期</th>
-                                    <th>操作</th>
+                                    <th data-i18n="adminDash.pointsTableUid">UID</th>
+                                    <th data-i18n="adminDash.pointsTableUser">用户</th>
+                                    <th data-i18n="adminDash.pointsTablePoints">积分</th>
+                                    <th data-i18n="adminDash.pointsTableStreak">连续签到</th>
+                                    <th data-i18n="adminDash.pointsTableLastCheckin">最后签到日期</th>
+                                    <th data-i18n="adminDash.pointsTableAction">操作</th>
                                 </tr>
                             </thead>
                             <tbody id="pointsBody">
-                                <tr><td colspan="6" class="loading">加载中...</td></tr>
+                                <tr><td colspan="6" class="loading" data-i18n="common.loading">加载中...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
+            <!-- 积分明细 -->
+            <div class="card" id="cardPointLogs">
+                <div class="card-head">
+                    <h2 data-i18n="adminDash.pointLogsTitle">📜 积分明细</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgePointLogs">—</span>
+                        <button class="refresh-btn-mini" id="refreshPointLogsBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="adminDash.pointLogsTableTime">时间</th>
+                                <th data-i18n="adminDash.pointLogsTableUser">用户</th>
+                                <th data-i18n="adminDash.pointLogsTableChange">变动</th>
+                                <th data-i18n="adminDash.pointLogsTableReason">原因</th>
+                                <th data-i18n="adminDash.pointLogsTableBalance">余额</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pointLogsBody">
+                            <tr><td colspan="5" class="loading" data-i18n="common.loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- 忘记密码申请 -->
             <div class="card" id="cardForgot">
                 <div class="card-head">
-                    <h2>📝 忘记密码申请</h2>
+                    <h2 data-i18n="adminDash.forgotTitle">📝 忘记密码申请</h2>
                     <div class="head-actions">
                         <span class="badge" id="badgeForgot">—</span>
                         <button class="refresh-btn-mini" id="refreshForgotBtn" title="刷新">🔄</button>
@@ -204,15 +236,15 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>邮箱</th>
-                                <th>联系方式</th>
-                                <th>问题描述</th>
-                                <th>提交时间</th>
-                                <th>操作</th>
+                                <th data-i18n="adminDash.forgotTableEmail">邮箱</th>
+                                <th data-i18n="adminDash.forgotTableContact">联系方式</th>
+                                <th data-i18n="adminDash.forgotTableReason">问题描述</th>
+                                <th data-i18n="adminDash.forgotTableTime">提交时间</th>
+                                <th data-i18n="adminDash.forgotTableAction">操作</th>
                             </tr>
                         </thead>
                         <tbody id="forgotBody">
-                            <tr><td colspan="5" class="loading">加载中...</td></tr>
+                            <tr><td colspan="5" class="loading" data-i18n="common.loading">加载中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -221,7 +253,7 @@
             <!-- 注册用户列表 -->
             <div class="card" id="cardProfiles">
                 <div class="card-head">
-                    <h2>📋 注册用户列表</h2>
+                    <h2 data-i18n="adminDash.profilesTitle">📋 注册用户列表</h2>
                     <div class="head-actions">
                         <span class="badge" id="badgeProfiles">—</span>
                         <button class="refresh-btn-mini" id="refreshProfilesBtn" title="刷新">🔄</button>
@@ -231,17 +263,17 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>UID</th>
-                                <th>用户</th>
-                                <th>昵称</th>
-                                <th>手机号</th>
-                                <th>状态</th>
-                                <th>注册时间</th>
-                                <th>操作</th>
+                                <th data-i18n="adminDash.profilesTableUid">UID</th>
+                                <th data-i18n="adminDash.profilesTableUser">用户</th>
+                                <th data-i18n="adminDash.profilesTableName">昵称</th>
+                                <th data-i18n="adminDash.profilesTablePhone">手机号</th>
+                                <th data-i18n="adminDash.profilesTableStatus">状态</th>
+                                <th data-i18n="adminDash.profilesTableCreated">注册时间</th>
+                                <th data-i18n="adminDash.profilesTableAction">操作</th>
                             </tr>
                         </thead>
                         <tbody id="profilesBody">
-                            <tr><td colspan="7" class="loading">加载中...</td></tr>
+                            <tr><td colspan="7" class="loading" data-i18n="common.loading">加载中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -250,54 +282,51 @@
             <!-- 用户管理 -->
             <div class="card" id="cardManage">
                 <div class="card-head">
-                    <h2>⚙️ 用户管理</h2>
-                    <span class="badge">修改实时同步</span>
+                    <h2 data-i18n="adminDash.manageTitle">⚙️ 用户管理</h2>
+                    <span class="badge" data-i18n="adminDash.manageBadgeSync">修改实时同步</span>
                 </div>
                 <div class="manage-layout">
                     <div class="manage-preview">
                         <img id="previewAvatar" class="preview-avatar"
                              src="image/default-avatar.png" alt="头像">
-                        <div class="preview-name" id="previewName">未选择用户</div>
-                        <div class="preview-email" id="previewEmail">请从右侧下拉框选择</div>
+                        <div class="preview-name" id="previewName" data-i18n="adminDash.manageNoUser">未选择用户</div>
+                        <div class="preview-email" id="previewEmail" data-i18n="adminDash.manageSelectHint">请从右侧下拉框选择</div>
                         <span class="preview-status" id="previewStatus" style="display:none;">正常</span>
                         <div class="preview-divider"></div>
-                        <div class="preview-hint">
-                            修改后点击右侧「保存修改」<br>
-                            昵称、手机号、邮箱、密码、UID 将实时同步
-                        </div>
+                        <div class="preview-hint">修改后点击右侧「保存修改」<br>昵称、手机号、邮箱、密码、UID 将实时同步</div>
                     </div>
                     <div class="manage-form">
-                        <div class="form-section-title">① 选择目标用户</div>
+                        <div class="form-section-title" data-i18n="adminDash.manageStep1">① 选择目标用户</div>
                         <div class="form-group">
-                            <label>用户</label>
+                            <label data-i18n="adminDash.manageStep1">用户</label>
                             <select id="manageUserSelect">
                                 <option value="">-- 请选择用户 --</option>
                             </select>
                         </div>
-                        <div class="form-section-title">② 修改用户资料</div>
+                        <div class="form-section-title" data-i18n="adminDash.manageStep2">② 修改用户资料</div>
                         <div class="form-group">
-                            <label>UID <span class="hint">（5-9 位数字，仅管理员可改）</span></label>
+                            <label><span data-i18n="adminDash.manageUid">UID</span> <span class="hint" data-i18n="adminDash.manageUidHint">（5-9 位数字，仅管理员可改）</span></label>
                             <input type="text" id="manageUid" placeholder="例如 10001" maxlength="9"/>
                         </div>
                         <div class="form-group">
-                            <label>昵称</label>
+                            <label data-i18n="adminDash.manageName">昵称</label>
                             <input type="text" id="manageName" placeholder="输入新的昵称"/>
                         </div>
                         <div class="form-group">
-                            <label>手机号</label>
+                            <label data-i18n="adminDash.managePhone">手机号</label>
                             <input type="tel" id="managePhone" placeholder="输入新的手机号"/>
                         </div>
                         <div class="form-group">
-                            <label>邮箱 <span class="hint">（会同步修改登录邮箱）</span></label>
+                            <label><span data-i18n="adminDash.manageEmail">邮箱</span> <span class="hint" data-i18n="adminDash.manageEmailHint">（会同步修改登录邮箱）</span></label>
                             <input type="email" id="manageEmail" placeholder="输入新的邮箱"/>
                         </div>
                         <div class="form-group">
-                            <label>新密码 <span class="hint">留空则不修改</span></label>
+                            <label><span data-i18n="adminDash.managePassword">新密码</span> <span class="hint" data-i18n="adminDash.managePasswordHint">留空则不修改</span></label>
                             <input type="password" id="managePassword" placeholder="至少 6 位"/>
                         </div>
                         <div class="form-actions">
-                            <button class="btn-save" id="saveManageBtn">💾 保存修改</button>
-                            <button class="btn-reset" id="resetManageBtn">清空</button>
+                            <button class="btn-save" id="saveManageBtn" data-i18n="adminDash.manageSave">💾 保存修改</button>
+                            <button class="btn-reset" id="resetManageBtn" data-i18n="adminDash.manageReset">清空</button>
                         </div>
                     </div>
                 </div>
@@ -306,7 +335,7 @@
             <!-- 积分商城（管理端） -->
             <div class="card" id="cardShop">
                 <div class="card-head">
-                    <h2>🛒 积分商城管理</h2>
+                    <h2 data-i18n="adminDash.shopMgrTitle">🛒 积分商城管理</h2>
                     <div class="head-actions">
                         <span class="badge" id="badgeShop">—</span>
                         <button class="refresh-btn-mini" id="refreshShopBtn" title="刷新">🔄</button>
@@ -315,65 +344,65 @@
 
                 <div class="shop-add-form">
                     <div class="form-row">
-                        <div class="form-group"><label>① 商品名称</label><input type="text" id="addShopName" placeholder="请输入商品名称"/></div>
-                        <div class="form-group"><label>② 积分价格</label><input type="number" id="addShopPrice" placeholder="请输入积分价格" min="0"/></div>
-                        <div class="form-group"><label>③ 库存</label><input type="number" id="addShopStock" placeholder="请输入库存" min="0" value="10"/></div>
+                        <div class="form-group"><label data-i18n="adminDash.shopAddName">① 商品名称</label><input type="text" id="addShopName" placeholder="请输入商品名称"/></div>
+                        <div class="form-group"><label data-i18n="adminDash.shopAddPrice">② 积分价格</label><input type="number" id="addShopPrice" placeholder="请输入积分价格" min="0"/></div>
+                        <div class="form-group"><label data-i18n="adminDash.shopAddStock">③ 库存</label><input type="number" id="addShopStock" placeholder="请输入库存" min="0" value="10"/></div>
                     </div>
-                    <div class="form-group"><label>④ 商品描述（用户看到的简短介绍）</label><textarea id="addShopDesc" rows="2" placeholder="请输入商品描述"></textarea></div>
-                    <div class="form-group"><label>⑤ 商品详情（用户兑换后才能看到）</label><textarea id="addShopDetail" rows="3" placeholder="请输入商品详情"></textarea></div>
+                    <div class="form-group"><label data-i18n="adminDash.shopAddDesc">④ 商品描述（用户看到的简短介绍）</label><textarea id="addShopDesc" rows="2" placeholder="请输入商品描述"></textarea></div>
+                    <div class="form-group"><label data-i18n="adminDash.shopAddDetail">⑤ 商品详情（用户兑换后才能看到）</label><textarea id="addShopDetail" rows="3" placeholder="请输入商品详情"></textarea></div>
                     <div class="form-row">
-                        <div class="form-group"><label>⑥ 商品图片展示链接（可选）</label><input type="text" id="addShopImage" placeholder="https://..."/></div>
-                        <div class="form-group"><label>⑦ 商品图标（Emoji）</label><input type="text" id="addShopIcon" placeholder="如 🎁" value="🎁"/></div>
+                        <div class="form-group"><label data-i18n="adminDash.shopAddImage">⑥ 商品图片展示链接（可选）</label><input type="text" id="addShopImage" placeholder="https://..."/></div>
+                        <div class="form-group"><label data-i18n="adminDash.shopAddIcon">⑦ 商品图标（Emoji）</label><input type="text" id="addShopIcon" placeholder="如 🎁" value="🎁"/></div>
                     </div>
                     <div class="form-group">
-                        <label>⑧ 每人限购</label>
+                        <label data-i18n="adminDash.shopAddLimit">⑧ 每人限购</label>
                         <div class="limit-row">
-                            <button type="button" class="limit-toggle" id="addLimitToggle" data-on="false">关闭（无限）</button>
+                            <button type="button" class="limit-toggle" id="addLimitToggle" data-on="false" data-i18n="adminDash.shopLimitOff">关闭（无限）</button>
                             <input type="number" id="addShopLimit" min="1" value="1" disabled/>
-                            <span class="limit-unit">份</span>
+                            <span class="limit-unit" data-i18n="adminDash.shopLimitUnit"> 份</span>
                         </div>
                     </div>
                     <div class="form-submit">
-                        <button class="btn-save" id="addShopBtn" style="padding: 0 24px; width: auto;">➕ 上架商品</button>
+                        <button class="btn-save" id="addShopBtn" style="padding: 0 24px; width: auto;" data-i18n="adminDash.shopAddBtn">➕ 上架商品</button>
                     </div>
                 </div>
 
                 <div class="shop-grid" id="adminShopGrid">
-                    <div class="empty">加载中...</div>
+                    <div class="empty" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>
 
-            <!-- 兑换记录（按用户折叠） -->
+            <!-- 兑换记录 -->
             <div class="card" id="cardPurchases">
                 <div class="card-head">
-                    <h2>📋 用户兑换记录</h2>
+                    <h2 data-i18n="adminDash.purchasesTitle">📋 用户兑换记录</h2>
                     <div class="head-actions">
                         <span class="badge" id="badgePurchases">—</span>
                         <button class="refresh-btn-mini" id="refreshPurchasesBtn" title="刷新">🔄</button>
                     </div>
                 </div>
                 <div class="purchase-users" id="purchaseUsersList">
-                    <div class="empty">加载中...</div>
+                    <div class="empty" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>
 
             <!-- 我的签到 -->
             <div class="card" id="cardMyCheckin">
                 <div class="card-head">
-                    <h2>📅 我的签到</h2>
-                    <span class="badge">每天签到，积分累积</span>
+                    <h2 data-i18n="adminDash.myCheckinTitle">📅 我的签到</h2>
+                    <span class="badge" data-i18n="adminDash.myCheckinBadge">每天签到，积分累积</span>
                 </div>
                 <div class="checkin-hero">
                     <div class="checkin-points">
                         <span class="num" id="myPoints">0</span>
-                        <span class="lbl">我的积分</span>
+                        <span class="lbl" data-i18n="adminDash.myCheckinMyPoints">我的积分</span>
                     </div>
-                    <button class="checkin-btn" id="myCheckinBtn">签 到</button>
+                    <button class="checkin-btn" id="myCheckinBtn" data-i18n="adminDash.myCheckinBtn">签 到</button>
                     <div class="checkin-calendar" id="myCheckinCalendar"></div>
                     <div class="checkin-stats" style="grid-template-columns: 1fr 1fr 1fr; max-width: 520px;">
-                        <div class="checkin-stat"><span class="v" id="myStreak">0</span><span class="k">连续签到</span></div>
-                        <div class="checkin-stat"><span class="v" id="myTodayReward">—</span><span class="k">今日奖励</span></div>
-                        <div class="checkin-stat"><span class="v" id="myAdminRank">—</span><span class="k">积分排名</span></div>
+                        <div class="checkin-stat"><span class="v" id="myStreak">0</span><span class="k" data-i18n="adminDash.myCheckinStreak">连续签到</span></div>
+                        <div class="checkin-stat"><span class="v" id="myTodayReward">—</span><span class="k" data-i18n="adminDash.myCheckinTodayReward">今日奖励</span></div>
+                        <div class="checkin-stat"><span class="v" id="myAdminRank">—</span><span class="k" data-i18n="adminDash.myCheckinRank">积分排名</span></div>
                     </div>
                 </div>
             </div>
@@ -381,78 +410,78 @@
             <!-- 我的好友 -->
             <div class="card" id="cardMyFriends">
                 <div class="card-head">
-                    <h2>💬 我的好友</h2>
+                    <h2 data-i18n="adminDash.myFriendsTitle">💬 我的好友</h2>
                     <span class="badge" id="myBadgeFriends">—</span>
                 </div>
                 <div class="add-friend-box">
-                    <input type="email" id="myFriendEmailInput" placeholder="输入对方邮箱以添加好友..."/>
-                    <button id="myAddFriendBtn">➕ 添加好友</button>
+                    <input type="email" id="myFriendEmailInput" placeholder="输入对方邮箱以添加好友..." data-i18n-placeholder="adminDash.myFriendsAddPlaceholder"/>
+                    <button id="myAddFriendBtn" data-i18n="adminDash.myFriendsAddBtn">➕ 添加好友</button>
                 </div>
                 <div class="friend-section">
-                    <div class="friend-section-title">待处理的好友请求</div>
-                    <div class="friend-list" id="myPendingList"><div class="empty-state">加载中...</div></div>
+                    <div class="friend-section-title" data-i18n="adminDash.myFriendsPendingTitle">待处理的好友请求</div>
+                    <div class="friend-list" id="myPendingList"><div class="empty-state" data-i18n="common.loading">加载中...</div></div>
                 </div>
                 <div class="friend-section">
-                    <div class="friend-section-title">我的好友</div>
-                    <div class="friend-list" id="myFriendList"><div class="empty-state">加载中...</div></div>
+                    <div class="friend-section-title" data-i18n="adminDash.myFriendsListTitle">我的好友</div>
+                    <div class="friend-list" id="myFriendList"><div class="empty-state" data-i18n="common.loading">加载中...</div></div>
                 </div>
             </div>
 
             <!-- 服务端信息 -->
             <div class="card" id="cardServer">
                 <div class="card-head">
-                    <h2>📊 服务端信息</h2>
-                    <span class="badge">实时读取 Supabase</span>
+                    <h2 data-i18n="adminDash.serverTitle">📊 服务端信息</h2>
+                    <span class="badge" data-i18n="adminDash.serverBadge">实时读取 Supabase</span>
                 </div>
                 <div class="info-toolbar">
-                    <span class="last-update" id="lastUpdate">尚未加载</span>
+                    <span class="last-update" id="lastUpdate" data-i18n="adminDash.serverLastUpdate">尚未加载</span>
                     <button class="refresh-btn" id="refreshServerBtn">🔄 刷新</button>
                 </div>
-                <div class="stat-section-title">🟢 服务健康状态</div>
+                <div class="stat-section-title" data-i18n="adminDash.serverHealthTitle">🟢 服务健康状态</div>
                 <div class="health-grid" id="healthGrid">
                     <div class="health-card">
                         <div class="health-dot" style="background:#555;"></div>
-                        <div class="health-info"><span class="name">加载中...</span></div>
+                        <div class="health-info"><span class="name" data-i18n="common.loading">加载中...</span></div>
                     </div>
                 </div>
-                <div class="stat-section-title">📈 数据统计</div>
+                <div class="stat-section-title" data-i18n="adminDash.serverStatsTitle">📈 数据统计</div>
                 <div class="stat-grid">
-                    <div class="stat-box"><span class="label">Auth 注册用户</span><span class="value" id="statAuthUsers">—</span></div>
-                    <div class="stat-box"><span class="label">profiles 用户资料</span><span class="value" id="statProfiles">—</span></div>
-                    <div class="stat-box"><span class="label">忘记密码申请</span><span class="value" id="statForgot">—</span></div>
-                    <div class="stat-box"><span class="label">已拉黑用户</span><span class="value" id="statBlocked">—</span></div>
-                    <div class="stat-box"><span class="label">头像文件数</span><span class="value" id="statAvatars">—</span></div>
-                    <div class="stat-box"><span class="label">头像占用空间</span><span class="value" id="statAvatarSize">—<span class="unit">MB</span></span></div>
+                    <div class="stat-box"><span class="label" data-i18n="adminDash.serverStatAuthUsers">Auth 注册用户</span><span class="value" id="statAuthUsers">—</span></div>
+                    <div class="stat-box"><span class="label" data-i18n="adminDash.serverStatProfiles">profiles 用户资料</span><span class="value" id="statProfiles">—</span></div>
+                    <div class="stat-box"><span class="label" data-i18n="adminDash.serverStatForgot">忘记密码申请</span><span class="value" id="statForgot">—</span></div>
+                    <div class="stat-box"><span class="label" data-i18n="adminDash.serverStatBlocked">已拉黑用户</span><span class="value" id="statBlocked">—</span></div>
+                    <div class="stat-box"><span class="label" data-i18n="adminDash.serverStatAvatars">头像文件数</span><span class="value" id="statAvatars">—</span></div>
+                    <div class="stat-box"><span class="label" data-i18n="adminDash.serverStatAvatarSize">头像占用空间</span><span class="value" id="statAvatarSize">—<span class="unit">MB</span></span></div>
                 </div>
-                <div class="stat-section-title">🌐 项目信息</div>
+                <div class="stat-section-title" data-i18n="adminDash.serverProjectTitle">🌐 项目信息</div>
                 <div class="project-info">
-                    <div class="info-row"><span class="key">项目地址</span><span class="val" id="infoUrl">—</span></div>
-                    <div class="info-row"><span class="key">区域</span><span class="val" id="infoRegion">—</span></div>
-                    <div class="info-row"><span class="key">查询耗时</span><span class="val" id="infoQueryTime">—</span></div>
-                    <div class="info-row"><span class="key">内存占用</span><span class="val" id="infoMemory">—</span></div>
-                    <div class="info-row"><span class="key">Deno 版本</span><span class="val" id="infoDeno">—</span></div>
-                    <div class="info-row"><span class="key">服务器时间</span><span class="val" id="infoTimestamp">—</span></div>
+                    <div class="info-row"><span class="key" data-i18n="adminDash.serverInfoUrl">项目地址</span><span class="val" id="infoUrl">—</span></div>
+                    <div class="info-row"><span class="key" data-i18n="adminDash.serverInfoRegion">区域</span><span class="val" id="infoRegion">—</span></div>
+                    <div class="info-row"><span class="key" data-i18n="adminDash.serverInfoQueryTime">查询耗时</span><span class="val" id="infoQueryTime">—</span></div>
+                    <div class="info-row"><span class="key" data-i18n="adminDash.serverInfoMemory">内存占用</span><span class="val" id="infoMemory">—</span></div>
+                    <div class="info-row"><span class="key" data-i18n="adminDash.serverInfoDeno">Deno 版本</span><span class="val" id="infoDeno">—</span></div>
+                    <div class="info-row"><span class="key" data-i18n="adminDash.serverInfoTimestamp">服务器时间</span><span class="val" id="infoTimestamp">—</span></div>
                 </div>
             </div>
 
             <!-- 主题设置 -->
             <div class="card" id="cardTheme">
                 <div class="card-head">
-                    <h2>🎨 主题设置</h2>
-                    <span class="badge">跟账号同步</span>
+                    <h2 data-i18n="adminDash.themeTitle">🎨 主题设置</h2>
+                    <span class="badge" data-i18n="adminDash.themeBadge">跟账号同步</span>
                 </div>
-                <div class="theme-section-hint">所有设置都会保存到你的账号，换设备登录时自动同步。</div>
+                <div class="theme-section-hint" data-i18n="adminDash.themeHint">所有设置都会保存到你的账号，换设备登录时自动同步。</div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">主题配色</span>
-                        <span class="setting-desc">选择你喜欢的界面主色调</span>
+                        <span class="setting-title" data-i18n="adminDash.themeColorTitle">主题配色</span>
+                        <span class="setting-desc" data-i18n="adminDash.themeColorDesc">选择你喜欢的界面主色调</span>
                     </div>
                     <div id="themeSwitcherContainer"></div>
                 </div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">字号大小</span>
-                        <span class="setting-desc">调整界面文字和间距的大小</span>
+                        <span class="setting-title" data-i18n="adminDash.themeFontTitle">字号大小</span>
+                        <span class="setting-desc" data-i18n="adminDash.themeFontDesc">调整界面文字和间距的大小</span>
                     </div>
                     <div class="setting-options" data-setting="fontSize">
                         <button class="setting-btn" data-value="small">小</button>
@@ -463,8 +492,8 @@
                 </div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">圆角风格</span>
-                        <span class="setting-desc">调整卡片、输入框和按钮的圆润程度</span>
+                        <span class="setting-title" data-i18n="adminDash.themeRadiusTitle">圆角风格</span>
+                        <span class="setting-desc" data-i18n="adminDash.themeRadiusDesc">调整卡片、输入框和按钮的圆润程度</span>
                     </div>
                     <div class="setting-options" data-setting="radius">
                         <button class="setting-btn" data-value="small">直角</button>
@@ -474,8 +503,8 @@
                 </div>
                 <div class="setting-group">
                     <div class="setting-label">
-                        <span class="setting-title">过渡动效</span>
-                        <span class="setting-desc">关闭后切换页面和主题时不再有动画</span>
+                        <span class="setting-title" data-i18n="adminDash.themeAnimTitle">过渡动效</span>
+                        <span class="setting-desc" data-i18n="adminDash.themeAnimDesc">关闭后切换页面和主题时不再有动画</span>
                     </div>
                     <div class="setting-options" data-setting="animations">
                         <button class="setting-btn" data-value="on">开启</button>
@@ -483,39 +512,39 @@
                     </div>
                 </div>
                 <div class="setting-reset-row">
-                    <button class="setting-reset-btn" id="resetAppearanceBtn">↺ 恢复默认设置</button>
+                    <button class="setting-reset-btn" id="resetAppearanceBtn" data-i18n="adminDash.themeResetBtn">↺ 恢复默认设置</button>
                 </div>
             </div>
 
             <!-- 音效设置 -->
             <div class="card" id="cardSound">
                 <div class="card-head">
-                    <h2>🔊 音效设置</h2>
-                    <span class="badge">全站生效</span>
+                    <h2 data-i18n="adminDash.soundTitle">🔊 音效设置</h2>
+                    <span class="badge" data-i18n="adminDash.soundBadge">全站生效</span>
                 </div>
-                <div class="theme-section-hint">音效设置保存在浏览器本地，所有页面共享。</div>
+                <div class="theme-section-hint" data-i18n="adminDash.soundHint">音效设置保存在浏览器本地，所有页面共享。</div>
                 <div class="toggle-row">
                     <div class="toggle-label">
-                        <span class="title">🔔 登录音效</span>
-                        <span class="desc">用户登录成功时播放提示音</span>
+                        <span class="title" data-i18n="adminDash.soundLoginTitle">🔔 登录音效</span>
+                        <span class="desc" data-i18n="adminDash.soundLoginDesc">用户登录成功时播放提示音</span>
                     </div>
                     <button type="button" class="toggle-switch" id="toggleLoginSound" aria-label="登录音效开关"></button>
                 </div>
                 <div class="toggle-row">
                     <div class="toggle-label">
-                        <span class="title">💬 消息提示音</span>
-                        <span class="desc">好友发来新消息时播放提示音</span>
+                        <span class="title" data-i18n="adminDash.soundMsgTitle">💬 消息提示音</span>
+                        <span class="desc" data-i18n="adminDash.soundMsgDesc">好友发来新消息时播放提示音</span>
                     </div>
                     <button type="button" class="toggle-switch" id="toggleMessageSound" aria-label="消息提示音开关"></button>
                 </div>
                 <div class="setting-group" style="margin-top: 28px;">
                     <div class="setting-label">
-                        <span class="setting-title">试听</span>
-                        <span class="setting-desc">点击按钮试听两种音效</span>
+                        <span class="setting-title" data-i18n="adminDash.soundTestTitle">试听</span>
+                        <span class="setting-desc" data-i18n="adminDash.soundTestDesc">点击按钮试听两种音效</span>
                     </div>
                     <div style="display:flex; gap:12px; flex-wrap:wrap;">
-                        <button class="setting-btn" id="testLoginSoundBtn" style="max-width: 160px;">▶ 登录音效</button>
-                        <button class="setting-btn" id="testMessageSoundBtn" style="max-width: 160px;">▶ 消息提示音</button>
+                        <button class="setting-btn" id="testLoginSoundBtn" style="max-width: 160px;" data-i18n="adminDash.soundTestLogin">▶ 登录音效</button>
+                        <button class="setting-btn" id="testMessageSoundBtn" style="max-width: 160px;" data-i18n="adminDash.soundTestMsg">▶ 消息提示音</button>
                     </div>
                 </div>
             </div>
@@ -523,25 +552,25 @@
             <!-- 用户反馈 -->
             <div class="card" id="cardFeedback">
                 <div class="card-head">
-                    <h2>💬 用户反馈</h2>
+                    <h2 data-i18n="adminDash.feedbackTitle">💬 用户反馈</h2>
                     <div class="feedback-toolbar-right">
                         <span class="badge" id="badgeFeedback">—</span>
                         <select id="feedbackFilter" class="feedback-filter-select">
-                            <option value="all">全部</option>
-                            <option value="pending">⏳ 待处理</option>
-                            <option value="processing">🔄 处理中</option>
-                            <option value="resolved">✅ 已解决</option>
+                            <option value="all" data-i18n="adminDash.feedbackFilterAll">全部</option>
+                            <option value="pending" data-i18n="adminDash.feedbackFilterPending">⏳ 待处理</option>
+                            <option value="processing" data-i18n="adminDash.feedbackFilterProcessing">🔄 处理中</option>
+                            <option value="resolved" data-i18n="adminDash.feedbackFilterResolved">✅ 已解决</option>
                         </select>
                         <button class="refresh-btn-mini" id="refreshFeedbackBtn" title="刷新">🔄</button>
                     </div>
                 </div>
                 <div class="fb-toolbar">
-                    <label class="fb-select-all"><input type="checkbox" id="fbAdminSelectAll"><span>全选</span></label>
+                    <label class="fb-select-all"><input type="checkbox" id="fbAdminSelectAll"><span data-i18n="adminDash.feedbackSelectAll">全选</span></label>
                     <span class="fb-selected-count" id="fbAdminSelectedCount">已选 0 条</span>
-                    <button class="action-btn del fb-batch-del" id="fbAdminDeleteSelected" disabled>🗑 删除选中</button>
+                    <button class="action-btn del fb-batch-del" id="fbAdminDeleteSelected" disabled data-i18n="adminDash.feedbackDeleteSelected">🗑 删除选中</button>
                 </div>
                 <div class="feedback-list" id="adminFeedbackList">
-                    <div class="empty-state">加载中...</div>
+                    <div class="empty-state" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>
 
@@ -551,17 +580,17 @@
     <!-- 封禁时长弹窗 -->
     <div class="mask" id="banDurationModal" style="display:none;">
         <div class="dialog">
-            <h3>设置封禁时长</h3>
-            <p class="dialog-hint">留空或全填 0 表示永久封禁</p>
+            <h3 data-i18n="adminDash.banModalTitle">设置封禁时长</h3>
+            <p class="dialog-hint" data-i18n="adminDash.banModalHint">留空或全填 0 表示永久封禁</p>
             <div class="dialog-inputs">
-                <div class="field"><label>天</label><input type="number" id="banDays" min="0" max="36500" value="0"/></div>
-                <div class="field"><label>小时</label><input type="number" id="banHours" min="0" max="23" value="0"/></div>
-                <div class="field"><label>分钟</label><input type="number" id="banMinutes" min="0" max="59" value="0"/></div>
+                <div class="field"><label data-i18n="adminDash.banModalDays">天</label><input type="number" id="banDays" min="0" max="36500" value="0"/></div>
+                <div class="field"><label data-i18n="adminDash.banModalHours">小时</label><input type="number" id="banHours" min="0" max="23" value="0"/></div>
+                <div class="field"><label data-i18n="adminDash.banModalMinutes">分钟</label><input type="number" id="banMinutes" min="0" max="59" value="0"/></div>
             </div>
-            <div class="dialog-preview" id="banPreview">永久封禁</div>
+            <div class="dialog-preview" id="banPreview" data-i18n="adminDash.banModalPermanent">永久封禁</div>
             <div class="dialog-actions">
-                <button type="button" class="btn-cancel" id="banCancelBtn">取消</button>
-                <button type="button" class="btn-confirm" id="banConfirmBtn">确定封禁</button>
+                <button type="button" class="btn-cancel" id="banCancelBtn" data-i18n="common.cancel">取消</button>
+                <button type="button" class="btn-confirm" id="banConfirmBtn" data-i18n="adminDash.banModalConfirm">确定封禁</button>
             </div>
         </div>
     </div>
@@ -569,15 +598,15 @@
     <!-- 调整用户数据弹窗 -->
     <div class="mask" id="pointsModal" style="display:none;">
         <div class="dialog">
-            <h3>调整用户数据</h3>
+            <h3 data-i18n="adminDash.pointsModalTitle">调整用户数据</h3>
             <p class="dialog-hint" id="pointsTargetHint">—</p>
             <div class="field-row">
-                <div class="field"><label>积分</label><input type="number" id="pointsNewValue" value="0" min="0"/></div>
-                <div class="field"><label>连续签到天数</label><input type="number" id="streakNewValue" value="0" min="0"/></div>
+                <div class="field"><label data-i18n="adminDash.pointsModalPoints">积分</label><input type="number" id="pointsNewValue" value="0" min="0"/></div>
+                <div class="field"><label data-i18n="adminDash.pointsModalStreak">连续签到天数</label><input type="number" id="streakNewValue" value="0" min="0"/></div>
             </div>
             <div class="dialog-actions">
-                <button type="button" class="btn-cancel" id="pointsCancelBtn">取消</button>
-                <button type="button" class="btn-confirm" id="pointsConfirmBtn" style="background:var(--theme-accent-soft);border-color:var(--theme-accent-border);color:var(--theme-accent);">保存</button>
+                <button type="button" class="btn-cancel" id="pointsCancelBtn" data-i18n="common.cancel">取消</button>
+                <button type="button" class="btn-confirm" id="pointsConfirmBtn" data-i18n="adminDash.pointsModalSave">保存</button>
             </div>
         </div>
     </div>
@@ -585,49 +614,46 @@
     <!-- 编辑商品弹窗 -->
     <div class="mask" id="editShopModal" style="display:none;">
         <div class="dialog" style="width: 480px; max-width: 95%; max-height: 90vh; overflow-y: auto;">
-            <h3>编辑商品信息</h3>
+            <h3 data-i18n="adminDash.editShopTitle">编辑商品信息</h3>
             <div class="announce-form" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
-                <div class="form-group"><label>① 商品名称</label><input type="text" id="editShopName"/></div>
-                <div class="form-group"><label>② 积分价格</label><input type="number" id="editShopPrice" min="0"/></div>
-                <div class="form-group"><label>③ 库存</label><input type="number" id="editShopStock" min="0"/></div>
-                <div class="form-group"><label>④ 商品描述</label><textarea id="editShopDesc" rows="2"></textarea></div>
-                <div class="form-group"><label>⑤ 商品详情</label><textarea id="editShopDetail" rows="3"></textarea></div>
-                <div class="form-group"><label>⑥ 商品图片展示链接</label><input type="text" id="editShopImage"/></div>
-                <div class="form-group"><label>⑦ 商品图标</label><input type="text" id="editShopIcon"/></div>
+                <div class="form-group"><label data-i18n="adminDash.shopAddName">① 商品名称</label><input type="text" id="editShopName"/></div>
+                <div class="form-group"><label data-i18n="adminDash.shopAddPrice">② 积分价格</label><input type="number" id="editShopPrice" min="0"/></div>
+                <div class="form-group"><label data-i18n="adminDash.shopAddStock">③ 库存</label><input type="number" id="editShopStock" min="0"/></div>
+                <div class="form-group"><label data-i18n="adminDash.shopAddDesc">④ 商品描述</label><textarea id="editShopDesc" rows="2"></textarea></div>
+                <div class="form-group"><label data-i18n="adminDash.shopAddDetail">⑤ 商品详情</label><textarea id="editShopDetail" rows="3"></textarea></div>
+                <div class="form-group"><label data-i18n="adminDash.shopAddImage">⑥ 商品图片展示链接</label><input type="text" id="editShopImage"/></div>
+                <div class="form-group"><label data-i18n="adminDash.shopAddIcon">⑦ 商品图标</label><input type="text" id="editShopIcon"/></div>
                 <div class="form-group">
-                    <label>⑧ 每人限购</label>
+                    <label data-i18n="adminDash.shopAddLimit">⑧ 每人限购</label>
                     <div class="limit-row">
                         <button type="button" class="limit-toggle" id="editLimitToggle" data-on="false">关闭（无限）</button>
                         <input type="number" id="editShopLimit" min="1" value="1" disabled/>
-                        <span class="limit-unit">份</span>
+                        <span class="limit-unit" data-i18n="adminDash.shopLimitUnit"> 份</span>
                     </div>
                 </div>
             </div>
             <div class="dialog-actions" style="margin-top: 16px;">
-                <button type="button" class="btn-cancel" id="editShopCancelBtn">取消</button>
-                <button type="button" class="btn-confirm" id="editShopSaveBtn" style="background:var(--theme-accent-soft);border-color:var(--theme-accent-border);color:var(--theme-accent);">保存修改</button>
+                <button type="button" class="btn-cancel" id="editShopCancelBtn" data-i18n="common.cancel">取消</button>
+                <button type="button" class="btn-confirm" id="editShopSaveBtn" data-i18n="adminDash.editShopSaveBtn">保存修改</button>
             </div>
         </div>
     </div>
 
-    <!-- ★ 反馈积分奖励弹窗（新增） -->
+    <!-- 反馈积分奖励弹窗 -->
     <div class="mask" id="feedbackRewardModal" style="display:none;">
         <div class="dialog">
-            <h3>🎁 奖励积分</h3>
+            <h3 data-i18n="adminDash.feedbackRewardModalTitle">🎁 奖励积分</h3>
             <p class="dialog-hint" id="feedbackRewardHint">—</p>
             <div class="field-row" style="grid-template-columns:1fr;">
                 <div class="field">
-                    <label>奖励积分</label>
+                    <label data-i18n="adminDash.feedbackRewardPoints">奖励积分</label>
                     <input type="number" id="feedbackRewardPoints" value="5" min="0" max="9999"/>
                 </div>
             </div>
             <div class="dialog-preview" id="feedbackRewardPreview">奖励 5 积分</div>
             <div class="dialog-actions">
-                <button type="button" class="btn-cancel" id="feedbackRewardCancelBtn">取消</button>
-                <button type="button" class="btn-confirm" id="feedbackRewardConfirmBtn"
-                        style="background:var(--theme-accent-soft);border-color:var(--theme-accent-border);color:var(--theme-accent);">
-                    确认并奖励
-                </button>
+                <button type="button" class="btn-cancel" id="feedbackRewardCancelBtn" data-i18n="common.cancel">取消</button>
+                <button type="button" class="btn-confirm" id="feedbackRewardConfirmBtn" data-i18n="adminDash.feedbackRewardConfirm">确认并奖励</button>
             </div>
         </div>
     </div>
@@ -640,19 +666,19 @@
                 <span class="chat-name" id="myChatFriendName">—</span>
                 <button class="chat-close-btn" id="myChatCloseBtn">✕</button>
             </div>
-            <div class="chat-body" id="myChatBody"><div class="empty-state">加载中...</div></div>
+            <div class="chat-body" id="myChatBody"><div class="empty-state" data-i18n="common.loading">加载中...</div></div>
             <div class="chat-input-box">
-                <input type="text" id="myChatInput" placeholder="输入消息..."/>
-                <button id="myChatSendBtn">发送</button>
+                <input type="text" id="myChatInput" placeholder="输入消息..." data-i18n-placeholder="userDash.chatInputPlaceholder"/>
+                <button id="myChatSendBtn" data-i18n="userDash.chatSend">发送</button>
             </div>
         </div>
     </div>
 
     <script src="other/admin-dashboard.js"></script>
-
     <script src="other/theme.js"></script>
     <script src="other/sound.js"></script>
     <script src="other/message-notify.js"></script>
     <script src="other/ban-guard.js"></script>
+    <script src="other/session-guard.js"></script>
 </body>
 </html>

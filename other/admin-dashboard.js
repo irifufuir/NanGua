@@ -1,6 +1,28 @@
 /* ============================================================
- *  admin-dashboard.html 主逻辑
+ *  admin-dashboard.html 主逻辑（多语言版）
  * ============================================================ */
+
+/* ============================================================
+ *  语言辅助
+ * ============================================================ */
+function t(key, fallback) {
+    if (window.LangHelper && window.LangHelper.t) {
+        return window.LangHelper.t(key, fallback);
+    }
+    return fallback != null ? fallback : key;
+}
+function getLang() {
+    return (window.LangHelper && window.LangHelper.getLang) ? window.LangHelper.getLang() : 'zh';
+}
+function applyLang() {
+    if (window.LangHelper && window.LangHelper.apply) {
+        window.LangHelper.apply();
+    }
+    if (typeof refreshDynamicText === 'function') {
+        try { refreshDynamicText(); } catch (e) {}
+    }
+}
+window.__adLangChanged = applyLang;
 
 /* ============================================================
  *  移动端导航分组
@@ -114,11 +136,11 @@
         document.addEventListener('DOMContentLoaded', build);
     } else { build(); }
 
-    var t = null;
+    var resizeTimer = null;
     var lastMode = isMobile();
     window.addEventListener('resize', function () {
-        clearTimeout(t);
-        t = setTimeout(function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
             var now = isMobile();
             if (now !== lastMode) { lastMode = now; build(); }
             else if (now && window.syncMobileSubRow) { window.syncMobileSubRow(); }
@@ -143,6 +165,21 @@ var myCurrentChatFriend = null;
 var myChatPollTimer = null;
 var myLastMsgTs = null;
 
+/* ============================================================
+ *  工具函数
+ * ============================================================ */
+function writePointLog(userId, changeAmount, reason, balanceAfter) {
+    if (!userId || !changeAmount) return Promise.resolve();
+    return supabaseClient.from('point_logs').insert([{
+        user_id: userId,
+        change_amount: changeAmount,
+        reason: reason || '积分变化',
+        balance_after: balanceAfter != null ? balanceAfter : 0
+    }]).then(function (r) {
+        if (r.error) console.warn('[积分日志] 写入失败：', r.error.message);
+    });
+}
+
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -162,19 +199,21 @@ function formatDate(iso) {
 function getRemainingTime(bannedUntil) {
     if (!bannedUntil) return null;
     var diff = new Date(bannedUntil).getTime() - Date.now();
-    if (diff <= 0) return '即将解封';
+    if (diff <= 0) return t('adminDash.banUnlockingSoon', '即将解封');
     var totalMinutes = Math.floor(diff / 60000);
     var days = Math.floor(totalMinutes / 1440);
     var hours = Math.floor((totalMinutes % 1440) / 60);
     var minutes = totalMinutes % 60;
     var parts = [];
-    if (days > 0) parts.push(days + '天');
-    if (hours > 0) parts.push(hours + '小时');
-    if (days === 0 && minutes > 0) parts.push(minutes + '分钟');
-    return parts.join(' ') || '不到 1 分钟';
+    if (days > 0) parts.push(days + t('adminDash.pointsDaysUnit', '天'));
+    if (hours > 0) parts.push(hours + t('adminDash.banModalHours', '小时'));
+    if (days === 0 && minutes > 0) parts.push(minutes + t('adminDash.banModalMinutes', '分钟'));
+    return parts.join(' ') || t('adminDash.banLessThanMinute', '不到 1 分钟');
 }
 
-/* 侧边栏分组展开 */
+/* ============================================================
+ *  侧边栏分组展开
+ * ============================================================ */
 document.querySelectorAll('.nav-group').forEach(function (group) {
     group.addEventListener('click', function () {
         var key = this.getAttribute('data-group');
@@ -195,10 +234,13 @@ document.querySelectorAll('.nav-group').forEach(function (group) {
     });
 });
 
-/* 视图切换 */
+/* ============================================================
+ *  视图切换
+ * ============================================================ */
 var CARDS = {
     announce:  'cardAnnounce',
     points:    'cardPoints',
+    pointLogs: 'cardPointLogs',
     forgot:    'cardForgot',
     profiles:  'cardProfiles',
     manage:    'cardManage',
@@ -229,6 +271,7 @@ function switchTab(tab) {
     });
     if (tab === 'announce')  loadAnnouncements();
     if (tab === 'points')    loadPoints();
+    if (tab === 'pointLogs') loadAllPointLogs();
     if (tab === 'forgot')    loadForgotRequests();
     if (tab === 'profiles')  loadProfiles();
     if (tab === 'server')    loadServerInfo();
@@ -265,7 +308,9 @@ function callEdgeFunction(action, userId, banDuration, newValue, metadata) {
     });
 }
 
-/* 权限守卫 */
+/* ============================================================
+ *  权限守卫
+ * ============================================================ */
 supabaseClient.auth.getSession().then(function (res) {
     var session = res.data && res.data.session;
     if (!session) { location.href = 'index.html'; return; }
@@ -288,6 +333,9 @@ supabaseClient.auth.onAuthStateChange(function (event, session) {
     if (event === 'SIGNED_OUT' || !session) location.href = 'index.html';
 });
 
+/* ============================================================
+ *  头像上传
+ * ============================================================ */
 document.getElementById('avatarChangeBtn').addEventListener('click', function () {
     document.getElementById('avatarInput').click();
 });
@@ -297,11 +345,11 @@ document.getElementById('avatarInput').addEventListener('change', function (e) {
     if (!file) return;
     var inputEl = this;
 
-    if (file.size > 5 * 1024 * 1024) { alert('头像文件大小不能超过 5 MB！'); inputEl.value = ''; return; }
-    if (!file.type.startsWith('image/')) { alert('请上传图片文件！'); inputEl.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { alert(t('adminDash.avatarTooLarge', '头像文件大小不能超过 5 MB！')); inputEl.value = ''; return; }
+    if (!file.type.startsWith('image/')) { alert(t('adminDash.avatarNotImage', '请上传图片文件！')); inputEl.value = ''; return; }
 
     supabaseClient.auth.getUser().then(function (userRes) {
-        if (userRes.error || !userRes.data.user) { alert('获取用户信息失败'); return; }
+        if (userRes.error || !userRes.data.user) { alert(t('adminDash.avatarGetUserFail', '获取用户信息失败')); return; }
         var userId = userRes.data.user.id;
 
         var storageKey = 'last_avatar_upload_' + userId;
@@ -311,7 +359,8 @@ document.getElementById('avatarInput').addEventListener('change', function (e) {
             var oneHour = 60 * 60 * 1000;
             if (elapsed < oneHour) {
                 var remainingMin = Math.ceil((oneHour - elapsed) / 60000);
-                alert('头像修改过于频繁\n请 ' + (remainingMin >= 60 ? Math.floor(remainingMin/60)+' 小时 '+(remainingMin%60)+' 分钟' : remainingMin+' 分钟') + ' 后再试');
+                alert(t('adminDash.avatarTooFrequent', '头像修改过于频繁') + '\n' +
+                      t('adminDash.avatarRetryPrefix', '请 ') + remainingMin + t('adminDash.avatarRetrySuffix', ' 分钟后再试'));
                 inputEl.value = '';
                 return;
             }
@@ -323,7 +372,7 @@ document.getElementById('avatarInput').addEventListener('change', function (e) {
         supabaseClient.storage.from('avatars')
             .upload(filePath, file, { upsert: true })
             .then(function (uploadRes) {
-                if (uploadRes.error) { alert('头像上传失败：' + uploadRes.error.message); return; }
+                if (uploadRes.error) { alert(t('adminDash.avatarUploadFail', '头像上传失败：') + uploadRes.error.message); return; }
                 return supabaseClient.storage.from('avatars').createSignedUrl(filePath, 60*60*24*365*10);
             })
             .then(function (signRes) {
@@ -336,7 +385,7 @@ document.getElementById('avatarInput').addEventListener('change', function (e) {
                     .then(function () {
                         localStorage.setItem(storageKey, Date.now().toString());
                         document.getElementById('avatarImg').src = signedUrl;
-                        alert('头像更新成功！');
+                        alert(t('adminDash.avatarUpdated', '头像更新成功！'));
                     });
             });
     });
@@ -347,35 +396,37 @@ document.getElementById('logoutBtn').addEventListener('click', function () {
     supabaseClient.auth.signOut().then(function () { location.href = 'index.html'; });
 });
 
-/* 公告管理 */
+/* ============================================================
+ *  公告管理
+ * ============================================================ */
 function loadAnnouncements() {
     var listEl = document.getElementById('announceList');
     var badge = document.getElementById('badgeAnnounce');
-    listEl.innerHTML = '<div class="empty">加载中...</div>';
+    listEl.innerHTML = '<div class="empty">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('announcements').select('*')
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                listEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                listEl.innerHTML = '<div class="empty">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
                 return;
             }
             var data = res.data || [];
-            badge.textContent = data.length + ' 条';
-            if (data.length === 0) { listEl.innerHTML = '<div class="empty">暂无公告</div>'; return; }
+            badge.textContent = data.length + ' ' + (getLang() === 'zh' ? '条' : '');
+            if (data.length === 0) { listEl.innerHTML = '<div class="empty">' + t('adminDash.announceListEmpty', '暂无公告') + '</div>'; return; }
 
             var html = '';
             data.forEach(function (item) {
                 html += '<div class="announce-item">' +
                     '<div class="announce-head">' +
-                        (item.is_pinned ? '<span class="announce-pinned">📌 置顶</span>' : '') +
+                        (item.is_pinned ? '<span class="announce-pinned">' + t('userDash.announcePinned', '📌 置顶') + '</span>' : '') +
                         '<span class="announce-title">' + escapeHtml(item.title) + '</span>' +
                         '<span class="announce-time">' + formatTime(item.created_at) + '</span>' +
                     '</div>' +
                     '<div class="announce-content">' + escapeHtml(item.content) + '</div>' +
                     '<div class="announce-actions">' +
-                        '<button class="action-btn del" data-id="' + item.id + '">删除</button>' +
+                        '<button class="action-btn del" data-id="' + item.id + '">' + t('common.delete', '删除') + '</button>' +
                     '</div>' +
                 '</div>';
             });
@@ -384,9 +435,9 @@ function loadAnnouncements() {
             listEl.querySelectorAll('.action-btn.del').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var id = this.getAttribute('data-id');
-                    if (!confirm('确定删除这条公告吗？')) return;
+                    if (!confirm(t('adminDash.announceDeleteConfirm', '确定删除这条公告吗？'))) return;
                     supabaseClient.from('announcements').delete().eq('id', id).then(function (r) {
-                        if (r.error) { alert('删除失败：' + r.error.message); return; }
+                        if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
                         loadAnnouncements();
                     });
                 });
@@ -404,18 +455,18 @@ document.getElementById('createAnnounceBtn').addEventListener('click', function 
     var title = document.getElementById('announceTitle').value.trim();
     var content = document.getElementById('announceContent').value.trim();
     var pinned = document.getElementById('announcePinned').checked;
-    if (!title) { alert('请填写公告标题'); return; }
-    if (!content) { alert('请填写公告内容'); return; }
+    if (!title) { alert(t('adminDash.announceTitleRequired', '请填写公告标题')); return; }
+    if (!content) { alert(t('adminDash.announceContentRequired', '请填写公告内容')); return; }
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '发布中...';
+    btn.textContent = t('common.loading', '加载中...');
     supabaseClient.from('announcements').insert([{
         title: title, content: content, is_pinned: pinned
     }]).then(function (res) {
         btn.disabled = false;
-        btn.textContent = '✚ 发布公告';
-        if (res.error) { alert('发布失败：' + res.error.message); return; }
+        btn.textContent = t('adminDash.announceFormSubmit', '✚ 发布公告');
+        if (res.error) { alert(t('common.fail', '操作失败') + '：' + res.error.message); return; }
         document.getElementById('announceTitle').value = '';
         document.getElementById('announceContent').value = '';
         document.getElementById('announcePinned').checked = false;
@@ -423,24 +474,25 @@ document.getElementById('createAnnounceBtn').addEventListener('click', function 
     });
 });
 
-/* ========== 用户反馈管理 ========== */
+/* ============================================================
+ *  用户反馈管理
+ * ============================================================ */
 function loadAllFeedbacks() {
     var listEl = document.getElementById('adminFeedbackList');
     var filter = document.getElementById('feedbackFilter').value;
     if (!listEl) return;
-    listEl.innerHTML = '<div class="empty-state">加载中...</div>';
+    listEl.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
-        var query = supabaseClient.from('feedbacks').select('*');
+    var query = supabaseClient.from('feedbacks').select('*');
     if (filter !== 'all') query = query.eq('status', filter);
 
     query.then(function (res) {
         if (res.error) {
-            listEl.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
+            listEl.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
             return;
         }
         var data = res.data || [];
 
-        /* ★ 自定义排序：待处理 → 处理中 → 已解决；同状态内按时间倒序 */
         var STATUS_ORDER = { pending: 0, processing: 1, resolved: 2 };
         data.sort(function (a, b) {
             var sa = (STATUS_ORDER[a.status] != null) ? STATUS_ORDER[a.status] : 99;
@@ -449,49 +501,53 @@ function loadAllFeedbacks() {
             return new Date(b.created_at) - new Date(a.created_at);
         });
 
-        document.getElementById('badgeFeedback').textContent = data.length + ' 条';
+        document.getElementById('badgeFeedback').textContent = data.length + ' ' + (getLang() === 'zh' ? '条' : '');
         if (data.length === 0) {
-            listEl.innerHTML = '<div class="empty-state">📭 ' + (filter === 'all' ? '暂无反馈' : '该状态下暂无反馈') + '</div>';
+            listEl.innerHTML = '<div class="empty-state">📭</div>';
             resetAdminFbSelection();
             return;
         }
 
-        var statusMap = { pending: '⏳ 待处理', processing: '🔄 处理中', resolved: '✅ 已解决' };
+        var statusMap = {
+            pending:    t('adminDash.feedbackStatusPending', '⏳ 待处理'),
+            processing: t('adminDash.feedbackStatusProcessing', '🔄 处理中'),
+            resolved:   t('adminDash.feedbackStatusResolved', '✅ 已解决')
+        };
         var html = '';
         data.forEach(function (item) {
             var time = new Date(item.created_at).toLocaleString('zh-CN', { hour12: false });
             var initial = (item.user_email || '匿').charAt(0).toUpperCase();
             html += '<div class="feedback-item">' +
-                '<label class="fb-check" title="选择这条反馈"><input type="checkbox" class="fb-item-check" data-id="' + item.id + '"></label>' +
+                '<label class="fb-check" title="Select"><input type="checkbox" class="fb-item-check" data-id="' + item.id + '"></label>' +
                 '<div class="fb-main">' +
                     '<div class="feedback-head">' +
                         '<span class="fb-avatar">' + escapeHtml(initial) + '</span>' +
-                        '<span class="feedback-email">' + escapeHtml(item.user_email || '匿名用户') + '</span>' +
+                        '<span class="feedback-email">' + escapeHtml(item.user_email || 'Anonymous') + '</span>' +
                         '<span class="feedback-status ' + item.status + '">' + (statusMap[item.status] || item.status) + '</span>' +
                         ((item.reward_points && item.reward_points > 0)
-                            ? '<span class="feedback-reward-tag">+' + item.reward_points + ' 积分</span>'
+                            ? '<span class="feedback-reward-tag">+' + item.reward_points + ' ' + (getLang() === 'zh' ? '积分' : 'pts') + '</span>'
                             : '') +
                         '<span class="feedback-time">' + time + '</span>' +
                     '</div>' +
                     '<div class="feedback-content">' + escapeHtml(item.content) + '</div>' +
-                    (item.reply ? '<div class="feedback-reply">💬 <b>已回复：</b>' + escapeHtml(item.reply) + '</div>' : '') +
-                                        '<div class="feedback-actions">' +
+                    (item.reply ? '<div class="feedback-reply">💬 <b>' + t('userDash.feedbackAdminReply', '💬 管理员回复：') + '</b>' + escapeHtml(item.reply) + '</div>' : '') +
+                    '<div class="feedback-actions">' +
                         '<select class="status-select" data-id="' + item.id + '" data-old-status="' + item.status + '">' +
-                            '<option value="pending"' + (item.status==='pending'?' selected':'') + '>待处理</option>' +
-                            '<option value="processing"' + (item.status==='processing'?' selected':'') + '>处理中</option>' +
-                            '<option value="resolved"' + (item.status==='resolved'?' selected':'') + '>已解决</option>' +
+                            '<option value="pending"' + (item.status==='pending'?' selected':'') + '>' + t('adminDash.feedbackStatusPending', '待处理') + '</option>' +
+                            '<option value="processing"' + (item.status==='processing'?' selected':'') + '>' + t('adminDash.feedbackStatusProcessing', '处理中') + '</option>' +
+                            '<option value="resolved"' + (item.status==='resolved'?' selected':'') + '>' + t('adminDash.feedbackStatusResolved', '已解决') + '</option>' +
                         '</select>' +
-                        '<button class="action-btn edit reply-btn" data-id="' + item.id + '">' + (item.reply ? '✏️ 修改回复' : '💬 回复') + '</button>' +
+                        '<button class="action-btn edit reply-btn" data-id="' + item.id + '">' + (item.reply ? t('adminDash.feedbackEditReplyBtn', '✏️ 修改回复') : t('adminDash.feedbackReplyBtn', '💬 回复')) + '</button>' +
                         (item.status === 'resolved'
-                            ? '<button class="action-btn edit fb-edit-reward" data-id="' + item.id + '">🎁 编辑奖励</button>'
+                            ? '<button class="action-btn edit fb-edit-reward" data-id="' + item.id + '">' + t('adminDash.feedbackEditRewardBtn', '🎁 编辑奖励') + '</button>'
                             : '') +
-                        '<button class="action-btn del fb-del" data-id="' + item.id + '">🗑 删除</button>' +
+                        '<button class="action-btn del fb-del" data-id="' + item.id + '">' + t('adminDash.feedbackDelBtn', '🗑 删除') + '</button>' +
                     '</div>' +
                     '<div class="reply-box" id="replyBox_' + item.id + '" style="display:none;margin-top:10px;">' +
-                        '<textarea class="reply-input" placeholder="输入回复内容..." rows="2" style="width:100%;padding:10px 12px;border-radius:10px;background:var(--theme-info-box);color:var(--theme-text);border:1px solid var(--theme-border);font-family:inherit;font-size:0.9em;resize:vertical;outline:none;">' + (item.reply || '') + '</textarea>' +
+                        '<textarea class="reply-input" placeholder="' + t('adminDash.feedbackReplyPlaceholder', '输入回复内容...') + '" rows="2" style="width:100%;padding:10px 12px;border-radius:10px;background:var(--theme-info-box);color:var(--theme-text);border:1px solid var(--theme-border);font-family:inherit;font-size:0.9em;resize:vertical;outline:none;">' + (item.reply || '') + '</textarea>' +
                         '<div style="margin-top:6px;display:flex;gap:8px;">' +
-                            '<button class="action-btn save-reply-btn" data-id="' + item.id + '">保存回复</button>' +
-                            '<button class="action-btn cancel-reply-btn" data-id="' + item.id + '">取消</button>' +
+                            '<button class="action-btn save-reply-btn" data-id="' + item.id + '">' + t('adminDash.feedbackSaveReply', '保存回复') + '</button>' +
+                            '<button class="action-btn cancel-reply-btn" data-id="' + item.id + '">' + t('adminDash.feedbackCancelReply', '取消') + '</button>' +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -500,7 +556,6 @@ function loadAllFeedbacks() {
         listEl.innerHTML = html;
         resetAdminFbSelection();
 
-                /* ★ 状态下拉框 change：只要选"已解决"，都弹窗 */
         listEl.querySelectorAll('.status-select').forEach(function (sel) {
             sel.addEventListener('change', function () {
                 var selectEl = this;
@@ -516,7 +571,6 @@ function loadAllFeedbacks() {
             });
         });
 
-        /* ★ 已解决的反馈有「🎁 编辑奖励」按钮，点击重新打开弹窗 */
         listEl.querySelectorAll('.fb-edit-reward').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var id = this.getAttribute('data-id');
@@ -538,9 +592,9 @@ function loadAllFeedbacks() {
                 var id = this.getAttribute('data-id');
                 var reply = document.querySelector('#replyBox_' + id + ' .reply-input').value.trim();
                 supabaseClient.from('feedbacks').update({ reply: reply, updated_at: new Date().toISOString() }).eq('id', id).select().then(function (r) {
-                    if (r.error) { showToast('保存失败：' + r.error.message, 'error'); return; }
-                    if (!r.data || r.data.length === 0) { showToast('回复未保存：请检查反馈表的 update 权限（RLS 策略）', 'error'); return; }
-                    showToast('回复已保存', 'success');
+                    if (r.error) { showToast(t('common.fail', '操作失败') + '：' + r.error.message, 'error'); return; }
+                    if (!r.data || r.data.length === 0) { showToast(t('adminDash.replyRls', '回复未保存：请检查 RLS 策略'), 'error'); return; }
+                    showToast(t('adminDash.replySaved', '回复已保存'), 'success');
                     loadAllFeedbacks();
                 });
             });
@@ -576,7 +630,7 @@ function updateAdminFbSelected() {
     var cnt = document.getElementById('fbAdminSelectedCount');
     var sa  = document.getElementById('fbAdminSelectAll');
     if (btn) btn.disabled = ids.length === 0;
-    if (cnt) cnt.textContent = '已选 ' + ids.length + ' 条';
+    if (cnt) cnt.textContent = t('adminDash.feedbackSelectedCountTpl', '已选 ') + ids.length + t('adminDash.feedbackSelectedCountUnit', ' 条');
     if (sa) {
         var total = document.querySelectorAll('#adminFeedbackList .fb-item-check').length;
         sa.checked = total > 0 && ids.length === total;
@@ -584,37 +638,42 @@ function updateAdminFbSelected() {
 }
 function deleteAdminFb(ids, single) {
     if (!ids.length) return;
-    var msg = single ? '确定删除这条反馈吗？删除后不可恢复。' : '确定删除选中的 ' + ids.length + ' 条反馈吗？删除后不可恢复。';
+    var msg = single
+        ? t('userDash.feedbackDeleteConfirm', '确定删除这条反馈吗？删除后不可恢复。')
+        : t('userDash.feedbackDeleteConfirmMulti', '确定删除选中的 ') + ids.length + t('userDash.feedbackDeleteConfirmMulti2', ' 条反馈吗？删除后不可恢复。');
     confirmFb(msg).then(function (ok) {
         if (!ok) return;
         var q = supabaseClient.from('feedbacks').delete().select();
         q = single ? q.eq('id', ids[0]) : q.in('id', ids);
         q.then(function (res) {
-            if (res.error) { showToast('删除失败：' + res.error.message, 'error'); return; }
+            if (res.error) { showToast(t('common.fail', '操作失败') + '：' + res.error.message, 'error'); return; }
             if (!res.data || res.data.length === 0) {
-                showToast('删除未生效：反馈表缺少删除权限（RLS 策略），请先在 Supabase 中添加 delete 策略', 'error');
+                showToast(t('adminDash.deleteRls', '删除未生效：请检查 RLS 策略'), 'error');
                 loadAllFeedbacks();
                 return;
             }
-            showToast(single ? '已删除该反馈' : '已删除 ' + res.data.length + ' 条反馈', 'success');
+            showToast(single
+                ? t('adminDash.deletedOne', '已删除')
+                : (t('adminDash.deletedManyPrefix', '已删除 ') + res.data.length + t('adminDash.deletedManySuffix', ' 条')),
+                'success');
             loadAllFeedbacks();
         });
     });
 }
 function showToast(msg, type) {
-    var t = document.getElementById('fbToast');
-    if (!t) {
-        t = document.createElement('div');
-        t.id = 'fbToast';
-        t.className = 'fb-toast';
-        document.body.appendChild(t);
+    var toast = document.getElementById('fbToast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'fbToast';
+        toast.className = 'fb-toast';
+        document.body.appendChild(toast);
     }
-    t.className = 'fb-toast ' + (type === 'success' ? 'fb-toast-success' : type === 'error' ? 'fb-toast-error' : '');
-    t.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ') + msg;
-    void t.offsetWidth;
-    t.classList.add('show');
-    clearTimeout(t._t);
-    t._t = setTimeout(function () { t.classList.remove('show'); }, 2600);
+    toast.className = 'fb-toast ' + (type === 'success' ? 'fb-toast-success' : type === 'error' ? 'fb-toast-error' : '');
+    toast.textContent = (type === 'success' ? '✅ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ') + msg;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { toast.classList.remove('show'); }, 2600);
 }
 var fbPendingResolve = null;
 function confirmFb(message) {
@@ -624,7 +683,7 @@ function confirmFb(message) {
             mask = document.createElement('div');
             mask.id = 'fbModalMask';
             mask.className = 'fb-modal-mask';
-            mask.innerHTML = '<div class="fb-modal"><div class="fb-modal-title">⚠️ 确认删除</div><div class="fb-modal-msg"></div><div class="fb-modal-actions"><button class="fb-btn" data-act="cancel">取消</button><button class="fb-btn fb-btn-ok" data-act="ok">确定删除</button></div></div>';
+            mask.innerHTML = '<div class="fb-modal"><div class="fb-modal-title">⚠️ ' + t('common.confirm', '确定') + '</div><div class="fb-modal-msg"></div><div class="fb-modal-actions"><button class="fb-btn" data-act="cancel">' + t('common.cancel', '取消') + '</button><button class="fb-btn fb-btn-ok" data-act="ok">' + t('common.confirm', '确定') + '</button></div></div>';
             mask.addEventListener('click', function (e) {
                 if (e.target === mask || (e.target.getAttribute && e.target.getAttribute('data-act') === 'cancel')) {
                     mask.classList.remove('show');
@@ -659,7 +718,7 @@ document.getElementById('adminFeedbackList').addEventListener('click', function 
 });
 
 /* ============================================================
- *  反馈状态更新 + 积分奖励（新增）
+ *  反馈状态更新 + 积分奖励
  * ============================================================ */
 function updateFeedbackStatus(id, status, selectEl, oldStatus) {
     supabaseClient.from('feedbacks').update({
@@ -667,17 +726,17 @@ function updateFeedbackStatus(id, status, selectEl, oldStatus) {
         updated_at: new Date().toISOString()
     }).eq('id', id).select().then(function (r) {
         if (r.error) {
-            showToast('更新失败：' + r.error.message, 'error');
+            showToast(t('common.fail', '操作失败') + '：' + r.error.message, 'error');
             if (selectEl) selectEl.value = oldStatus;
             return;
         }
         if (!r.data || r.data.length === 0) {
-            showToast('状态未生效：请检查反馈表的 update 权限（RLS 策略）', 'error');
+            showToast(t('adminDash.statusRls', '状态未生效：请检查 RLS 策略'), 'error');
             if (selectEl) selectEl.value = oldStatus;
             return;
         }
         if (selectEl) selectEl.setAttribute('data-old-status', status);
-        showToast('状态已更新', 'success');
+        showToast(t('adminDash.statusUpdated', '状态已更新'), 'success');
     });
 }
 
@@ -690,9 +749,9 @@ function openFeedbackRewardDialog(feedbackId, selectEl, oldStatus, itemEl) {
     var previewEl = document.getElementById('feedbackRewardPreview');
 
     var emailEl = itemEl ? itemEl.querySelector('.feedback-email') : null;
-    var emailText = emailEl ? emailEl.textContent : '该用户';
+    var emailText = emailEl ? emailEl.textContent : t('adminDash.feedbackRewardHintTpl3', '该用户');
 
-    hint.textContent = '给「' + emailText + '」奖励积分：';
+    hint.textContent = t('adminDash.feedbackRewardHintTpl', '给「') + emailText + t('adminDash.feedbackRewardHintTpl2', '」奖励积分：');
     inputEl.value = '5';
 
     var oldPoints = 0;
@@ -701,20 +760,25 @@ function openFeedbackRewardDialog(feedbackId, selectEl, oldStatus, itemEl) {
         var v = parseInt(inputEl.value, 10) || 0;
         if (oldPoints > 0) {
             if (v === oldPoints) {
-                previewEl.textContent = '保持 ' + v + ' 积分（无变化）';
+                previewEl.textContent = t('adminDash.rewardKeepPrefix', '保持 ') + v + t('adminDash.rewardKeepSuffix', ' 积分（无变化）');
             } else if (v > oldPoints) {
-                previewEl.textContent = '从 ' + oldPoints + ' 增加到 ' + v + ' 积分（+' + (v - oldPoints) + '）';
+                previewEl.textContent = t('adminDash.rewardIncPrefix', '从 ') + oldPoints
+                    + t('adminDash.rewardIncMid', ' 增加到 ') + v
+                    + t('adminDash.rewardIncSuffix', ' 积分（+') + (v - oldPoints) + '）';
             } else {
-                previewEl.textContent = '从 ' + oldPoints + ' 减少到 ' + v + ' 积分（-' + (oldPoints - v) + '）';
+                previewEl.textContent = t('adminDash.rewardDecPrefix', '从 ') + oldPoints
+                    + t('adminDash.rewardDecMid', ' 减少到 ') + v
+                    + t('adminDash.rewardDecSuffix', ' 积分（-') + (oldPoints - v) + '）';
             }
         } else {
-            previewEl.textContent = v > 0 ? ('奖励 ' + v + ' 积分') : '不奖励（仅标记已解决）';
+            previewEl.textContent = v > 0
+                ? (t('adminDash.rewardGivePrefix', '奖励 ') + v + t('adminDash.rewardGiveSuffix', ' 积分'))
+                : t('adminDash.rewardNone', '不奖励（仅标记已解决）');
         }
     }
     inputEl.oninput = updatePreview;
     updatePreview();
 
-    /* 读已有奖励分，预填输入框 */
     supabaseClient.from('feedbacks').select('reward_points').eq('id', feedbackId).maybeSingle()
         .then(function (r) {
             oldPoints = (r.data && r.data.reward_points) || 0;
@@ -749,69 +813,74 @@ document.getElementById('feedbackRewardConfirmBtn').addEventListener('click', fu
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '处理中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.from('feedbacks').select('user_id, user_email, reward_points').eq('id', id).maybeSingle()
     .then(function (r) {
-        if (r.error || !r.data) throw new Error('无法读取反馈信息');
+        if (r.error || !r.data) throw new Error(t('adminDash.fbReadFail', '无法读取反馈信息'));
         var userId = r.data.user_id;
-        var delta = points - (r.data.reward_points || 0);   // ★ 差量
+        var delta = points - (r.data.reward_points || 0);
 
         return supabaseClient.from('feedbacks').update({
             status: 'resolved',
             reward_points: points,
             updated_at: new Date().toISOString()
         }).eq('id', id).then(function (uRes) {
-            if (uRes.error) throw new Error('更新反馈状态失败：' + uRes.error.message);
-            return { userId: userId, delta: delta };       // ★ 带上 delta
+            if (uRes.error) throw new Error(t('adminDash.fbUpdateFail', '更新反馈状态失败：') + uRes.error.message);
+            return { userId: userId, delta: delta };
         });
     })
-        .then(function (info) {
-    if (!info.userId || info.delta === 0) return null;
+    .then(function (info) {
+        if (!info.userId || info.delta === 0) {
+            return { newPoints: null, userId: info.userId, delta: 0 };
+        }
+        return supabaseClient.from('profiles')
+            .select('points')
+            .eq('id', info.userId)
+            .maybeSingle()
+            .then(function (pRes) {
+                if (pRes.error || !pRes.data) throw new Error(t('adminDash.fbReadPointsFail', '无法读取用户积分'));
+                var newPoints = (pRes.data.points || 0) + info.delta;
+                return supabaseClient.from('profiles')
+                    .update({ points: newPoints })
+                    .eq('id', info.userId)
+                    .then(function (upRes) {
+                        if (upRes.error) throw new Error(t('adminDash.fbAddPointsFail', '加分失败：') + upRes.error.message);
+                        return { newPoints: newPoints, userId: info.userId, delta: info.delta };
+                    });
+            });
+    })
+    .then(function (result) {
+        btn.disabled = false;
+        btn.textContent = t('adminDash.feedbackRewardConfirm', '确认并奖励');
+        document.getElementById('feedbackRewardModal').style.display = 'none';
 
-            return supabaseClient.from('profiles')
-                .select('points')
-                .eq('id', info.userId)
-                .maybeSingle()
-                .then(function (pRes) {
-                    if (pRes.error || !pRes.data) throw new Error('无法读取用户积分');
-                       var newPoints = (pRes.data.points || 0) + info.delta;
-                    return supabaseClient.from('profiles')
-                        .update({ points: newPoints })
-                        .eq('id', info.userId)
-                        .then(function (upRes) {
-                            if (upRes.error) throw new Error('加分失败：' + upRes.error.message);
-                            return { newPoints: newPoints };
-                        });
-                });
-        })
-        .then(function (result) {
-            btn.disabled = false;
-            btn.textContent = '确认并奖励';
-            document.getElementById('feedbackRewardModal').style.display = 'none';
+        if (selectEl) selectEl.setAttribute('data-old-status', 'resolved');
+        fbRewardPending = null;
 
-            if (selectEl) selectEl.setAttribute('data-old-status', 'resolved');
-            fbRewardPending = null;
-
-            if (result && result.newPoints != null) {
-                showToast('已标记为已解决，奖励 ' + points + ' 积分', 'success');
-            } else {
-                showToast('已标记为已解决', 'success');
-            }
-            loadAllFeedbacks();
-        })
-        .catch(function (err) {
-            btn.disabled = false;
-            btn.textContent = '确认并奖励';
-            showToast((err && err.message) ? err.message : '处理失败', 'error');
-        });
+        if (result && result.newPoints != null) {
+            showToast(t('adminDash.fbResolvedRewardedPrefix', '已标记为已解决，奖励 ') + points + t('adminDash.fbResolvedRewardedSuffix', ' 积分'), 'success');
+            writePointLog(result.userId, result.delta, t('adminDash.fbRewardReason', '反馈奖励'), result.newPoints);
+        } else {
+            showToast(t('adminDash.fbResolvedOnly', '已标记为已解决'), 'success');
+        }
+        loadAllFeedbacks();
+    })
+    .catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = t('adminDash.feedbackRewardConfirm', '确认并奖励');
+        showToast((err && err.message) ? err.message : t('adminDash.fbProcessFail', '处理失败'), 'error');
+    });
 });
 
 document.getElementById('feedbackRewardCancelBtn').addEventListener('click', closeFeedbackRewardDialog);
 document.getElementById('feedbackRewardModal').addEventListener('click', function (e) {
     if (e.target === this) closeFeedbackRewardDialog();
 });
-/* 每日签到积分管理 */
+
+/* ============================================================
+ *  每日签到积分管理
+ * ============================================================ */
 function loadPointsConfig() {
     supabaseClient.from('checkin_config').select('*').eq('id', 1).maybeSingle()
         .then(function (res) {
@@ -829,7 +898,7 @@ function loadPointsConfig() {
 document.getElementById('saveConfigBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '保存中...';
+    btn.textContent = t('common.loading', '加载中...');
     var data = {
         id: 1,
         monday:    parseInt(document.getElementById('cfgMonday').value)    || 0,
@@ -844,9 +913,9 @@ document.getElementById('saveConfigBtn').addEventListener('click', function () {
     supabaseClient.from('checkin_config').upsert(data, { onConflict: 'id' })
         .then(function (res) {
             btn.disabled = false;
-            btn.textContent = '💾 保存配置';
-            if (res.error) { alert('保存失败：' + res.error.message); return; }
-            alert('配置已保存！');
+            btn.textContent = t('adminDash.pointsSaveConfigBtn', '💾 保存配置');
+            if (res.error) { alert(t('common.fail', '操作失败') + '：' + res.error.message); return; }
+            alert(t('adminDash.pointsConfigSaved', '配置已保存！'));
         });
 });
 function loadPoints() {
@@ -854,38 +923,38 @@ function loadPoints() {
 
     var body = document.getElementById('pointsBody');
     var badge = document.getElementById('badgePoints');
-    body.innerHTML = '<tr><td colspan="6" class="loading">加载中...</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" class="loading">' + t('common.loading', '加载中...') + '</td></tr>';
 
     supabaseClient.from('profiles')
         .select('id, uid, email, full_name, avatar_url, points, checkin_streak, last_checkin_date')
         .order('points', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                body.innerHTML = '<tr><td colspan="6" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                body.innerHTML = '<tr><td colspan="6" class="empty">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</td></tr>';
                 return;
             }
             var data = res.data || [];
-            badge.textContent = data.length + ' 人';
+            badge.textContent = data.length + ' ' + (getLang() === 'zh' ? '人' : '');
             if (data.length === 0) {
-                body.innerHTML = '<tr><td colspan="6" class="empty">暂无数据</td></tr>';
+                body.innerHTML = '<tr><td colspan="6" class="empty">' + t('common.noData', '暂无数据') + '</td></tr>';
                 return;
             }
             var html = '';
             data.forEach(function (item) {
                 var avatar = item.avatar_url || DEFAULT_AVATAR;
                 html += '<tr>' +
-                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '未分配') + '</strong></td>' +
+                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '—') + '</strong></td>' +
                     '<td><div class="user-cell">' +
                         '<img class="user-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
                         '<div style="display:flex;flex-direction:column;">' +
-                            '<span>' + escapeHtml(item.email || '未知') + '</span>' +
-                            '<span style="font-size:0.8em;color:var(--theme-text-faint);">' + escapeHtml(item.full_name || '未设置昵称') + '</span>' +
+                            '<span>' + escapeHtml(item.email || '—') + '</span>' +
+                            '<span style="font-size:0.8em;color:var(--theme-text-faint);">' + escapeHtml(item.full_name || '—') + '</span>' +
                         '</div>' +
                     '</div></td>' +
                     '<td><strong style="color:var(--theme-accent);">' + (item.points || 0) + '</strong></td>' +
-                    '<td>' + (item.checkin_streak || 0) + ' 天</td>' +
+                    '<td>' + (item.checkin_streak || 0) + t('adminDash.pointsDaysUnit', ' 天') + '</td>' +
                     '<td>' + formatDate(item.last_checkin_date) + '</td>' +
-                    '<td><button class="action-btn edit" data-id="' + item.id + '" data-email="' + escapeHtml(item.email || '') + '" data-points="' + (item.points || 0) + '" data-streak="' + (item.checkin_streak || 0) + '">调整数据</button></td>' +
+                    '<td><button class="action-btn edit" data-id="' + item.id + '" data-email="' + escapeHtml(item.email || '') + '" data-points="' + (item.points || 0) + '" data-streak="' + (item.checkin_streak || 0) + '">' + t('adminDash.pointsAdjustBtn', '调整数据') + '</button></td>' +
                 '</tr>';
             });
             body.innerHTML = html;
@@ -919,46 +988,168 @@ document.getElementById('pointsConfirmBtn').addEventListener('click', function (
 
     var pointsVal = parseInt(document.getElementById('pointsNewValue').value, 10);
     var streakVal = parseInt(document.getElementById('streakNewValue').value, 10);
-    if (isNaN(pointsVal) || pointsVal < 0) { alert('请输入有效的积分值（≥0）'); return; }
-    if (isNaN(streakVal) || streakVal < 0) { alert('请输入有效的连续天数（≥0）'); return; }
+    if (isNaN(pointsVal) || pointsVal < 0) { alert(t('adminDash.pointsInvalid', '请输入有效的积分值（≥0）')); return; }
+    if (isNaN(streakVal) || streakVal < 0) { alert(t('adminDash.streakInvalid', '请输入有效的连续天数（≥0）')); return; }
+
+    var targetUserId = currentPointsUserId;
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '保存中...';
-    Promise.all([
-        supabaseClient.from('profiles').update({ points: pointsVal }).eq('id', currentPointsUserId),
-        supabaseClient.rpc('admin_update_streak', { target_user_id: currentPointsUserId, new_streak: streakVal })
-    ]).then(function (results) {
-        btn.disabled = false;
-        btn.textContent = '保存';
-        var pErr = results[0].error;
-        var sRes = results[1];
-        var sErr = sRes.error || (sRes.data && sRes.data.error);
-        if (pErr || sErr) {
-            alert('保存失败：\n' + (pErr ? '积分：' + pErr.message + '\n' : '') + (sErr ? '连续天数：' + (sErr.message || sErr) : ''));
-            return;
-        }
-        document.getElementById('pointsModal').style.display = 'none';
-        currentPointsUserId = null;
-        loadPoints();
-    });
+    btn.textContent = t('common.loading', '加载中...');
+
+    supabaseClient.from('profiles').select('points').eq('id', targetUserId).maybeSingle()
+        .then(function (r) {
+            var oldPoints = (r.data && r.data.points) || 0;
+            var delta = pointsVal - oldPoints;
+
+            return Promise.all([
+                supabaseClient.from('profiles').update({ points: pointsVal }).eq('id', targetUserId),
+                supabaseClient.rpc('admin_update_streak', { target_user_id: targetUserId, new_streak: streakVal })
+            ]).then(function (results) {
+                return { oldPoints: oldPoints, delta: delta, results: results };
+            });
+        })
+        .then(function (info) {
+            btn.disabled = false;
+            btn.textContent = t('adminDash.pointsModalSave', '保存');
+            var pErr = info.results[0].error;
+            var sRes = info.results[1];
+            var sErr = sRes.error || (sRes.data && sRes.data.error);
+            if (pErr || sErr) {
+                alert(t('common.fail', '操作失败') + '：\n' + (pErr ? t('adminDash.pointsLabel', '积分：') + pErr.message + '\n' : '') + (sErr ? t('adminDash.streakLabel', '连续天数：') + (sErr.message || sErr) : ''));
+                return;
+            }
+
+            if (info.delta !== 0) {
+                writePointLog(
+                    targetUserId,
+                    info.delta,
+                    t('adminDash.adminAdjustReasonPrefix', '管理员调整积分（') + info.oldPoints + ' → ' + pointsVal + '）',
+                    pointsVal
+                );
+            }
+
+            document.getElementById('pointsModal').style.display = 'none';
+            currentPointsUserId = null;
+            loadPoints();
+        })
+        .catch(function (err) {
+            btn.disabled = false;
+            btn.textContent = t('adminDash.pointsModalSave', '保存');
+            alert(t('common.fail', '操作失败') + '：' + (err && err.message ? err.message : err));
+        });
 });
 
-/* 忘记密码申请 */
+/* ============================================================
+ *  积分明细（管理端，最近 100 条）
+ * ============================================================ */
+function loadAllPointLogs() {
+    var body = document.getElementById('pointLogsBody');
+    if (!body) return;
+
+    body.innerHTML = '<tr><td colspan="5" class="loading">' + t('common.loading', '加载中...') + '</td></tr>';
+
+    supabaseClient.from('point_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100)
+        .then(function (res) {
+            if (res.error) {
+                body.innerHTML = '<tr><td colspan="5" class="empty">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</td></tr>';
+                return;
+            }
+            var data = res.data || [];
+            if (data.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="empty">' + t('adminDash.pointLogsEmpty', '暂无积分记录') + '</td></tr>';
+                var badge0 = document.getElementById('badgePointLogs');
+                if (badge0) badge0.textContent = '0';
+                return;
+            }
+
+            var badge = document.getElementById('badgePointLogs');
+            if (badge) badge.textContent = data.length + ' ' + (getLang() === 'zh' ? '条' : '');
+
+            var userIds = [];
+            data.forEach(function (log) {
+                if (log.user_id && userIds.indexOf(log.user_id) === -1) {
+                    userIds.push(log.user_id);
+                }
+            });
+
+            supabaseClient.from('profiles')
+                .select('id, uid, email, full_name')
+                .in('id', userIds)
+                .then(function (pRes) {
+                    var map = {};
+                    (pRes.data || []).forEach(function (p) { map[p.id] = p; });
+
+                    var html = '';
+                    data.forEach(function (log) {
+                        var isPlus = log.change_amount > 0;
+                        var sign   = isPlus ? '+' : '';
+                        var color  = isPlus ? '#8cc8a0' : 'var(--danger)';
+                        var user   = map[log.user_id] || {};
+                        var uname  = user.full_name || user.email || '—';
+                        var uidTag = user.uid ? ('[UID ' + user.uid + '] ') : '';
+                        var time   = new Date(log.created_at)
+                            .toLocaleString('zh-CN', { hour12: false });
+
+                        html += '<tr>' +
+                            '<td style="white-space:nowrap;">' + time + '</td>' +
+                            '<td><div style="display:flex; flex-direction:column; gap:2px;">' +
+                                '<span>' + escapeHtml(uidTag + uname) + '</span>' +
+                                '<span style="font-size:0.78em; color:var(--theme-text-faint);">' +
+                                    escapeHtml(user.email || '') +
+                                '</span>' +
+                            '</div></td>' +
+                            '<td><strong style="color:' + color + ';">' +
+                                sign + log.change_amount +
+                            '</strong></td>' +
+                            '<td>' + escapeHtml(log.reason || '—') + '</td>' +
+                            '<td>' + (log.balance_after != null ? log.balance_after : '—') + '</td>' +
+                        '</tr>';
+                    });
+                    body.innerHTML = html;
+                })
+                .catch(function () {
+                    body.innerHTML = '<tr><td colspan="5" class="empty">' + t('common.loadFailed', '加载失败：') + '</td></tr>';
+                });
+        });
+}
+
+(function () {
+    var btn = document.getElementById('refreshPointLogsBtn');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.classList.add('spinning');
+        loadAllPointLogs();
+        setTimeout(function () {
+            btn.disabled = false;
+            btn.classList.remove('spinning');
+        }, 800);
+    });
+})();
+
+/* ============================================================
+ *  忘记密码申请
+ * ============================================================ */
 function loadForgotRequests() {
     var body = document.getElementById('forgotBody');
     var badge = document.getElementById('badgeForgot');
-    body.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+    body.innerHTML = '<tr><td colspan="5" class="loading">' + t('common.loading', '加载中...') + '</td></tr>';
     supabaseClient.from('forgot_requests').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                body.innerHTML = '<tr><td colspan="5" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" class="empty">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</td></tr>';
                 return;
             }
             var data = res.data || [];
-            badge.textContent = data.length + ' 条';
+            badge.textContent = data.length + ' ' + (getLang() === 'zh' ? '条' : '');
             if (data.length === 0) {
-                body.innerHTML = '<tr><td colspan="5" class="empty">暂无申请</td></tr>';
+                body.innerHTML = '<tr><td colspan="5" class="empty">' + t('adminDash.forgotEmpty', '暂无申请') + '</td></tr>';
                 return;
             }
             var html = '';
@@ -968,17 +1159,17 @@ function loadForgotRequests() {
                     '<td>' + escapeHtml(item.contact) + '</td>' +
                     '<td>' + escapeHtml(item.reason || '—') + '</td>' +
                     '<td>' + formatTime(item.created_at) + '</td>' +
-                    '<td><button class="action-btn del" data-id="' + item.id + '">删除</button></td>' +
+                    '<td><button class="action-btn del" data-id="' + item.id + '">' + t('common.delete', '删除') + '</button></td>' +
                 '</tr>';
             });
             body.innerHTML = html;
             body.querySelectorAll('.action-btn.del').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var id = this.getAttribute('data-id');
-                    if (!confirm('确定删除这条记录吗？')) return;
+                    if (!confirm(t('adminDash.forgotDeleteConfirm', '确定删除这条记录吗？'))) return;
                     supabaseClient.from('forgot_requests').delete().eq('id', id)
                         .then(function (r) {
-                            if (r.error) { alert('删除失败：' + r.error.message); return; }
+                            if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
                             loadForgotRequests();
                         });
                 });
@@ -993,24 +1184,26 @@ document.getElementById('refreshForgotBtn').addEventListener('click', function (
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
 
-/* 注册用户列表 */
+/* ============================================================
+ *  注册用户列表
+ * ============================================================ */
 function loadProfiles() {
     var body = document.getElementById('profilesBody');
     var badge = document.getElementById('badgeProfiles');
-    body.innerHTML = '<tr><td colspan="7" class="loading">加载中...</td></tr>';
+    body.innerHTML = '<tr><td colspan="7" class="loading">' + t('common.loading', '加载中...') + '</td></tr>';
     supabaseClient.from('profiles').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                body.innerHTML = '<tr><td colspan="7" class="empty">加载失败：' + escapeHtml(res.error.message) + '</td></tr>';
+                body.innerHTML = '<tr><td colspan="7" class="empty">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</td></tr>';
                 return;
             }
             var data = res.data || [];
             allProfiles = data;
-            badge.textContent = data.length + ' 人';
+            badge.textContent = data.length + ' ' + (getLang() === 'zh' ? '人' : '');
             updateManageSelect();
             if (data.length === 0) {
-                body.innerHTML = '<tr><td colspan="7" class="empty">暂无用户</td></tr>';
+                body.innerHTML = '<tr><td colspan="7" class="empty">' + t('adminDash.profilesEmpty', '暂无用户') + '</td></tr>';
                 return;
             }
             var html = '';
@@ -1018,18 +1211,18 @@ function loadProfiles() {
                 var isBlocked = item.is_blocked === true;
                 var avatar = item.avatar_url || DEFAULT_AVATAR;
                 var statusHtml = isBlocked
-                    ? '<span class="status-tag blocked">已拉黑</span>'
-                    : '<span class="status-tag active">正常</span>';
+                    ? '<span class="status-tag blocked">' + t('adminDash.profilesStatusBlocked', '已拉黑') + '</span>'
+                    : '<span class="status-tag active">' + t('adminDash.profilesStatusNormal', '正常') + '</span>';
                 var blockBtn = isBlocked
-                    ? '<button class="action-btn unblock" data-id="' + item.id + '">解除拉黑</button>'
-                    : '<button class="action-btn block" data-id="' + item.id + '">拉黑</button>';
+                    ? '<button class="action-btn unblock" data-id="' + item.id + '">' + t('adminDash.profilesUnblockBtn', '解除拉黑') + '</button>'
+                    : '<button class="action-btn block" data-id="' + item.id + '">' + t('adminDash.profilesBlockBtn', '拉黑') + '</button>';
                 var remain = '';
                 if (isBlocked) {
                     var rt = getRemainingTime(item.banned_until);
-                    if (rt) remain = '<span class="remaining-tag">剩余：' + escapeHtml(rt) + '</span>';
+                    if (rt) remain = '<span class="remaining-tag">' + t('adminDash.profilesRemainPrefix', '剩余：') + escapeHtml(rt) + '</span>';
                 }
                 html += '<tr>' +
-                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '未分配') + '</strong></td>' +
+                    '<td><strong style="color:var(--theme-accent);">' + (item.uid || '—') + '</strong></td>' +
                     '<td><div class="user-cell">' +
                         '<img class="user-avatar" src="' + escapeHtml(avatar) + '" onerror="this.src=\'' + DEFAULT_AVATAR + '\'">' +
                         '<span>' + escapeHtml(item.email) + '</span>' +
@@ -1039,7 +1232,7 @@ function loadProfiles() {
                     '<td>' + statusHtml + '</td>' +
                     '<td>' + formatTime(item.created_at) + '</td>' +
                     '<td>' +
-                        '<button class="action-btn del" data-id="' + item.id + '">删除</button>' +
+                        '<button class="action-btn del" data-id="' + item.id + '">' + t('common.delete', '删除') + '</button>' +
                         blockBtn + remain +
                     '</td>' +
                 '</tr>';
@@ -1061,10 +1254,10 @@ function bindProfileActions() {
     body.querySelectorAll('.action-btn.del[data-id]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
-            if (!confirm('⚠️ 确定要彻底删除该用户吗？\n此操作不可恢复！')) return;
+            if (!confirm(t('adminDash.profilesDeleteConfirm', '⚠️ 确定要彻底删除该用户吗？此操作不可恢复！'))) return;
             callEdgeFunction('delete', id).then(function (res) {
                 if (res.error || (res.data && res.data.error)) {
-                    alert('删除失败：' + (res.error ? res.error.message : res.data.error));
+                    alert(t('common.fail', '操作失败') + '：' + (res.error ? res.error.message : res.data.error));
                     return;
                 }
                 loadProfiles();
@@ -1084,10 +1277,10 @@ function bindProfileActions() {
     body.querySelectorAll('.action-btn.unblock').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var id = this.getAttribute('data-id');
-            if (!confirm('确定要解除拉黑吗？')) return;
+            if (!confirm(t('adminDash.profilesBlockConfirm', '确定要解除拉黑吗？'))) return;
             callRPC('admin_unban_user', { target_user_id: id }).then(function (res) {
                 if (res.error || (res.data && res.data.error)) {
-                    alert('操作失败：' + (res.error ? res.error.message : res.data.error));
+                    alert(t('common.fail', '操作失败') + '：' + (res.error ? res.error.message : res.data.error));
                     return;
                 }
                 loadProfiles();
@@ -1100,14 +1293,14 @@ function updateBanPreview() {
     var h = parseInt(document.getElementById('banHours').value) || 0;
     var m = parseInt(document.getElementById('banMinutes').value) || 0;
     if (d === 0 && h === 0 && m === 0) {
-        document.getElementById('banPreview').textContent = '永久封禁';
+        document.getElementById('banPreview').textContent = t('adminDash.banModalPermanent', '永久封禁');
         return;
     }
     var parts = [];
-    if (d > 0) parts.push(d + ' 天');
-    if (h > 0) parts.push(h + ' 小时');
-    if (m > 0) parts.push(m + ' 分钟');
-    document.getElementById('banPreview').textContent = '总封禁时长：' + parts.join(' ');
+    if (d > 0) parts.push(d + ' ' + t('adminDash.banModalDays', '天'));
+    if (h > 0) parts.push(h + ' ' + t('adminDash.banModalHours', '小时'));
+    if (m > 0) parts.push(m + ' ' + t('adminDash.banModalMinutes', '分钟'));
+    document.getElementById('banPreview').textContent = t('adminDash.banModalTotal', '总封禁时长：') + parts.join(' ');
 }
 
 document.getElementById('banDays').addEventListener('input', updateBanPreview);
@@ -1137,16 +1330,16 @@ document.getElementById('banConfirmBtn').addEventListener('click', function () {
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '处理中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     callRPC('admin_ban_user', {
         target_user_id: currentBanUserId,
         ban_seconds: totalSeconds
     }).then(function (res) {
         btn.disabled = false;
-        btn.textContent = '确定封禁';
+        btn.textContent = t('adminDash.banModalConfirm', '确定封禁');
         if (res.error || (res.data && res.data.error)) {
-            alert('拉黑失败：' + (res.error ? res.error.message : res.data.error));
+            alert(t('common.fail', '操作失败') + '：' + (res.error ? res.error.message : res.data.error));
             return;
         }
         document.getElementById('banDurationModal').style.display = 'none';
@@ -1155,14 +1348,16 @@ document.getElementById('banConfirmBtn').addEventListener('click', function () {
     });
 });
 
-/* 用户管理 */
+/* ============================================================
+ *  用户管理
+ * ============================================================ */
 function updateManageSelect() {
     var sel = document.getElementById('manageUserSelect');
     var cur = sel.value;
-    var html = '<option value="">-- 请选择用户 --</option>';
+    var html = '<option value="">' + t('adminDash.manageSelectPlaceholder', '-- 请选择用户 --') + '</option>';
     allProfiles.forEach(function (p) {
         var uidTag = p.uid ? ('[UID ' + p.uid + '] ') : '';
-        html += '<option value="' + p.id + '">' + escapeHtml(uidTag + (p.email || '未知') + ' （' + (p.full_name || '未设置昵称') + '）') + '</option>';
+        html += '<option value="' + p.id + '">' + escapeHtml(uidTag + (p.email || '—') + ' （' + (p.full_name || '—') + '）') + '</option>';
     });
     sel.innerHTML = html;
     if (cur) sel.value = cur;
@@ -1187,21 +1382,21 @@ function updatePreview(user) {
     var st = document.getElementById('previewStatus');
     if (!user) {
         av.src = DEFAULT_AVATAR;
-        nm.textContent = '未选择用户';
-        em.textContent = '请从右侧下拉框选择';
+        nm.textContent = t('adminDash.manageNoUser', '未选择用户');
+        em.textContent = t('adminDash.manageSelectHint', '请从右侧下拉框选择');
         st.style.display = 'none';
         return;
     }
     av.src = user.avatar_url || DEFAULT_AVATAR;
-    nm.textContent = user.full_name || '未设置昵称';
-    em.textContent = user.email || '未知邮箱';
+    nm.textContent = user.full_name || t('userDash.homeNotSet', '未设置');
+    em.textContent = user.email || '—';
     st.style.display = 'inline-block';
     if (user.is_blocked === true) {
         st.className = 'preview-status blocked';
-        st.textContent = '已拉黑';
+        st.textContent = t('adminDash.profilesStatusBlocked', '已拉黑');
     } else {
         st.className = 'preview-status active';
-        st.textContent = '正常';
+        st.textContent = t('adminDash.profilesStatusNormal', '正常');
     }
 }
 
@@ -1221,9 +1416,9 @@ document.getElementById('resetManageBtn').addEventListener('click', function () 
 
 document.getElementById('saveManageBtn').addEventListener('click', function () {
     var userId = document.getElementById('manageUserSelect').value;
-    if (!userId) { alert('请先选择用户'); return; }
+    if (!userId) { alert(t('adminDash.manageSelectUser', '请先选择用户')); return; }
     var user = allProfiles.find(function (p) { return p.id === userId; });
-    if (!user) { alert('找不到该用户信息'); return; }
+    if (!user) { alert(t('adminDash.manageUserNotFound', '找不到该用户信息')); return; }
 
     var newUid   = document.getElementById('manageUid').value.trim();
     var newName  = document.getElementById('manageName').value.trim();
@@ -1236,20 +1431,14 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
 
     var oldUid = user.uid != null ? String(user.uid) : '';
     if (newUid !== oldUid) {
-        if (newUid === '') {
-            alert('UID 不能为空');
-            return;
-        }
-        if (!/^\d{5,9}$/.test(newUid)) {
-            alert('UID 必须是 5 到 9 位的纯数字！');
-            return;
-        }
+        if (newUid === '') { alert(t('adminDash.manageUidEmpty', 'UID 不能为空')); return; }
+        if (!/^\d{5,9}$/.test(newUid)) { alert(t('adminDash.manageUidInvalid', 'UID 必须是 5 到 9 位的纯数字！')); return; }
         tasks.push(
             supabaseClient.from('profiles').update({ uid: parseInt(newUid, 10) }).eq('id', userId)
                 .then(function (r) {
                     if (r.error) {
                         if (r.error.code === '23505') {
-                            return { ok: false, field: 'UID', err: { message: '该 UID 已被其他用户占用，请更换' } };
+                            return { ok: false, field: 'UID', err: { message: t('adminDash.manageUidTaken', '该 UID 已被其他用户占用，请更换') } };
                         }
                         return { ok: false, field: 'UID', err: r.error };
                     }
@@ -1264,8 +1453,8 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
 
     if (nameChanged || phoneChanged) {
         var fields = [];
-        if (nameChanged)  fields.push('昵称');
-        if (phoneChanged) fields.push('手机号');
+        if (nameChanged)  fields.push(t('adminDash.manageFieldName', '昵称'));
+        if (phoneChanged) fields.push(t('adminDash.manageFieldPhone', '手机号'));
         tasks.push(
             callRPC('admin_update_profile', {
                 target_user_id: userId,
@@ -1281,55 +1470,59 @@ document.getElementById('saveManageBtn').addEventListener('click', function () {
 
     if (newEmail && newEmail !== (user.email || '')) {
         tasks.push(callEdgeFunction('update_email', userId, null, newEmail).then(function (r) {
-            if (r.error || (r.data && r.data.error)) return { ok: false, field: '邮箱', err: r.error };
-            return { ok: true, field: '邮箱' };
+            if (r.error || (r.data && r.data.error)) return { ok: false, field: t('adminDash.manageFieldEmail', '邮箱'), err: r.error };
+            return { ok: true, field: t('adminDash.manageFieldEmail', '邮箱') };
         }));
-        messages.push('邮箱');
+        messages.push(t('adminDash.manageFieldEmail', '邮箱'));
     }
 
     if (newPwd) {
-        if (newPwd.length < 6) { alert('密码至少 6 位'); return; }
+        if (newPwd.length < 6) { alert(t('adminDash.managePwdTooShort', '密码至少 6 位')); return; }
         tasks.push(callEdgeFunction('update_password', userId, null, newPwd).then(function (r) {
-            if (r.error || (r.data && r.data.error)) return { ok: false, field: '密码', err: r.error };
-            return { ok: true, field: '密码' };
+            if (r.error || (r.data && r.data.error)) return { ok: false, field: t('adminDash.manageFieldPwd', '密码'), err: r.error };
+            return { ok: true, field: t('adminDash.manageFieldPwd', '密码') };
         }));
-        messages.push('密码');
+        messages.push(t('adminDash.manageFieldPwd', '密码'));
     }
 
-    if (tasks.length === 0) { alert('没有任何修改'); return; }
+    if (tasks.length === 0) { alert(t('adminDash.manageNoChange', '没有任何修改')); return; }
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '保存中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     Promise.all(tasks).then(function (results) {
         btn.disabled = false;
-        btn.textContent = '💾 保存修改';
+        btn.textContent = t('adminDash.manageSave', '💾 保存修改');
         var failures = results.filter(function (r) { return !r.ok; });
         if (failures.length > 0) {
-            alert('部分修改失败：\n\n' + failures.map(function (f) {
-                return f.field + '：' + (f.err && f.err.message ? f.err.message : '失败');
+            alert(t('common.fail', '操作失败') + '：\n\n' + failures.map(function (f) {
+                return f.field + '：' + (f.err && f.err.message ? f.err.message : t('common.fail', '失败'));
             }).join('\n'));
         } else {
-            alert('修改成功：\n\n' + messages.join('、'));
+            alert(t('common.success', '操作成功') + '：\n\n' + messages.join('、'));
         }
         loadProfiles();
     });
 });
 
-/* 管理端积分商城 */
+/* ============================================================
+ *  积分商城管理
+ * ============================================================ */
 function bindLimitToggle(toggleId, inputId) {
-    var t = document.getElementById(toggleId);
-    var i = document.getElementById(inputId);
-    if (!t || !i) return;
+    var toggleBtn = document.getElementById(toggleId);
+    var inputEl = document.getElementById(inputId);
+    if (!toggleBtn || !inputEl) return;
 
     function sync() {
-        var on = t.dataset.on === 'true';
-        i.disabled = !on;
-        t.textContent = on ? '开启限购' : '关闭无限';
+        var on = toggleBtn.dataset.on === 'true';
+        inputEl.disabled = !on;
+        toggleBtn.textContent = on
+            ? t('adminDash.shopLimitOn', '开启限购')
+            : t('adminDash.shopLimitOff', '关闭（无限）');
     }
-    t.addEventListener('click', function () {
-        t.dataset.on = (t.dataset.on === 'true') ? 'false' : 'true';
+    toggleBtn.addEventListener('click', function () {
+        toggleBtn.dataset.on = (toggleBtn.dataset.on === 'true') ? 'false' : 'true';
         sync();
     });
     sync();
@@ -1338,8 +1531,8 @@ bindLimitToggle('addLimitToggle',  'addShopLimit');
 bindLimitToggle('editLimitToggle', 'editShopLimit');
 
 function readLimit(toggleId, inputId) {
-    var t = document.getElementById(toggleId);
-    if (!t || t.dataset.on !== 'true') return null;
+    var toggleBtn = document.getElementById(toggleId);
+    if (!toggleBtn || toggleBtn.dataset.on !== 'true') return null;
     var v = parseInt(document.getElementById(inputId).value, 10) || 1;
     if (v < 1) v = 1;
     return v;
@@ -1350,42 +1543,42 @@ function loadAdminShop() {
     var badge = document.getElementById('badgeShop');
     if (!grid) return;
 
-    grid.innerHTML = '<div class="empty">加载中...</div>';
+    grid.innerHTML = '<div class="empty">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('shop_items').select('*')
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                grid.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                grid.innerHTML = '<div class="empty">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
                 return;
             }
             var items = res.data || [];
-            badge.textContent = items.length + ' 件';
+            badge.textContent = items.length + ' ' + (getLang() === 'zh' ? '件' : '');
             if (items.length === 0) {
-                grid.innerHTML = '<div class="empty">暂无商品，请在上方上架</div>';
+                grid.innerHTML = '<div class="empty">' + t('common.noData', '暂无数据') + '</div>';
                 return;
             }
 
             var html = '';
             items.forEach(function (it) {
-                var stockText = (it.stock === 0) ? '已售罄' : ('库存: ' + (it.stock || 0));
-                var activeTag = it.is_active === false ? '（已下架）' : '';
+                var stockText = (it.stock === 0) ? t('adminDash.shopStockNone', '已售罄') : (t('adminDash.shopStockPrefix', '库存: ') + (it.stock || 0));
+                var activeTag = it.is_active === false ? ' (—)' : '';
                 var limitTag = '';
                 if (it.per_user_limit != null && it.per_user_limit > 0) {
-                    limitTag = '<div class="shop-item-limit">每人限购 ' + it.per_user_limit + ' 份</div>';
+                    limitTag = '<div class="shop-item-limit">' + t('userDash.shopLimitPerUser', '每人限购 ') + it.per_user_limit + t('userDash.shopLimitUnit', ' 份') + '</div>';
                 }
 
                 html +=
                     '<div class="shop-item">' +
                         '<div class="shop-item-icon">' + escapeHtml(it.icon || '🎁') + '</div>' +
                         '<div class="shop-item-name">' + escapeHtml(it.name) + activeTag + '</div>' +
-                        '<div class="shop-item-price">' + (it.price || 0) + ' 积分</div>' +
+                        '<div class="shop-item-price">' + (it.price || 0) + t('userDash.shopPointsUnit', ' 积分') + '</div>' +
                         '<div class="shop-item-stock">' + stockText + '</div>' +
                         limitTag +
                         '<div class="shop-item-actions">' +
-                            '<button class="btn-edit" data-id="' + it.id + '">编辑</button>' +
-                            '<button class="btn-del" data-id="' + it.id + '">删除</button>' +
+                            '<button class="btn-edit" data-id="' + it.id + '">' + t('adminDash.shopEditBtn', '编辑') + '</button>' +
+                            '<button class="btn-del" data-id="' + it.id + '">' + t('adminDash.shopDelBtn', '删除') + '</button>' +
                         '</div>' +
                     '</div>';
             });
@@ -1394,10 +1587,10 @@ function loadAdminShop() {
             grid.querySelectorAll('.btn-del').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     var id = this.getAttribute('data-id');
-                    if (!confirm('确定删除该商品吗？此操作不可恢复。')) return;
+                    if (!confirm(t('adminDash.shopDelConfirm', '确定删除该商品吗？此操作不可恢复。'))) return;
                     supabaseClient.from('shop_items').delete().eq('id', id)
                         .then(function (r) {
-                            if (r.error) { alert('删除失败：' + r.error.message); return; }
+                            if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
                             loadAdminShop();
                         });
                 });
@@ -1425,12 +1618,12 @@ function loadAdminShop() {
                         editToggle.dataset.on = 'true';
                         editLimitInput.value = it.per_user_limit;
                         editLimitInput.disabled = false;
-                        editToggle.textContent = '开启（限购）';
+                        editToggle.textContent = t('adminDash.shopLimitOn', '开启限购');
                     } else {
                         editToggle.dataset.on = 'false';
                         editLimitInput.value = 1;
                         editLimitInput.disabled = true;
-                        editToggle.textContent = '关闭（无限）';
+                        editToggle.textContent = t('adminDash.shopLimitOff', '关闭（无限）');
                     }
 
                     document.getElementById('editShopModal').style.display = 'flex';
@@ -1457,11 +1650,11 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
     var icon   = document.getElementById('addShopIcon').value.trim() || '🎁';
     var limitVal = readLimit('addLimitToggle', 'addShopLimit');
 
-    if (!name) { alert('请填写商品名称'); return; }
+    if (!name) { alert(t('adminDash.shopNameRequired', '请填写商品名称')); return; }
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '上架中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.from('shop_items').insert([{
         name: name,
@@ -1476,12 +1669,12 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
         sort_order: 0
     }]).then(function (res) {
         btn.disabled = false;
-        btn.textContent = '➕ 上架商品';
+        btn.textContent = t('adminDash.shopAddBtn', '➕ 上架商品');
         if (res.error) {
-            alert('上架失败：' + res.error.message);
+            alert(t('adminDash.shopAddFail', '上架失败：') + res.error.message);
             return;
         }
-        alert('上架成功！所有用户刷新页面即可看到。');
+        alert(t('adminDash.shopAddSuccess', '上架成功！'));
         ['addShopName','addShopPrice','addShopDesc','addShopDetail','addShopImage'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.value = '';
@@ -1491,7 +1684,7 @@ document.getElementById('addShopBtn').addEventListener('click', function () {
         var addToggle = document.getElementById('addLimitToggle');
         var addLimitInput = document.getElementById('addShopLimit');
         addToggle.dataset.on = 'false';
-        addToggle.textContent = '关闭（无限）';
+        addToggle.textContent = t('adminDash.shopLimitOff', '关闭（无限）');
         addLimitInput.value = 1;
         addLimitInput.disabled = true;
 
@@ -1512,11 +1705,11 @@ document.getElementById('editShopSaveBtn').addEventListener('click', function ()
     var icon   = document.getElementById('editShopIcon').value.trim() || '🎁';
     var limitVal = readLimit('editLimitToggle', 'editShopLimit');
 
-    if (!name) { alert('商品名称不能为空'); return; }
+    if (!name) { alert(t('adminDash.shopNameRequired', '商品名称不能为空')); return; }
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '保存中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.from('shop_items').update({
         name: name,
@@ -1529,8 +1722,8 @@ document.getElementById('editShopSaveBtn').addEventListener('click', function ()
         per_user_limit: limitVal
     }).eq('id', id).then(function (r) {
         btn.disabled = false;
-        btn.textContent = '保存修改';
-        if (r.error) { alert('保存失败：' + r.error.message); return; }
+        btn.textContent = t('adminDash.editShopSaveBtn', '保存修改');
+        if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
         document.getElementById('editShopModal').style.display = 'none';
         currentEditShopId = null;
         loadAdminShop();
@@ -1548,25 +1741,27 @@ document.getElementById('editShopModal').addEventListener('click', function (e) 
     }
 });
 
-/* 兑换记录 */
+/* ============================================================
+ *  兑换记录
+ * ============================================================ */
 function loadPurchases() {
     var listEl = document.getElementById('purchaseUsersList');
     var badge  = document.getElementById('badgePurchases');
     if (!listEl) return;
 
-    listEl.innerHTML = '<div class="empty">加载中...</div>';
+    listEl.innerHTML = '<div class="empty">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('user_purchases').select('*')
         .order('created_at', { ascending: false })
         .then(function (res) {
             if (res.error) {
-                listEl.innerHTML = '<div class="empty">加载失败：' + escapeHtml(res.error.message) + '</div>';
+                listEl.innerHTML = '<div class="empty">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
                 return;
             }
             var records = res.data || [];
             if (records.length === 0) {
-                listEl.innerHTML = '<div class="empty">暂无兑换记录</div>';
-                badge.textContent = '0 人';
+                listEl.innerHTML = '<div class="empty">' + t('adminDash.purchasesEmpty', '暂无兑换记录') + '</div>';
+                badge.textContent = '0';
                 return;
             }
 
@@ -1588,7 +1783,7 @@ function loadPurchases() {
                     var profiles = {};
                     (pRes.data || []).forEach(function (p) { profiles[p.id] = p; });
 
-                    badge.textContent = userIds.length + ' 人';
+                    badge.textContent = userIds.length + ' ' + (getLang() === 'zh' ? '人' : '');
 
                     var html = '';
                     userIds.forEach(function (uid) {
@@ -1597,20 +1792,20 @@ function loadPurchases() {
                         var lastTime = recs[0]
                             ? new Date(recs[0].created_at).toLocaleString('zh-CN', { hour12: false })
                             : '—';
-                        var name = u.full_name || u.email || '未知用户';
+                        var name = u.full_name || u.email || '—';
                         var email = u.email || '';
                         var avatar = u.avatar_url || DEFAULT_AVATAR;
                         var uidTag = u.uid ? ('UID ' + u.uid + ' · ') : '';
 
                         var recordsHtml = '';
                         recs.forEach(function (r) {
-                            var t = new Date(r.created_at).toLocaleString('zh-CN', { hour12: false });
+                            var time = new Date(r.created_at).toLocaleString('zh-CN', { hour12: false });
                             recordsHtml +=
                                 '<div class="purchase-record">' +
                                     '<span class="pr-icon">' + escapeHtml(r.item_icon || '🎁') + '</span>' +
                                     '<div class="pr-info">' +
-                                        '<div class="pr-name">' + escapeHtml(r.item_name || '未知商品') + '</div>' +
-                                        '<div class="pr-time">' + t + '</div>' +
+                                        '<div class="pr-name">' + escapeHtml(r.item_name || '—') + '</div>' +
+                                        '<div class="pr-time">' + time + '</div>' +
                                     '</div>' +
                                     '<span class="pr-price">-' + (r.price_paid || 0) + '</span>' +
                                 '</div>';
@@ -1624,8 +1819,8 @@ function loadPurchases() {
                                         '<div class="pu-name">' + escapeHtml(name) + '</div>' +
                                         '<div class="pu-email">' + escapeHtml(uidTag + email) + '</div>' +
                                     '</div>' +
-                                    '<span class="pu-count">' + recs.length + ' 件</span>' +
-                                    '<span class="pu-last">最近：' + lastTime + '</span>' +
+                                    '<span class="pu-count">' + recs.length + t('adminDash.purchasesCountUnit', ' 件') + '</span>' +
+                                    '<span class="pu-last">' + t('adminDash.purchasesLastPrefix', '最近：') + lastTime + '</span>' +
                                     '<span class="pu-arrow">▾</span>' +
                                 '</div>' +
                                 '<div class="purchase-user-body">' + recordsHtml + '</div>' +
@@ -1658,13 +1853,15 @@ document.getElementById('refreshPurchasesBtn').addEventListener('click', functio
     setTimeout(function () { btn.disabled = false; btn.classList.remove('spinning'); }, 500);
 });
 
-/* 服务端信息 */
+/* ============================================================
+ *  服务端信息
+ * ============================================================ */
 function renderHealthCard(name, ok) {
     return '<div class="health-card">' +
         '<div class="health-dot ' + (ok ? 'ok' : 'error') + '"></div>' +
         '<div class="health-info">' +
             '<span class="name">' + name + '</span>' +
-            '<span class="status">' + (ok ? '运行正常' : '异常') + '</span>' +
+            '<span class="status">' + (ok ? t('adminDash.serverHealthOk', '运行正常') : t('adminDash.serverHealthError', '异常')) + '</span>' +
         '</div>' +
     '</div>';
 }
@@ -1672,14 +1869,14 @@ function renderHealthCard(name, ok) {
 function loadServerInfo() {
     var btn = document.getElementById('refreshServerBtn');
     btn.disabled = true;
-    btn.textContent = '加载中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.functions.invoke('server-info', { body: {} }).then(function (res) {
         btn.disabled = false;
-        btn.textContent = '🔄 刷新';
-        if (res.error) { alert('加载失败：' + res.error.message); return; }
+        btn.textContent = '🔄 ' + t('common.refresh', '刷新');
+        if (res.error) { alert(t('common.fail', '操作失败') + '：' + res.error.message); return; }
         var data = res.data;
-        if (!data || !data.success) { alert('加载失败：' + (data && data.error ? data.error : '未知错误')); return; }
+        if (!data || !data.success) { alert(t('common.fail', '操作失败') + '：' + (data && data.error ? data.error : t('common.fail', '未知错误'))); return; }
 
         var health = data.health || {};
         document.getElementById('healthGrid').innerHTML =
@@ -1707,17 +1904,19 @@ function loadServerInfo() {
         document.getElementById('infoTimestamp').textContent = data.timestamp
             ? new Date(data.timestamp).toLocaleString('zh-CN', { hour12: false }) : '—';
 
-        document.getElementById('lastUpdate').textContent = '最后更新：' + new Date().toLocaleString('zh-CN', { hour12: false });
+        document.getElementById('lastUpdate').textContent = t('adminDash.serverLastUpdatePrefix', '最后更新：') + new Date().toLocaleString('zh-CN', { hour12: false });
     }).catch(function (err) {
         btn.disabled = false;
-        btn.textContent = '🔄 刷新';
-        alert('加载失败：' + (err && err.message ? err.message : err));
+        btn.textContent = '🔄 ' + t('common.refresh', '刷新');
+        alert(t('common.fail', '操作失败') + '：' + (err && err.message ? err.message : err));
     });
 }
 
 document.getElementById('refreshServerBtn').addEventListener('click', loadServerInfo);
 
-/* 我的签到 */
+/* ============================================================
+ *  我的签到
+ * ============================================================ */
 function myToDateStr(d) {
     var y = d.getFullYear();
     var m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1761,7 +1960,11 @@ function myLoadCheckinCalendar() {
 }
 
 function myRenderCalendar(monday, cfg, checked) {
-    var names = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    var names = [
+        t('adminDash.pointsMon', '周一'), t('adminDash.pointsTue', '周二'), t('adminDash.pointsWed', '周三'),
+        t('adminDash.pointsThu', '周四'), t('adminDash.pointsFri', '周五'), t('adminDash.pointsSat', '周六'),
+        t('adminDash.pointsSun', '周日')
+    ];
     var keys  = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
     var todayStr = myToDateStr(myShanghaiNow());
 
@@ -1811,11 +2014,11 @@ function myRefreshCheckinUI() {
 
         var btn = document.getElementById('myCheckinBtn');
         if (hasCheckedToday) {
-            btn.textContent = '✓ 今日已签到';
+            btn.textContent = t('adminDash.myCheckinDone', '✓ 今日已签到');
             btn.disabled = true;
             document.getElementById('myTodayReward').textContent = '+' + (todayRow.points || 0);
         } else {
-            btn.textContent = '签 到';
+            btn.textContent = t('adminDash.myCheckinBtn', '签 到');
             btn.disabled = false;
             document.getElementById('myTodayReward').textContent = '—';
         }
@@ -1852,13 +2055,13 @@ function myLoadRank(userId) {
 document.getElementById('myCheckinBtn').addEventListener('click', function () {
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '签到中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.rpc('do_checkin').then(function (res) {
         if (res.error) {
-            alert('签到失败：' + res.error.message);
+            alert(t('userDash.checkinFail', '签到失败：') + res.error.message);
             btn.disabled = false;
-            btn.textContent = '签 到';
+            btn.textContent = t('adminDash.myCheckinBtn', '签 到');
             return;
         }
         var data = res.data || {};
@@ -1868,21 +2071,29 @@ document.getElementById('myCheckinBtn').addEventListener('click', function () {
             myLoadCheckinCalendar();
             return;
         }
-        btn.textContent = '✓ 今日已签到';
+        btn.textContent = t('adminDash.myCheckinDone', '✓ 今日已签到');
         document.getElementById('myPoints').textContent =
             (parseInt(document.getElementById('myPoints').textContent) || 0) + (data.points || 0);
         document.getElementById('myStreak').textContent = data.streak || 0;
         document.getElementById('myTodayReward').textContent = '+' + (data.points || 0);
         myLoadCheckinCalendar();
-        alert('签到成功！\n获得 ' + data.points + ' 积分\n连续签到 ' + data.streak + ' 天');
+
+        var _newBal = parseInt(document.getElementById('myPoints').textContent) || 0;
+        writePointLog(currentAdmin.id, data.points, t('adminDash.checkinReason', '每日签到'), _newBal);
+
+        alert(t('userDash.checkinSuccess', '签到成功！') + '\n' +
+              t('userDash.checkinGotPoints', '获得 ') + data.points + t('userDash.checkinPointsUnit', ' 积分') + '\n' +
+              t('userDash.checkinStreakDay', '连续签到 ') + data.streak + t('userDash.checkinStreakDayUnit', ' 天'));
     }).catch(function (err) {
-        alert('签到失败：' + (err.message || err));
+        alert(t('userDash.checkinFail', '签到失败：') + (err.message || err));
         btn.disabled = false;
-        btn.textContent = '签 到';
+        btn.textContent = t('adminDash.myCheckinBtn', '签 到');
     });
 });
 
-/* 我的好友 */
+/* ============================================================
+ *  我的好友
+ * ============================================================ */
 function myLoadFriends() {
     if (!currentAdmin) return;
 
@@ -1890,15 +2101,15 @@ function myLoadFriends() {
     var friendList  = document.getElementById('myFriendList');
     var badge       = document.getElementById('myBadgeFriends');
 
-    pendingList.innerHTML = '<div class="empty-state">加载中...</div>';
-    friendList.innerHTML  = '<div class="empty-state">加载中...</div>';
+    pendingList.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
+    friendList.innerHTML  = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
     supabaseClient.from('friendships').select('*')
         .or('user_id.eq.' + currentAdmin.id + ',friend_id.eq.' + currentAdmin.id)
         .then(function (res) {
             if (res.error) {
-                pendingList.innerHTML = '<div class="empty-state">加载失败：' + escapeHtml(res.error.message) + '</div>';
-                friendList.innerHTML  = '<div class="empty-state">加载失败</div>';
+                pendingList.innerHTML = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + escapeHtml(res.error.message) + '</div>';
+                friendList.innerHTML  = '<div class="empty-state">' + t('common.loadFailed', '加载失败：') + '</div>';
                 return;
             }
 
@@ -1914,12 +2125,12 @@ function myLoadFriends() {
                 }
             });
 
-            badge.textContent = friendIds.length + ' 位好友';
+            badge.textContent = friendIds.length + t('userDash.friendsBadge', ' 位好友');
 
             var allIds = friendIds.concat(pendingFromOthers.map(function (f) { return f.user_id; }));
             if (allIds.length === 0) {
-                pendingList.innerHTML = '<div class="empty-state">暂无待处理的请求</div>';
-                friendList.innerHTML  = '<div class="empty-state">还没有好友，输入邮箱添加吧~</div>';
+                pendingList.innerHTML = '<div class="empty-state">' + t('userDash.friendsPendingEmpty', '暂无待处理的请求') + '</div>';
+                friendList.innerHTML  = '<div class="empty-state">' + t('userDash.friendsEmpty', '还没有好友，输入邮箱添加吧~') + '</div>';
                 return;
             }
 
@@ -1929,7 +2140,7 @@ function myLoadFriends() {
                     (pRes.data || []).forEach(function (p) { map[p.id] = p; });
 
                     if (pendingFromOthers.length === 0) {
-                        pendingList.innerHTML = '<div class="empty-state">暂无待处理的请求</div>';
+                        pendingList.innerHTML = '<div class="empty-state">' + t('userDash.friendsPendingEmpty', '暂无待处理的请求') + '</div>';
                     } else {
                         var ph = '';
                         pendingFromOthers.forEach(function (f) {
@@ -1942,7 +2153,7 @@ function myLoadFriends() {
 
                     myFriendsCache = friendIds.map(function (id) { return map[id]; }).filter(Boolean);
                     if (myFriendsCache.length === 0) {
-                        friendList.innerHTML = '<div class="empty-state">还没有好友，输入邮箱添加吧~</div>';
+                        friendList.innerHTML = '<div class="empty-state">' + t('userDash.friendsEmpty', '还没有好友，输入邮箱添加吧~') + '</div>';
                     } else {
                         var fh = '';
                         myFriendsCache.forEach(function (u) {
@@ -1957,7 +2168,7 @@ function myLoadFriends() {
 
 function myRenderFriendItem(user, fsId, isPending) {
     var avatar = user.avatar_url || DEFAULT_AVATAR;
-    var name = user.full_name || user.email || '未知';
+    var name = user.full_name || user.email || '—';
     var email = user.email || '';
     if (isPending) {
         return '<div class="friend-item pending" data-fsid="' + fsId + '" data-uid="' + user.id + '">' +
@@ -1967,8 +2178,8 @@ function myRenderFriendItem(user, fsId, isPending) {
                 '<div class="friend-email">' + escapeHtml(email) + '</div>' +
             '</div>' +
             '<div class="friend-actions">' +
-                '<button class="accept-btn">同意</button>' +
-                '<button class="reject-btn">拒绝</button>' +
+                '<button class="accept-btn">' + t('userDash.friendsAccept', '同意') + '</button>' +
+                '<button class="reject-btn">' + t('userDash.friendsReject', '拒绝') + '</button>' +
             '</div>' +
         '</div>';
     }
@@ -1988,15 +2199,15 @@ function myBindPendingActions() {
         item.querySelector('.accept-btn').addEventListener('click', function () {
             supabaseClient.from('friendships').update({ status: 'accepted' }).eq('id', fsId)
                 .then(function (r) {
-                    if (r.error) { alert('操作失败：' + r.error.message); return; }
+                    if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
                     myLoadFriends();
                 });
         });
         item.querySelector('.reject-btn').addEventListener('click', function () {
-            if (!confirm('确定拒绝该好友请求吗？')) return;
+            if (!confirm(t('userDash.friendsRejectConfirm', '确定拒绝该好友请求吗？'))) return;
             supabaseClient.from('friendships').delete().eq('id', fsId)
                 .then(function (r) {
-                    if (r.error) { alert('操作失败：' + r.error.message); return; }
+                    if (r.error) { alert(t('common.fail', '操作失败') + '：' + r.error.message); return; }
                     myLoadFriends();
                 });
         });
@@ -2016,22 +2227,22 @@ function myBindFriendClicks() {
 document.getElementById('myAddFriendBtn').addEventListener('click', function () {
     var input = document.getElementById('myFriendEmailInput');
     var email = input.value.trim().toLowerCase();
-    if (!email) { alert('请输入对方邮箱'); return; }
+    if (!email) { alert(t('userDash.friendsEnterEmail', '请输入对方邮箱')); return; }
     if (email === (currentAdmin.email || '').toLowerCase()) {
-        alert('不能添加自己为好友');
+        alert(t('userDash.friendsAddSelf', '不能添加自己为好友'));
         return;
     }
 
     var btn = this;
     btn.disabled = true;
-    btn.textContent = '添加中...';
+    btn.textContent = t('common.loading', '加载中...');
 
     supabaseClient.from('profiles').select('id, email, full_name').eq('email', email).maybeSingle()
         .then(function (res) {
             if (res.error || !res.data) {
                 btn.disabled = false;
-                btn.textContent = '➕ 添加好友';
-                alert('找不到这个邮箱的用户');
+                btn.textContent = t('adminDash.myFriendsAddBtn', '➕ 添加好友');
+                alert(t('userDash.friendsAddNoUser', '找不到这个邮箱的用户'));
                 return;
             }
 
@@ -2043,10 +2254,10 @@ document.getElementById('myAddFriendBtn').addEventListener('click', function () 
                 .then(function (fRes) {
                     if (fRes.data) {
                         btn.disabled = false;
-                        btn.textContent = '➕ 添加好友';
-                        if (fRes.data.status === 'accepted') alert('你们已经是好友了');
-                        else if (fRes.data.user_id === currentAdmin.id) alert('已发送过请求，等待对方同意');
-                        else alert('对方已经向你发起了请求，去"待处理"里同意吧');
+                        btn.textContent = t('adminDash.myFriendsAddBtn', '➕ 添加好友');
+                        if (fRes.data.status === 'accepted') alert(t('userDash.friendsAddAlready', '你们已经是好友了'));
+                        else if (fRes.data.user_id === currentAdmin.id) alert(t('userDash.friendsAddSent', '已发送过请求，等待对方同意'));
+                        else alert(t('userDash.friendsAddCameIn', '对方已经向你发起了请求，去"待处理"里同意吧'));
                         return;
                     }
 
@@ -2056,10 +2267,10 @@ document.getElementById('myAddFriendBtn').addEventListener('click', function () 
                         status: 'pending'
                     }]).then(function (iRes) {
                         btn.disabled = false;
-                        btn.textContent = '➕ 添加好友';
-                        if (iRes.error) { alert('添加失败：' + iRes.error.message); return; }
+                        btn.textContent = t('adminDash.myFriendsAddBtn', '➕ 添加好友');
+                        if (iRes.error) { alert(t('userDash.friendsAddFail', '添加失败：') + iRes.error.message); return; }
                         input.value = '';
-                        alert('好友请求已发送！');
+                        alert(t('userDash.friendsAddSuccess', '好友请求已发送！'));
                         myLoadFriends();
                     });
                 });
@@ -2072,7 +2283,7 @@ function myOpenChat(friend) {
     document.getElementById('myChatFriendName').textContent = friend.full_name || friend.email;
     document.getElementById('myChatFriendAvatar').src = friend.avatar_url || DEFAULT_AVATAR;
     document.getElementById('myChatModal').style.display = 'flex';
-    document.getElementById('myChatBody').innerHTML = '<div class="empty-state">加载中...</div>';
+    document.getElementById('myChatBody').innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
     myLoadMessages();
 
     if (myChatPollTimer) clearInterval(myChatPollTimer);
@@ -2104,7 +2315,7 @@ function myLoadMessages() {
             var body = document.getElementById('myChatBody');
 
             if (data.length === 0) {
-                body.innerHTML = '<div class="empty-state">还没有聊天记录，说点什么吧~</div>';
+                body.innerHTML = '<div class="empty-state">' + t('userDash.chatEmpty', '还没有聊天记录，说点什么吧~') + '</div>';
                 return;
             }
 
@@ -2161,7 +2372,7 @@ function mySendMessage() {
         content: content
     }]).then(function (res) {
         btn.disabled = false;
-        if (res.error) { alert('发送失败：' + res.error.message); return; }
+        if (res.error) { alert(t('userDash.chatSendFail', '发送失败：') + res.error.message); return; }
         input.value = '';
         myLoadMessages();
     });
@@ -2172,7 +2383,9 @@ document.getElementById('myChatInput').addEventListener('keydown', function (e) 
     if (e.key === 'Enter') mySendMessage();
 });
 
-/* 音效设置 */
+/* ============================================================
+ *  音效设置
+ * ============================================================ */
 (function initSoundSetting() {
     var pairs = [
         { elId: 'toggleLoginSound',   key: 'nangua_loginSound'   },
@@ -2201,8 +2414,6 @@ document.getElementById('myChatInput').addEventListener('keydown', function (e) 
     if (t1) t1.addEventListener('click', function () {
         if (window.LoginSound && window.LoginSound.play) {
             window.LoginSound.play();
-        } else {
-            alert('音效模块未加载，请检查 other/sound.js');
         }
     });
 
@@ -2210,8 +2421,43 @@ document.getElementById('myChatInput').addEventListener('keydown', function (e) 
     if (t2) t2.addEventListener('click', function () {
         if (window.LoginSound && window.LoginSound.playMessage) {
             window.LoginSound.playMessage();
-        } else {
-            alert('音效模块未加载，请检查 other/sound.js');
         }
     });
 })();
+
+/* ============================================================
+ *  动态语言刷新
+ * ============================================================ */
+function refreshDynamicText() {
+    try {
+        var cards = {
+            'cardAnnounce':  loadAnnouncements,
+            'cardPoints':    loadPoints,
+            'cardPointLogs': loadAllPointLogs,
+            'cardForgot':    loadForgotRequests,
+            'cardProfiles':  loadProfiles,
+            'cardShop':      loadAdminShop,
+            'cardPurchases': loadPurchases,
+            'cardFeedback':  loadAllFeedbacks,
+            'cardMyCheckin': function () { myRefreshCheckinUI(); myLoadCheckinCalendar(); },
+            'cardMyFriends': myLoadFriends
+        };
+        Object.keys(cards).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.classList.contains('active')) {
+                try { cards[id](); } catch (e) {}
+            }
+        });
+        if (window.LangHelper && window.LangHelper.apply) {
+            window.LangHelper.apply();
+        }
+    } catch (e) {}
+}
+window.refreshDynamicText = refreshDynamicText;
+
+/* ============================================================
+ *  初次加载 + 应用语言
+ * ============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(applyLang, 100);
+});
