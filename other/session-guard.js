@@ -1,19 +1,18 @@
 /* ============================================================
- *  单设备登录守卫 · other/session-guard.js
+ *  会话守卫 · other/session-guard.js
  *  ----------------------------------------------------------
- *  作用：每个账号同一时间只能在一个设备上登录
- *        - 用户在 A 设备登录 → A 写入 active_device_id
- *        - 用户在 B 设备登录 → B 抢占 active_device_id
- *        - A 轮询发现 active_device_id 不是自己 → 强制登出
- *  ⭐ 优化：只有主动登录（sessionStorage 有 fresh_login 标记）才抢占；
- *          页面刷新时只轮询，不重复写库。
- *  依赖：window.supabaseClient（必须先定义）
+ *  合并了原 session-guard.js（单设备）和 ban-guard.js（封禁）
+ *  一次轮询，同时检查：
+ *    1. active_device_id   → 单设备登录
+ *    2. is_blocked         → 管理员封禁
+ *  管理员（role === 'admin'）自动跳过
+ *  依赖：window.supabaseClient
  * ============================================================ */
 (function () {
     'use strict';
 
-    var POLL_INTERVAL = 10000;   // 10 秒轮询一次
-    var FIRST_DELAY   = 1500;    // 首次检查延迟
+    var POLL_INTERVAL = 10000;
+    var FIRST_DELAY   = 1500;
     var DEVICE_KEY    = 'nangua_device_id';
     var FRESH_KEY     = 'nangua_fresh_login';
 
@@ -21,8 +20,8 @@
     var kicked        = false;
     var currentUserId = null;
     var myDeviceId    = null;
+    var isAdmin       = false;
 
-    /* ---------- 读取 / 清除"主动登录"标记 ---------- */
     function isFreshLogin() {
         try { return sessionStorage.getItem(FRESH_KEY) === '1'; }
         catch (e) { return false; }
@@ -31,45 +30,68 @@
         try { sessionStorage.removeItem(FRESH_KEY); } catch (e) {}
     }
 
-    /* ---------- 生成 / 读取本机 device_id ---------- */
     function getOrCreateDeviceId() {
         var id = localStorage.getItem(DEVICE_KEY);
         if (!id) {
-            id = 'dev_' + Date.now() + '_' +
-                 Math.random().toString(36).slice(2, 10);
+            id = 'dev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
             try { localStorage.setItem(DEVICE_KEY, id); } catch (e) {}
         }
         return id;
     }
 
-    /* ---------- 生成人类可读的设备名 ---------- */
     function getDeviceName() {
         var ua = navigator.userAgent || '';
-        var platform = '未知设备';
-        if (/Windows/i.test(ua))                  platform = 'Windows';
-        else if (/Macintosh|Mac OS X/i.test(ua))  platform = 'Mac';
-        else if (/Android/i.test(ua))             platform = 'Android';
-        else if (/iPhone|iPad|iPod/i.test(ua))    platform = 'iOS';
-        else if (/Linux/i.test(ua))               platform = 'Linux';
-
-        var browser = '浏览器';
-        if (/Edg\//i.test(ua))                    browser = 'Edge';
-        else if (/OPR\/|Opera/i.test(ua))         browser = 'Opera';
-        else if (/Chrome\//i.test(ua))            browser = 'Chrome';
-        else if (/Firefox\//i.test(ua))           browser = 'Firefox';
-        else if (/Safari\//i.test(ua))            browser = 'Safari';
-
-        return platform + ' · ' + browser;
+        var p = '未知设备';
+        if (/Windows/i.test(ua))                 p = 'Windows';
+        else if (/Macintosh|Mac OS X/i.test(ua)) p = 'Mac';
+        else if (/Android/i.test(ua))            p = 'Android';
+        else if (/iPhone|iPad|iPod/i.test(ua))   p = 'iOS';
+        else if (/Linux/i.test(ua))              p = 'Linux';
+        var b = '浏览器';
+        if (/Edg\//i.test(ua))                   b = 'Edge';
+        else if (/OPR\/|Opera/i.test(ua))        b = 'Opera';
+        else if (/Chrome\//i.test(ua))           b = 'Chrome';
+        else if (/Firefox\//i.test(ua))          b = 'Firefox';
+        else if (/Safari\//i.test(ua))           b = 'Safari';
+        return p + ' · ' + b;
     }
 
-    /* ---------- 强制登出 ---------- */
+    /* ---------- 统一的强制登出 ---------- */
     function forceLogout(reason) {
         if (kicked) return;
         kicked = true;
-
         if (timer) { clearInterval(timer); timer = null; }
 
-        var msg = reason || '你的账号已在其他设备登录，当前设备已被强制退出。';
+        alert(reason || '你的账号已在其他设备登录，当前设备已被强制退出。');
+
+        if (window.supabaseClient && window.supabaseClient.auth) {
+            window.supabaseClient.auth.signOut()
+                .then(function () { location.href = 'index.html'; })
+                .catch(function () { location.href = 'index.html'; });
+        } else {
+            location.href = 'index.html';
+        }
+    }
+
+    function forceBanLogout(bannedUntil) {
+        if (kicked) return;
+        kicked = true;
+        if (timer) { clearInterval(timer); timer = null; }
+
+        var msg = '你的账号已被管理员封禁，无法继续使用。\n\n';
+        if (bannedUntil) {
+            var until = new Date(bannedUntil);
+            var diff  = until.getTime() - Date.now();
+            if (diff > 0) {
+                msg += '解封时间：' + until.toLocaleString('zh-CN', { hour12: false }) + '\n';
+                msg += '剩余：' + humanize(diff);
+            } else {
+                msg += '状态：即将解封';
+            }
+        } else {
+            msg += '状态：永久封禁';
+        }
+        msg += '\n\n点击"确定"后将退出登录。';
         alert(msg);
 
         if (window.supabaseClient && window.supabaseClient.auth) {
@@ -81,59 +103,63 @@
         }
     }
 
-    /* ---------- 抢占当前设备 ---------- */
+    function humanize(ms) {
+        var m = Math.floor(ms / 60000);
+        var d = Math.floor(m / 1440);
+        var h = Math.floor((m % 1440) / 60);
+        var mm = m % 60;
+        var p = [];
+        if (d > 0) p.push(d + ' 天');
+        if (h > 0) p.push(h + ' 小时');
+        if (d === 0 && mm > 0) p.push(mm + ' 分钟');
+        return p.join(' ') || '不到 1 分钟';
+    }
+
     function claimDevice() {
         if (!window.supabaseClient || !currentUserId || !myDeviceId) {
             return Promise.resolve();
         }
-
-        var now = new Date().toISOString();
-
         return window.supabaseClient
             .from('profiles')
             .update({
                 active_device_id:       myDeviceId,
-                active_device_login_at: now
+                active_device_login_at: new Date().toISOString()
             })
-            .eq('id', currentUserId)
-            .then(function (r) {
-                if (r.error) {
-                    console.warn('[设备守卫] 抢占失败：', r.error.message);
-                } else {
-                    console.log('[设备守卫] 已抢占设备：', getDeviceName());
-                }
-            });
+            .eq('id', currentUserId);
     }
 
-    /* ---------- 单次检查 ---------- */
+    /* ---------- 单次检查：一次查询搞定两件事 ---------- */
     function checkOnce() {
-        if (kicked || !currentUserId || !myDeviceId) return;
+        if (kicked || !currentUserId) return;
+        if (isAdmin) return;
         if (!window.supabaseClient) return;
 
         window.supabaseClient
             .from('profiles')
-            .select('active_device_id')
+            .select('is_blocked, banned_until, active_device_id')
             .eq('id', currentUserId)
             .maybeSingle()
             .then(function (res) {
                 if (res.error || !res.data) return;
 
-                var remoteId = res.data.active_device_id;
+                // ① 封禁优先
+                if (res.data.is_blocked === true) {
+                    forceBanLogout(res.data.banned_until);
+                    return;
+                }
 
-                // 远端为空（第一次使用）→ 补写
+                // ② 单设备
+                var remoteId = res.data.active_device_id;
                 if (!remoteId) {
                     claimDevice();
                     return;
                 }
-
-                // 远端不是我 → 被其他设备抢登，踢出
                 if (remoteId !== myDeviceId) {
                     forceLogout('你的账号已在其他设备登录，当前设备已被强制退出。');
                 }
             });
     }
 
-    /* ---------- 启动轮询 ---------- */
     function startPolling() {
         setTimeout(function () {
             checkOnce();
@@ -142,59 +168,42 @@
         }, FIRST_DELAY);
     }
 
-    /* ---------- 启动 ---------- */
     function start(user) {
         if (!user || !user.id || kicked) return;
 
-        // ★ 管理员豁免
         var role = user.app_metadata && user.app_metadata.role;
         if (role === 'admin') {
-            console.log('[设备守卫] 当前为管理员，跳过单设备限制');
+            isAdmin = true;
+            console.log('[会话守卫] 管理员，跳过');
             return;
         }
 
         currentUserId = user.id;
         myDeviceId    = getOrCreateDeviceId();
 
-        console.log('[设备守卫] 启动，device_id =', myDeviceId);
-
-        // ★ 判断是否是"主动登录"
         var fresh = isFreshLogin();
         clearFreshLogin();
 
         if (fresh) {
-            // 主动登录 → 抢占设备后再开始轮询
-            console.log('[设备守卫] 检测到主动登录，抢占设备…');
             claimDevice().then(startPolling);
         } else {
-            // 页面刷新 / token 恢复 → 只轮询，不抢占
-            console.log('[设备守卫] 页面恢复，仅轮询不抢占');
             startPolling();
         }
     }
 
-    /* ---------- 挂到 window ---------- */
     window.SessionGuard = {
         start:    start,
         checkNow: checkOnce,
-        stop: function () {
-            if (timer) { clearInterval(timer); timer = null; }
-        },
+        stop:     function () { if (timer) { clearInterval(timer); timer = null; } },
         getDeviceId: getOrCreateDeviceId
     };
 
-    /* ---------- 自动监听 Supabase 会话 ---------- */
     function autoStart() {
-        if (!window.supabaseClient || !window.supabaseClient.auth) {
-            console.warn('[设备守卫] supabaseClient 未就绪，跳过');
-            return;
-        }
-
+        if (!window.supabaseClient || !window.supabaseClient.auth) return;
         window.supabaseClient.auth.getSession().then(function (res) {
-            var session = res.data && res.data.session;
-            if (session && session.user) start(session.user);
+            var s = res.data && res.data.session;
+            if (s && s.user) start(s.user);
         });
-
         window.supabaseClient.auth.onAuthStateChange(function (event, session) {
             if (event === 'SIGNED_IN' && session && session.user) {
                 kicked = false;
