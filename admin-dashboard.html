@@ -37,7 +37,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="other/i18n.js"></script>
 
-    <!-- ★ 语言来源兜底：URL 参数 > localStorage > 默认 zh -->
     <script>
     (function () {
         var SUPPORTED = ['zh','en','ja','ko','fr','es'];
@@ -112,6 +111,15 @@
                 <div class="nav-sub-item" data-tab="pointLogs" data-i18n="adminDash.navPointLogs">📜 积分明细</div>
                 <div class="nav-sub-item" data-tab="shop" data-i18n="adminDash.navShopMgr">🛍️ 积分商城</div>
                 <div class="nav-sub-item" data-tab="purchases" data-i18n="adminDash.navPurchases">📋 兑换记录</div>
+            </div>
+
+            <!-- ★ 新增：成就系统入口 -->
+            <div class="nav-group" data-group="achievementGroup">
+                <span class="nav-text" data-i18n="adminDash.navAchievement">🏆 成就系统</span>
+                <span class="nav-arrow" data-arrow="achievementGroup">▾</span>
+            </div>
+            <div class="nav-sub" data-sub="achievementGroup">
+                <div class="nav-sub-item" data-tab="achievements" data-i18n="adminDash.achievementTitle">🏆 成就管理</div>
             </div>
 
             <div class="nav-group" data-group="users">
@@ -283,6 +291,80 @@
                 </div>
             </div>
 
+            <!-- 成就管理 -->
+            <div class="card" id="cardAchievements">
+                <div class="card-head">
+                    <h2 data-i18n="adminDash.achievementTitle">🏆 成就管理</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeAchievements">—</span>
+                        <button class="refresh-btn-mini" id="refreshAchievementsBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+
+                <!-- 添加成就表单 -->
+                <div class="shop-add-form">
+                    <div class="form-section-title" data-i18n="adminDash.achievementAddTitle">➕ 添加新成就</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-i18n="adminDash.achievementFormName">成就名称</label>
+                            <input type="text" id="achName" data-i18n-placeholder="adminDash.achievementFormNamePh" placeholder="例如：坚持不懈" />
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="adminDash.achievementFormIcon">图标 Emoji</label>
+                            <input type="text" id="achIcon" data-i18n-placeholder="adminDash.achievementFormIconPh" placeholder="例如：🔥" value="🏆" />
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="adminDash.achievementFormReward">奖励积分</label>
+                            <input type="number" id="achReward" placeholder="0" min="0" value="0" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-i18n="adminDash.achievementFormType">触发条件类型</label>
+                            <select id="achType">
+                                <option value="manual"        data-i18n="common.achTypeManual">手动发放</option>
+                                <option value="checkin_streak" data-i18n="common.achTypeCheckinStreak">连续签到（天）</option>
+                                <option value="points_reached" data-i18n="common.achTypePointsReached">积分达到</option>
+                                <option value="purchase_count" data-i18n="common.achTypePurchaseCount">兑换次数</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="adminDash.achievementFormValue">触发条件数值</label>
+                            <input type="number" id="achValue" data-i18n-placeholder="adminDash.achievementFormValuePh" placeholder="例如：7" min="0" value="0" />
+                        </div>
+                        <div class="form-group">
+                            <label data-i18n="adminDash.achievementFormSort">排序 (越小越前)</label>
+                            <input type="number" id="achSort" value="0" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label data-i18n="adminDash.achievementFormDesc">成就描述</label>
+                        <textarea id="achDesc" rows="2" data-i18n-placeholder="adminDash.achievementFormDescPh" placeholder="例如：连续签到7天即可获得"></textarea>
+                    </div>
+                    <div class="form-submit">
+                        <button class="btn-save" id="addAchievementBtn" style="padding: 0 24px; width: auto;" data-i18n="common.achFormSave">➕ 保存成就</button>
+                    </div>
+                </div>
+
+                <!-- 成就列表 -->
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="adminDash.achievementColIcon">图标</th>
+                                <th data-i18n="adminDash.achievementColName">名称</th>
+                                <th data-i18n="adminDash.achievementColCond">触发条件</th>
+                                <th data-i18n="adminDash.achievementColReward">奖励</th>
+                                <th data-i18n="adminDash.achievementColStatus">状态</th>
+                                <th data-i18n="adminDash.achievementColAction">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="achievementsBody">
+                            <tr><td colspan="6" class="loading" data-i18n="common.loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <!-- 注册用户列表 -->
             <div class="card" id="cardProfiles">
                 <div class="card-head">
@@ -292,10 +374,20 @@
                         <button class="refresh-btn-mini" id="refreshProfilesBtn" title="刷新">🔄</button>
                     </div>
                 </div>
+                
+                <!-- 批量操作工具栏 -->
+                <div class="fb-toolbar" style="margin-bottom: 12px;">
+                    <label class="fb-select-all"><input type="checkbox" id="profilesSelectAll"><span data-i18n="adminDash.feedbackSelectAll">全选</span></label>
+                    <span class="fb-selected-count" id="profilesSelectedCount">已选 0 人</span>
+                    <button class="action-btn del fb-batch-del" id="profilesBatchDeleteBtn" disabled data-i18n="adminDash.feedbackDeleteSelected">🗑 批量删除</button>
+                    <button class="action-btn block fb-batch-del" id="profilesBatchBlockBtn" disabled>🚫 批量拉黑</button>
+                </div>
+
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
+                                <th style="width: 40px; text-align: center;"><input type="checkbox" id="profilesSelectAllHeader" style="display: none;"></th>
                                 <th data-i18n="adminDash.profilesTableUid">UID</th>
                                 <th data-i18n="adminDash.profilesTableUser">用户</th>
                                 <th data-i18n="adminDash.profilesTableName">昵称</th>
@@ -306,7 +398,7 @@
                             </tr>
                         </thead>
                         <tbody id="profilesBody">
-                            <tr><td colspan="7" class="loading" data-i18n="common.loading">加载中...</td></tr>
+                            <tr><td colspan="8" class="loading" data-i18n="common.loading">加载中...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -690,6 +782,78 @@
             <div class="dialog-actions">
                 <button type="button" class="btn-cancel" id="feedbackRewardCancelBtn" data-i18n="common.cancel">取消</button>
                 <button type="button" class="btn-confirm" id="feedbackRewardConfirmBtn" data-i18n="adminDash.feedbackRewardConfirm">确认并奖励</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑成就弹窗 -->
+    <div class="mask" id="editAchievementModal" style="display:none;">
+        <div class="dialog" style="width: 480px; max-width: 95%;">
+            <h3 data-i18n="common.achEditTitle">编辑成就信息</h3>
+            <div class="announce-form" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
+                <div class="form-group">
+                    <label data-i18n="adminDash.achievementFormName">成就名称</label>
+                    <input type="text" id="editAchName"/>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="adminDash.achievementFormIcon">图标 Emoji</label>
+                    <input type="text" id="editAchIcon"/>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="adminDash.achievementFormType">触发条件类型</label>
+                    <select id="editAchType">
+                        <option value="manual"        data-i18n="common.achTypeManual">手动发放</option>
+                        <option value="checkin_streak" data-i18n="common.achTypeCheckinStreak">连续签到（天）</option>
+                        <option value="points_reached" data-i18n="common.achTypePointsReached">积分达到</option>
+                        <option value="purchase_count" data-i18n="common.achTypePurchaseCount">兑换次数</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="adminDash.achievementFormValue">触发条件数值</label>
+                    <input type="number" id="editAchValue" min="0"/>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="adminDash.achievementFormReward">奖励积分</label>
+                    <input type="number" id="editAchReward" min="0"/>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="adminDash.achievementFormSort">排序</label>
+                    <input type="number" id="editAchSort"/>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="adminDash.achievementFormDesc">成就描述</label>
+                    <textarea id="editAchDesc" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="common.achStatusOn">状态</label>
+                    <select id="editAchActive">
+                        <option value="true"  data-i18n="common.achStatusOn">启用</option>
+                        <option value="false" data-i18n="common.achStatusOff">停用</option>
+                    </select>
+                </div>
+            </div>
+            <div class="dialog-actions" style="margin-top: 16px;">
+                <button type="button" class="btn-cancel" id="editAchCancelBtn" data-i18n="common.cancel">取消</button>
+                <button type="button" class="btn-confirm" id="editAchSaveBtn" data-i18n="common.achEditSave">保存修改</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发放成就弹窗 -->
+    <div class="mask" id="grantAchievementModal" style="display:none;">
+        <div class="dialog">
+            <h3 data-i18n="common.achGrantTitle">发放成就</h3>
+            <p class="dialog-hint" id="grantAchNameHint">—</p>
+            <div class="field" style="width:100%; text-align: left;">
+                <label style="text-align: left; margin-bottom: 8px; display:block;"
+                       data-i18n="common.achGrantPickLabel">选择目标用户 (UID / 邮箱)</label>
+                <select id="grantUserSelect" style="width: 100%; height: 42px; background: var(--theme-info-box); border: 1px solid var(--theme-border-soft); border-radius: var(--radius-md); padding: 0 12px; color: var(--theme-text); outline: none;">
+                    <!-- 用户列表动态填充 -->
+                </select>
+            </div>
+            <div class="dialog-actions" style="margin-top: 16px;">
+                <button type="button" class="btn-cancel" id="grantAchCancelBtn" data-i18n="common.cancel">取消</button>
+                <button type="button" class="btn-confirm" id="grantAchConfirmBtn" style="background: rgba(130,225,160,.18); border-color: rgba(130,225,160,.45); color: #82e1a0;" data-i18n="common.achGrantConfirm">确认发放</button>
             </div>
         </div>
     </div>

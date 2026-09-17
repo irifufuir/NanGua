@@ -3,8 +3,9 @@
  *  ----------------------------------------------------------
  *  作用：已登录用户如果被管理员封禁，最多 N 秒内被踢回登录页
  *  ⭐ 管理员豁免：role === 'admin' 的账号不会被踢
+ *  ⭐ 修复：profiles 表没有 ban_reason 列时，查询会 400
+ *          现改为只查 is_blocked 和 banned_until
  *  用法：在 user-dashboard.html 里
- *        <script src="other/supabase-client-helper.js"></script>
  *        之后再引本文件（要保证 supabaseClient 已定义）
  * ============================================================ */
 (function () {
@@ -83,7 +84,7 @@
 
         window.supabaseClient
             .from('profiles')
-            .select('is_blocked, banned_until, ban_reason')
+            .select('is_blocked, banned_until')
             .eq('id', currentUserId)
             .maybeSingle()
             .then(function (res) {
@@ -91,7 +92,7 @@
                 var row = res.data;
 
                 if (row.is_blocked === true) {
-                    kickOut(row.ban_reason, row.banned_until);
+                    kickOut(null, row.banned_until);
                 }
             });
     }

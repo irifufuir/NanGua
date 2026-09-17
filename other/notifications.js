@@ -4,6 +4,7 @@
  *   1. 未读消息数轮询 → 侧边栏红点
  *   2. 新消息 → 播放提示音 + 右上角弹窗
  *   3. 心跳 → 每 60 秒更新自己的 last_seen
+ *  ⭐ 修复：管理端好友标签选择器兼容 .nav-item[data-tab="myFriends"]
  *  依赖：window.supabaseClient、window.LoginSound
  * ============================================================ */
 (function () {
@@ -158,6 +159,8 @@
         });
 
         el.addEventListener('click', function () {
+            // ★ 用户端：.nav-item[data-tab="friends"]
+            // ★ 管理端：.nav-item[data-tab="myFriends"]
             var tab =
                 document.querySelector('.nav-item[data-tab="friends"]') ||
                 document.querySelector('.nav-item[data-tab="myFriends"]');

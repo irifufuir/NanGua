@@ -1,5 +1,5 @@
 /* ============================================================
- *  user-dashboard.html 主逻辑（多语言版）
+ *  user-dashboard.html 主逻辑（多语言版 + 成就系统）
  * ============================================================ */
 
 /* ============================================================
@@ -347,13 +347,14 @@ msgGroup.addEventListener('click', function () {
 });
 
 var CARDS = {
-    home:     'cardHome',
-    announce: 'cardAnnounce',
-    checkin:  'cardCheckin',
-    shop:     'cardShop',
-    friends:  'cardFriends',
-    theme:    'cardTheme',
-    feedback: 'cardFeedback'
+    home:        'cardHome',
+    announce:    'cardAnnounce',
+    checkin:     'cardCheckin',
+    achievements:'cardAchievements', // ★ 新增
+    shop:        'cardShop',
+    friends:     'cardFriends',
+    theme:       'cardTheme',
+    feedback:    'cardFeedback'
 };
 
 function switchTab(tab) {
@@ -389,7 +390,8 @@ function switchTab(tab) {
                 });
         }
     }
-    if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); loadMyPointLogs(); }
+    if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); loadMyPointLogs(); checkAndUnlockAchievements('checkin'); } // ★ 触发成就检查
+    if (tab === 'achievements') loadMyAchievements(); // ★ 加载成就
     if (tab === 'shop')     loadShop();
     if (tab === 'friends')  loadFriends();
 
@@ -518,6 +520,141 @@ function loadAnnouncements() {
             });
             listEl.innerHTML = html;
         });
+}
+
+/* ============================================================
+ *  ★ 用户端成就系统
+ * ============================================================ */
+function loadMyAchievements() {
+    if (!currentUser) return;
+    var grid = document.getElementById('achievementsGrid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
+
+    // 使用 Promise.all 同时查询所有成就配置 + 用户已解锁的成就
+    Promise.all([
+        supabaseClient.from('achievements').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
+        supabaseClient.from('user_achievements').select('*').eq('user_id', currentUser.id)
+    ]).then(function (results) {
+        if (results[0].error || results[1].error) {
+            grid.innerHTML = '<div class="empty-state">加载失败，请稍后重试</div>';
+            return;
+        }
+
+        var allAch = results[0].data || [];
+        var myUnlocked = results[1].data || [];
+        
+        // 把用户已解锁的成就 ID 存到一个对象里，方便快速查找
+        var unlockedMap = {};
+        var unlockTimeMap = {};
+        myUnlocked.forEach(function (ua) {
+            unlockedMap[ua.achievement_id] = true;
+            unlockTimeMap[ua.achievement_id] = ua.unlocked_at;
+        });
+
+        if (allAch.length === 0) {
+            grid.innerHTML = '<div class="empty-state">暂时没有可解锁的成就</div>';
+            return;
+        }
+
+        var html = '';
+        allAch.forEach(function (item) {
+            var isUnlocked = !!unlockedMap[item.id];
+            var cardClass = isUnlocked ? 'unlocked' : 'locked';
+            
+            // 如果是已解锁，显示解锁时间；如果是未解锁，显示条件描述
+            var footerHtml = '';
+            if (isUnlocked) {
+                var time = new Date(unlockTimeMap[item.id]).toLocaleDateString('zh-CN');
+                footerHtml = '<div class="achieve-time">' + time + ' 解锁</div>';
+            } else {
+                var typeMap = { 'manual': '手动发放', 'checkin_streak': '连续签到', 'points_reached': '积分达到', 'purchase_count': '兑换次数' };
+                var conditionText = typeMap[item.condition_type] || '';
+                if (item.condition_value > 0) conditionText += ' ' + item.condition_value + (item.condition_type === 'checkin_streak' ? ' 天' : '');
+                footerHtml = '<div class="achieve-time" style="color:var(--theme-accent);">条件：' + conditionText + '</div>';
+            }
+
+            html += 
+                '<div class="achieve-card ' + cardClass + '">' +
+                    '<div class="achieve-icon">' + escapeHtml(item.icon || '🏆') + '</div>' +
+                    '<div class="achieve-name">' + escapeHtml(item.name) + '</div>' +
+                    '<div class="achieve-desc">' + escapeHtml(item.description || '') + '</div>' +
+                    (item.reward_points > 0 ? '<div class="achieve-reward">+' + item.reward_points + ' 积分</div>' : '') +
+                    footerHtml +
+                '</div>';
+        });
+        grid.innerHTML = html;
+    }).catch(function () {
+        grid.innerHTML = '<div class="empty-state">网络错误，加载失败</div>';
+    });
+}
+
+/* ============================================================
+ *  ★ 成就触发检查器（核心逻辑）
+ *  actionType: 'checkin' (签到后), 'purchase' (兑换后), 'points' (积分变动时)
+ * ============================================================ */
+function checkAndUnlockAchievements(actionType) {
+    if (!currentUser) return Promise.resolve();
+    
+    // 获取用户最新的数据
+    return supabaseClient.from('profiles').select('points, checkin_streak').eq('id', currentUser.id).maybeSingle()
+    .then(function (pRes) {
+        if (pRes.error || !pRes.data) return;
+        var profile = pRes.data;
+
+        // 获取所有启用中的成就
+        return supabaseClient.from('achievements').select('*').eq('is_active', true).then(function (achRes) {
+            var achievements = achRes.data || [];
+            var unlockPromises = [];
+
+            achievements.forEach(function (ach) {
+                var isQualified = false;
+
+                // 判断条件
+                if (ach.condition_type === 'checkin_streak' && profile.checkin_streak >= ach.condition_value) {
+                    isQualified = true;
+                } else if (ach.condition_type === 'points_reached' && profile.points >= ach.condition_value) {
+                    isQualified = true;
+                }
+                
+                if (isQualified) {
+                    // 使用 upsert 防止重复插入报错
+                    var promise = supabaseClient.from('user_achievements')
+                        .insert([{ user_id: currentUser.id, achievement_id: ach.id }])
+                        .then(function (insertRes) {
+                            // 如果没有报错（即之前没领过），就给用户加积分
+                            if (!insertRes.error && ach.reward_points > 0) {
+                                var newPoints = (profile.points || 0) + ach.reward_points;
+                                return supabaseClient.from('profiles').update({ points: newPoints }).eq('id', currentUser.id)
+                                .then(function() {
+                                    // 写入积分明细
+                                    addPointLog(currentUser.id, ach.reward_points, '解锁成就：' + ach.name, null, newPoints);
+                                    return { ach: ach, newPoints: newPoints };
+                                });
+                            }
+                            return null;
+                        });
+                    unlockPromises.push(promise);
+                }
+            });
+
+            return Promise.all(unlockPromises);
+        });
+    })
+    .then(function (unlockedResults) {
+        var unlockedList = unlockedResults.filter(function (r) { return r != null; });
+        if (unlockedList.length > 0) {
+            // 弹出提示
+            unlockedList.forEach(function (item) {
+                showToast('🎉 解锁成就：「' + item.ach.name + '」 +' + item.ach.reward_points + ' 积分', 'success');
+            });
+            // 刷新页面数据
+            refreshCheckinUI(); 
+            loadMyAchievements();
+        }
+    }).catch(function (err) {
+        console.warn('[成就系统] 检查异常：', err);
+    });
 }
 
 /* ============================================================
@@ -794,6 +931,9 @@ document.getElementById('checkinBtn').addEventListener('click', function () {
         var _newBal = parseInt(document.getElementById('myPoints').textContent) || 0;
         addPointLog(currentUser.id, data.points, '每日签到', null, _newBal);
         loadMyPointLogs();
+
+        // ★ 触发成就检查
+        checkAndUnlockAchievements('checkin');
 
         alert(t('userDash.checkinSuccess', '签到成功！') + '\n' +
               t('userDash.checkinGotPoints', '获得 ') + data.points + t('userDash.checkinPointsUnit', ' 积分') + '\n' +
@@ -1078,6 +1218,9 @@ function doPurchase(itemId, itemName, price) {
             }
 
             addPointLog(currentUser.id, -data.points, t('adminDash.purchasesTitle', '兑换：') + itemName, null, data.newPoints);
+
+            // ★ 触发成就检查
+            checkAndUnlockAchievements('purchase');
 
             alert(t('userDash.shopBuySuccess', '兑换成功！') + '\n' +
                   t('userDash.shopCost', '消耗 ') + data.points + t('userDash.shopPointsUnit', ' 积分') + '\n' +

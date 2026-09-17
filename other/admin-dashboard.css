@@ -1401,7 +1401,6 @@ tr:hover td { background: var(--theme-hover); }
     color: #82e1a0;
     border: 1px solid rgba(130, 225, 160, 0.28);
 }
-/* 反馈奖励积分标签 */
 .feedback-reward-tag {
     display: inline-flex;
     align-items: center;
@@ -1900,4 +1899,17 @@ tr:hover td { background: var(--theme-hover); }
     .nav-main-row .nav-text { max-width: 68px; }
     .nav-sub-row { padding: 4px 8px 6px; }
     .nav-sub-row .nav-sub-item { padding: 6px 12px; font-size: 0.74em; }
+}
+
+/* ============================================================
+   注册用户列表 - 多选复选框样式（新增）
+   ============================================================ */
+#profilesBody input[type="checkbox"],
+#profilesSelectAll,
+#profilesSelectAllHeader {
+    accent-color: var(--theme-accent);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    vertical-align: middle;
 }

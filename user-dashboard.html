@@ -106,6 +106,11 @@
                 <span class="nav-text" data-i18n="userDash.navCheckin">📅 每日签到</span>
             </div>
 
+            <!-- ★ 新增：成就入口 -->
+            <div class="nav-item" data-tab="achievements">
+                <span class="nav-text" data-i18n="userDash.navAchievements">🏆 我的成就</span>
+            </div>
+
             <div class="nav-item" data-tab="shop">
                 <span class="nav-text" data-i18n="userDash.navShop">🛒 积分商城</span>
             </div>
@@ -217,6 +222,21 @@
                     <button class="refresh-btn-mini" id="refreshMyPointLogsBtn" title="刷新" type="button">🔄</button>
                 </div>
                 <div class="point-logs" id="myPointLogs">
+                    <div class="empty-state" data-i18n="common.loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- ★ 新增：我的成就卡片 -->
+            <div class="card" id="cardAchievements">
+                <div class="card-head">
+                    <h2 data-i18n="userDash.achievementsTitle">🏆 我的成就</h2>
+                    <span class="badge" data-i18n="userDash.achievementsBadge">收集成就，赢取积分</span>
+                </div>
+                               <div class="shop-hint" style="margin-bottom: 20px;"
+                     data-i18n="userDash.achievementsHint">
+                    完成特定条件即可解锁成就并获得积分奖励，继续加油吧！
+                </div>
+                <div class="achievements-grid" id="achievementsGrid">
                     <div class="empty-state" data-i18n="common.loading">加载中...</div>
                 </div>
             </div>

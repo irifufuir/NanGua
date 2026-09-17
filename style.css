@@ -1910,3 +1910,16 @@ body.dragging-active * {
     color: inherit;
     text-decoration: none;
 }
+/* ============================================================
+   隐藏浏览器自带的密码查看按钮（小眼睛）
+   ============================================================ */
+/* 针对 Microsoft Edge / IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+}
+
+/* 针对部分 WebKit 内核浏览器（如旧版 Edge、Chrome 的某些变体） */
+input[type="password"]::-webkit-reveal {
+    display: none !important;
+}

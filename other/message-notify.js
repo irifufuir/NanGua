@@ -4,6 +4,7 @@
  *  - 有新消息 → 播放提示音 + 显示右上角提示框
  *  - 点击提示框 → 跳到"我的好友"
  *  ⭐ 修复：初始 lastSeenTs 往前推 10 秒，避免漏消息
+ *  ⭐ 修复：管理端好友标签选择器兼容 .nav-item[data-tab="myFriends"]
  *  依赖：window.supabaseClient、window.LoginSound
  * ============================================================ */
 (function () {
@@ -113,9 +114,11 @@
         });
 
         el.addEventListener('click', function () {
+            // ★ 用户端：.nav-item[data-tab="friends"]
+            // ★ 管理端：.nav-item[data-tab="myFriends"]
             var tab =
                 document.querySelector('.nav-item[data-tab="friends"]') ||
-                document.querySelector('.nav-sub-item[data-tab="myFriends"]');
+                document.querySelector('.nav-item[data-tab="myFriends"]');
             if (tab) tab.click();
             el.remove();
         });

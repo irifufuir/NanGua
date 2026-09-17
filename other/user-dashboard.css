@@ -1598,3 +1598,74 @@ body {
     background: var(--theme-accent-soft);
     color: var(--theme-accent);
 }
+/* ============================================================
+   我的成就 · 专属样式
+   ============================================================ */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
+}
+
+.achieve-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px 12px;
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 已解锁的样式 */
+.achieve-card.unlocked {
+    background: var(--theme-accent-soft);
+    border-color: var(--theme-accent-border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.achieve-card.unlocked .achieve-icon {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    transform: scale(1.1);
+}
+
+/* 未解锁的样式 */
+.achieve-card.locked {
+    opacity: 0.5;
+    filter: grayscale(1);
+}
+
+.achieve-icon {
+    font-size: 2.5em;
+    margin-bottom: 8px;
+    transition: transform 0.3s;
+}
+.achieve-name {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--theme-text);
+    margin-bottom: 4px;
+}
+.achieve-desc {
+    font-size: 0.7em;
+    color: var(--theme-text-faint);
+    line-height: 1.4;
+    min-height: 2.8em;
+    margin-bottom: 8px;
+}
+.achieve-reward {
+    font-size: 0.75em;
+    font-weight: 700;
+    color: var(--theme-accent);
+    background: var(--theme-accent-soft);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+.achieve-time {
+    font-size: 0.65em;
+    color: var(--theme-text-faint);
+    margin-top: 6px;
+}
