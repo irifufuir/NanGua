@@ -1,0 +1,63 @@
+/* ============================================================
+ *  security-guard.css · 安全防护遮罩样式
+ * ============================================================ */
+
+#__sg_blank__ {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2147483647 !important;
+    background: #0a0a0c !important;
+    color: #f0ece5 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    text-align: center !important;
+    padding: 24px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "PingFang SC", "Microsoft YaHei", sans-serif !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    pointer-events: all !important;
+}
+
+#__sg_blank__ .sg-icon {
+    font-size: 52px;
+    line-height: 1;
+    filter: grayscale(0.3);
+    animation: sgPulse 2s ease-in-out infinite;
+}
+
+#__sg_blank__ .sg-title {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #f0ece5;
+}
+
+#__sg_blank__ .sg-desc {
+    font-size: 13px;
+    line-height: 1.75;
+    color: rgba(240, 236, 229, 0.55);
+    max-width: 380px;
+}
+
+#__sg_blank__ .sg-hint {
+    font-size: 11.5px;
+    margin-top: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(240, 236, 229, 0.45);
+    letter-spacing: 0.5px;
+}
+
+@keyframes sgPulse {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%      { opacity: 0.7; transform: scale(0.96); }
+}
+
+/* 隐藏滚动条，防止通过滚动条长度推断内容 */
+#__sg_blank__ ::-webkit-scrollbar { display: none; }

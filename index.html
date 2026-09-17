@@ -8,7 +8,7 @@
     <title>齿轮盛宴</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
     <link rel="stylesheet" href="style.css">
-
+    <link rel="stylesheet" href="other/security/security-guard.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="other/i18n.js"></script>
 </head>
@@ -750,6 +750,10 @@
             clearRegisterForm();
 
             var role = currentUser.app_metadata && currentUser.app_metadata.role;
+            
+            try {
+    localStorage.setItem('nangua_role', role === 'admin' ? 'admin' : 'user');
+} catch (e) {}
 
             setTimeout(function () {
                 try { sessionStorage.setItem('nangua_fresh_login', '1'); } catch (e) {}
@@ -1144,6 +1148,7 @@
 </script>
 
 <script type="text/javascript" src="other/draggable.js"></script>
-<script type="text/javascript" src="other/protect.js"></script>
+<script src="other/security/security-roles.js"></script>
+<script src="other/security/security-guard.js"></script>
 </body>
 </html>
