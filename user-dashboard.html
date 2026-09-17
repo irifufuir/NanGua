@@ -31,13 +31,16 @@
         });
     })();
     </script>
+
     <link rel="stylesheet" href="other/theme.css">
     <link rel="stylesheet" href="other/user-dashboard.css">
     <link rel="stylesheet" href="other/security/security-guard.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="other/i18n.js"></script>
+    <link rel="stylesheet" href="other/dynamic-wall/wall.css">
 
-    <!-- ★ 语言来源兜底：URL 参数 > localStorage > 默认 zh -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="i18n/registry.js"></script>
+
     <script>
     (function () {
         var SUPPORTED = ['zh','en','ja','ko','fr','es'];
@@ -67,6 +70,11 @@
         document.documentElement.setAttribute('data-lang', lang);
     })();
     </script>
+
+    <script src="i18n/locales/zh-CN.js"></script>
+    <script src="i18n/locales/en-US.js"></script>
+
+    <script src="i18n/index.js"></script>
 
     <script src="other/lang-helper.js" defer></script>
 </head>
@@ -101,13 +109,13 @@
             </div>
             <div class="nav-sub" id="msgSub" data-sub="msg">
                 <div class="nav-sub-item" data-tab="announce" data-i18n="userDash.navAnnounce">📢 公告栏</div>
+                <div class="nav-sub-item" data-tab="wall" data-i18n="wall.navWall">🌊 动态墙</div>
             </div>
 
             <div class="nav-item" data-tab="checkin">
                 <span class="nav-text" data-i18n="userDash.navCheckin">📅 每日签到</span>
             </div>
 
-            <!-- ★ 新增：成就入口 -->
             <div class="nav-item" data-tab="achievements">
                 <span class="nav-text" data-i18n="userDash.navAchievements">🏆 我的成就</span>
             </div>
@@ -190,6 +198,29 @@
                 </div>
             </div>
 
+            <!-- 🌊 动态墙 -->
+            <div class="card" id="cardWall">
+                <div class="card-head">
+                    <h2 data-i18n="wall.title">🌊 动态墙</h2>
+                    <span class="badge" id="badgeWall">—</span>
+                </div>
+                <div class="wall-publish">
+                    <textarea id="wallPublishInput"
+                              data-i18n-placeholder="wall.publishPlaceholder"
+                              placeholder="分享你的此刻..." maxlength="500"></textarea>
+                    <div class="wall-publish-row">
+                        <label class="wall-anon-toggle">
+                            <input type="checkbox" id="wallPublishAnon">
+                            <span data-i18n="wall.anonymous">匿名发布</span>
+                        </label>
+                        <button class="wall-publish-btn" id="wallPublishBtn" data-i18n="wall.publishBtn">发布动态</button>
+                    </div>
+                </div>
+                <div class="wall-list" id="wallList">
+                    <div class="wall-empty" data-i18n="common.loading">加载中...</div>
+                </div>
+            </div>
+
             <div class="card" id="cardCheckin">
                 <div class="card-head">
                     <h2 data-i18n="userDash.checkinTitle">📅 每日签到</h2>
@@ -227,13 +258,12 @@
                 </div>
             </div>
 
-            <!-- ★ 新增：我的成就卡片 -->
             <div class="card" id="cardAchievements">
                 <div class="card-head">
                     <h2 data-i18n="userDash.achievementsTitle">🏆 我的成就</h2>
                     <span class="badge" data-i18n="userDash.achievementsBadge">收集成就，赢取积分</span>
                 </div>
-                               <div class="shop-hint" style="margin-bottom: 20px;"
+                <div class="shop-hint" style="margin-bottom: 20px;"
                      data-i18n="userDash.achievementsHint">
                     完成特定条件即可解锁成就并获得积分奖励，继续加油吧！
                 </div>
@@ -301,7 +331,7 @@
                         <span class="setting-title" data-i18n="userDash.themeFontTitle">字号大小</span>
                         <span class="setting-desc" data-i18n="userDash.themeFontDesc">调整界面文字和间距的大小</span>
                     </div>
-                        <div class="setting-options" data-setting="fontSize">
+                    <div class="setting-options" data-setting="fontSize">
                         <button class="setting-btn" data-value="small" data-i18n="common.themeFontSmall">小</button>
                         <button class="setting-btn" data-value="medium" data-i18n="common.themeFontMedium">标准</button>
                         <button class="setting-btn" data-value="large" data-i18n="common.themeFontLarge">大</button>
@@ -313,7 +343,7 @@
                         <span class="setting-title" data-i18n="userDash.themeRadiusTitle">圆角风格</span>
                         <span class="setting-desc" data-i18n="userDash.themeRadiusDesc">调整卡片、输入框和按钮的圆润程度</span>
                     </div>
-                        <div class="setting-options" data-setting="radius">
+                    <div class="setting-options" data-setting="radius">
                         <button class="setting-btn" data-value="small" data-i18n="common.themeRadiusSmall">直角</button>
                         <button class="setting-btn" data-value="medium" data-i18n="common.themeRadiusMedium">标准</button>
                         <button class="setting-btn" data-value="large" data-i18n="common.themeRadiusLarge">圆润</button>
@@ -324,7 +354,7 @@
                         <span class="setting-title" data-i18n="userDash.themeAnimTitle">过渡动效</span>
                         <span class="setting-desc" data-i18n="userDash.themeAnimDesc">关闭后切换页面和主题时不再有动画</span>
                     </div>
-                        <div class="setting-options" data-setting="animations">
+                    <div class="setting-options" data-setting="animations">
                         <button class="setting-btn" data-value="on" data-i18n="common.themeAnimOn">开启</button>
                         <button class="setting-btn" data-value="off" data-i18n="common.themeAnimOff">关闭</button>
                     </div>
@@ -456,5 +486,6 @@
 <script src="other/session-guard.js"></script>
 <script src="other/security/security-roles.js"></script>
 <script src="other/security/security-guard.js"></script>
+<script src="other/dynamic-wall/wall.js"></script>
 </body>
 </html>

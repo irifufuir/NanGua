@@ -1,10 +1,7 @@
 /* ============================================================
- *  user-dashboard.html 主逻辑（多语言版 + 成就系统）
+ *  user-dashboard.html 主逻辑（多语言版 + 成就系统 + 动态墙）
  * ============================================================ */
 
-/* ============================================================
- *  语言辅助：t() 和 applyLang()
- * ============================================================ */
 function t(key, fallback) {
     if (window.LangHelper && window.LangHelper.t) {
         return window.LangHelper.t(key, fallback);
@@ -18,12 +15,11 @@ function applyLang() {
     if (window.LangHelper && window.LangHelper.apply) {
         window.LangHelper.apply();
     }
-    // 更新页面动态内容
     if (typeof refreshDynamicText === 'function') {
         try { refreshDynamicText(); } catch (e) {}
     }
 }
-window.__udLangChanged = applyLang;   // 语言切换后 hook
+window.__udLangChanged = applyLang;
 
 /* ============================================================
  *  移动端导航分组
@@ -153,6 +149,7 @@ window.__udLangChanged = applyLang;   // 语言切换后 hook
 var SUPABASE_URL = 'https://syxawclhvreyxltynpnj.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_EvEBa8dU22MpK6E7UsnWbQ_2JRdVeZQ';
 var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+window.SUPABASE_URL = SUPABASE_URL;
 
 var DEFAULT_AVATAR = 'image/default-avatar.png';
 var currentUser = null;
@@ -349,8 +346,9 @@ msgGroup.addEventListener('click', function () {
 var CARDS = {
     home:        'cardHome',
     announce:    'cardAnnounce',
+    wall:        'cardWall',
     checkin:     'cardCheckin',
-    achievements:'cardAchievements', // ★ 新增
+    achievements:'cardAchievements',
     shop:        'cardShop',
     friends:     'cardFriends',
     theme:       'cardTheme',
@@ -375,6 +373,7 @@ function switchTab(tab) {
     });
 
     if (tab === 'announce') loadAnnouncements();
+    if (tab === 'wall' && typeof loadWall === 'function') loadWall();
     if (tab === 'feedback') {
         loadMyFeedbacks();
         if (currentUser) {
@@ -390,8 +389,8 @@ function switchTab(tab) {
                 });
         }
     }
-    if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); loadMyPointLogs(); checkAndUnlockAchievements('checkin'); } // ★ 触发成就检查
-    if (tab === 'achievements') loadMyAchievements(); // ★ 加载成就
+    if (tab === 'checkin')  { refreshCheckinUI(); loadCheckinCalendar(); loadMyPointLogs(); checkAndUnlockAchievements('checkin'); }
+    if (tab === 'achievements') loadMyAchievements();
     if (tab === 'shop')     loadShop();
     if (tab === 'friends')  loadFriends();
 
@@ -523,7 +522,7 @@ function loadAnnouncements() {
 }
 
 /* ============================================================
- *  ★ 用户端成就系统
+ *  用户端成就系统
  * ============================================================ */
 function loadMyAchievements() {
     if (!currentUser) return;
@@ -531,7 +530,6 @@ function loadMyAchievements() {
     if (!grid) return;
     grid.innerHTML = '<div class="empty-state">' + t('common.loading', '加载中...') + '</div>';
 
-    // 使用 Promise.all 同时查询所有成就配置 + 用户已解锁的成就
     Promise.all([
         supabaseClient.from('achievements').select('*').eq('is_active', true).order('sort_order', { ascending: true }),
         supabaseClient.from('user_achievements').select('*').eq('user_id', currentUser.id)
@@ -543,8 +541,7 @@ function loadMyAchievements() {
 
         var allAch = results[0].data || [];
         var myUnlocked = results[1].data || [];
-        
-        // 把用户已解锁的成就 ID 存到一个对象里，方便快速查找
+
         var unlockedMap = {};
         var unlockTimeMap = {};
         myUnlocked.forEach(function (ua) {
@@ -561,8 +558,7 @@ function loadMyAchievements() {
         allAch.forEach(function (item) {
             var isUnlocked = !!unlockedMap[item.id];
             var cardClass = isUnlocked ? 'unlocked' : 'locked';
-            
-            // 如果是已解锁，显示解锁时间；如果是未解锁，显示条件描述
+
             var footerHtml = '';
             if (isUnlocked) {
                 var time = new Date(unlockTimeMap[item.id]).toLocaleDateString('zh-CN');
@@ -574,7 +570,7 @@ function loadMyAchievements() {
                 footerHtml = '<div class="achieve-time" style="color:var(--theme-accent);">条件：' + conditionText + '</div>';
             }
 
-            html += 
+            html +=
                 '<div class="achieve-card ' + cardClass + '">' +
                     '<div class="achieve-icon">' + escapeHtml(item.icon || '🏆') + '</div>' +
                     '<div class="achieve-name">' + escapeHtml(item.name) + '</div>' +
@@ -589,20 +585,14 @@ function loadMyAchievements() {
     });
 }
 
-/* ============================================================
- *  ★ 成就触发检查器（核心逻辑）
- *  actionType: 'checkin' (签到后), 'purchase' (兑换后), 'points' (积分变动时)
- * ============================================================ */
 function checkAndUnlockAchievements(actionType) {
     if (!currentUser) return Promise.resolve();
-    
-    // 获取用户最新的数据
+
     return supabaseClient.from('profiles').select('points, checkin_streak').eq('id', currentUser.id).maybeSingle()
     .then(function (pRes) {
         if (pRes.error || !pRes.data) return;
         var profile = pRes.data;
 
-        // 获取所有启用中的成就
         return supabaseClient.from('achievements').select('*').eq('is_active', true).then(function (achRes) {
             var achievements = achRes.data || [];
             var unlockPromises = [];
@@ -610,24 +600,20 @@ function checkAndUnlockAchievements(actionType) {
             achievements.forEach(function (ach) {
                 var isQualified = false;
 
-                // 判断条件
                 if (ach.condition_type === 'checkin_streak' && profile.checkin_streak >= ach.condition_value) {
                     isQualified = true;
                 } else if (ach.condition_type === 'points_reached' && profile.points >= ach.condition_value) {
                     isQualified = true;
                 }
-                
+
                 if (isQualified) {
-                    // 使用 upsert 防止重复插入报错
                     var promise = supabaseClient.from('user_achievements')
                         .insert([{ user_id: currentUser.id, achievement_id: ach.id }])
                         .then(function (insertRes) {
-                            // 如果没有报错（即之前没领过），就给用户加积分
                             if (!insertRes.error && ach.reward_points > 0) {
                                 var newPoints = (profile.points || 0) + ach.reward_points;
                                 return supabaseClient.from('profiles').update({ points: newPoints }).eq('id', currentUser.id)
                                 .then(function() {
-                                    // 写入积分明细
                                     addPointLog(currentUser.id, ach.reward_points, '解锁成就：' + ach.name, null, newPoints);
                                     return { ach: ach, newPoints: newPoints };
                                 });
@@ -644,12 +630,10 @@ function checkAndUnlockAchievements(actionType) {
     .then(function (unlockedResults) {
         var unlockedList = unlockedResults.filter(function (r) { return r != null; });
         if (unlockedList.length > 0) {
-            // 弹出提示
             unlockedList.forEach(function (item) {
                 showToast('🎉 解锁成就：「' + item.ach.name + '」 +' + item.ach.reward_points + ' 积分', 'success');
             });
-            // 刷新页面数据
-            refreshCheckinUI(); 
+            refreshCheckinUI();
             loadMyAchievements();
         }
     }).catch(function (err) {
@@ -932,7 +916,6 @@ document.getElementById('checkinBtn').addEventListener('click', function () {
         addPointLog(currentUser.id, data.points, '每日签到', null, _newBal);
         loadMyPointLogs();
 
-        // ★ 触发成就检查
         checkAndUnlockAchievements('checkin');
 
         alert(t('userDash.checkinSuccess', '签到成功！') + '\n' +
@@ -1002,7 +985,6 @@ function loadMyPointLogs() {
         });
 }
 
-/* 刷新按钮 */
 (function () {
     var btn = document.getElementById('refreshMyPointLogsBtn');
     if (!btn) return;
@@ -1019,12 +1001,10 @@ function loadMyPointLogs() {
 })();
 
 /* ============================================================
- *  语言切换 hook（LangHelper 触发后调用）
+ *  语言切换 hook
  * ============================================================ */
 function refreshDynamicText() {
-    // 刷新签到日历里的星期名
     try { loadCheckinCalendar(); } catch (e) {}
-    // 若当前是商城/好友页面，重新加载列表
     try {
         var shopCard = document.getElementById('cardShop');
         if (shopCard && shopCard.classList.contains('active')) loadShop();
@@ -1032,6 +1012,8 @@ function refreshDynamicText() {
         if (friendsCard && friendsCard.classList.contains('active')) loadFriends();
         var annCard = document.getElementById('cardAnnounce');
         if (annCard && annCard.classList.contains('active')) loadAnnouncements();
+        var wallCard = document.getElementById('cardWall');
+        if (wallCard && wallCard.classList.contains('active') && typeof loadWall === 'function') loadWall();
         var fbCard = document.getElementById('cardFeedback');
         if (fbCard && fbCard.classList.contains('active')) loadMyFeedbacks();
         var logEl = document.getElementById('myPointLogs');
@@ -1040,13 +1022,13 @@ function refreshDynamicText() {
 }
 window.refreshDynamicText = refreshDynamicText;
 
-/* escapeHtml 提前定义，后面用到 */
 function escapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
+
 /* ============================================================
  *  积分商城
  * ============================================================ */
@@ -1219,7 +1201,6 @@ function doPurchase(itemId, itemName, price) {
 
             addPointLog(currentUser.id, -data.points, t('adminDash.purchasesTitle', '兑换：') + itemName, null, data.newPoints);
 
-            // ★ 触发成就检查
             checkAndUnlockAchievements('purchase');
 
             alert(t('userDash.shopBuySuccess', '兑换成功！') + '\n' +
@@ -1232,7 +1213,6 @@ function doPurchase(itemId, itemName, price) {
         });
 }
 
-/* 刷新商城 */
 (function () {
     var b = document.getElementById('refreshUserShopBtn');
     if (!b) return;

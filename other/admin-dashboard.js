@@ -245,7 +245,7 @@ var CARDS = {
     points:    'cardPoints',
     pointLogs: 'cardPointLogs',
     forgot:    'cardForgot',
-    achievements: 'cardAchievements', // ★ 新增
+    achievements: 'cardAchievements',
     profiles:  'cardProfiles',
     manage:    'cardManage',
     server:    'cardServer',
@@ -255,7 +255,14 @@ var CARDS = {
     sound:     'cardSound',
     myCheckin: 'cardMyCheckin',
     myFriends: 'cardMyFriends',
-    feedback:  'cardFeedback'
+    feedback:  'cardFeedback',
+    /* ★ 动态墙 */
+    aiDecisions: 'cardAiDecisions',
+    aiConfig:    'cardAiConfig',
+    aiWordlist:  'cardAiWordlist',
+    wallPosts:   'cardWallPosts',
+    aiTrust:     'cardAiTrust',
+    aiCost:      'cardAiCost'
 };
 
 function switchTab(tab) {
@@ -285,6 +292,9 @@ function switchTab(tab) {
     if (tab === 'feedback')  loadAllFeedbacks();
     if (tab === 'myCheckin') { myRefreshCheckinUI(); myLoadCheckinCalendar(); }
     if (tab === 'myFriends') myLoadFriends();
+    if (window.adminWallLoaders && window.adminWallLoaders[tab]) {
+        try { window.adminWallLoaders[tab](); } catch (e) { console.warn(e); }
+    }
 
     if (window.syncMobileSubRow) {
         setTimeout(window.syncMobileSubRow, 0);
@@ -2864,7 +2874,7 @@ document.getElementById('myChatInput').addEventListener('keydown', function (e) 
  * ============================================================ */
 function refreshDynamicText() {
     try {
-        var cards = {
+                var cards = {
             'cardAnnounce':  loadAnnouncements,
             'cardPoints':    loadPoints,
             'cardPointLogs': loadAllPointLogs,
@@ -2875,14 +2885,14 @@ function refreshDynamicText() {
             'cardPurchases': loadPurchases,
             'cardFeedback':  loadAllFeedbacks,
             'cardMyCheckin': function () { myRefreshCheckinUI(); myLoadCheckinCalendar(); },
-            'cardMyFriends': myLoadFriends
+            'cardMyFriends': myLoadFriends,
+            'cardAiDecisions': function () { window.adminWallLoaders && window.adminWallLoaders.aiDecisions(); },
+            'cardAiConfig':    function () { window.adminWallLoaders && window.adminWallLoaders.aiConfig(); },
+            'cardAiWordlist':  function () { window.adminWallLoaders && window.adminWallLoaders.aiWordlist(); },
+            'cardWallPosts':   function () { window.adminWallLoaders && window.adminWallLoaders.wallPosts(); },
+            'cardAiTrust':     function () { window.adminWallLoaders && window.adminWallLoaders.aiTrust(); },
+            'cardAiCost':      function () { window.adminWallLoaders && window.adminWallLoaders.aiCost(); }
         };
-        Object.keys(cards).forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el && el.classList.contains('active')) {
-                try { cards[id](); } catch (e) {}
-            }
-        });
         if (window.LangHelper && window.LangHelper.apply) {
             window.LangHelper.apply();
         }

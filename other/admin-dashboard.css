@@ -1913,3 +1913,189 @@ tr:hover td { background: var(--theme-hover); }
     cursor: pointer;
     vertical-align: middle;
 }
+/* ============================================================
+   管理端 · 动态墙 AI 控制中枢
+   ============================================================ */
+
+/* AI 决策卡片 */
+.ai-decision-card {
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color .2s;
+}
+.ai-decision-card:hover { border-color: var(--theme-border); }
+.ai-decision-head {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px; flex-wrap: wrap;
+}
+.level-badge {
+    font-size: 0.72em; font-weight: 700;
+    padding: 2px 8px; border-radius: var(--radius-full);
+    border: 1px solid transparent;
+}
+.level-badge.l0 { background: rgba(130,225,160,.12); color: #82e1a0; border-color: rgba(130,225,160,.3); }
+.level-badge.l1 { background: rgba(124,174,224,.12); color: #7caee0; border-color: rgba(124,174,224,.3); }
+.level-badge.l2 { background: rgba(248,200,80,.12); color: #f8c850; border-color: rgba(248,200,80,.3); }
+.level-badge.l3 { background: rgba(214,139,139,.12); color: var(--danger); border-color: rgba(214,139,139,.3); }
+
+.verdict-badge {
+    font-size: 0.72em; font-weight: 600;
+    padding: 2px 8px; border-radius: var(--radius-full);
+}
+.verdict-badge.ok    { background: rgba(130,225,160,.12); color: #82e1a0; }
+.verdict-badge.warn  { background: rgba(248,200,80,.12); color: #f8c850; }
+.verdict-badge.block { background: rgba(214,139,139,.12); color: var(--danger); }
+
+.ai-decision-card .confidence {
+    font-size: 0.72em; color: var(--theme-text-faint);
+    background: var(--theme-card);
+    padding: 2px 6px; border-radius: 4px;
+}
+.ai-decision-card .dec-target {
+    font-size: 0.78em; color: var(--theme-text-dim);
+    font-family: monospace;
+}
+.ai-decision-card .dec-time {
+    margin-left: auto;
+    font-size: 0.76em; color: var(--theme-text-faint);
+}
+.ai-decision-reason {
+    font-size: 0.88em; color: var(--theme-text);
+    line-height: 1.65;
+    padding: 8px 12px;
+    background: var(--theme-card);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+.ai-decision-tags {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.ai-decision-tags .tag {
+    font-size: 0.7em; padding: 2px 8px;
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent);
+    border: 1px solid var(--theme-accent-border);
+    border-radius: var(--radius-full);
+}
+.ai-decision-actions {
+    display: flex; gap: 8px; justify-content: flex-end;
+}
+
+/* AI 分级配置 */
+.config-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+.config-item {
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+}
+.config-item-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: 8px; margin-bottom: 10px;
+}
+.config-item-label { font-weight: 600; color: var(--theme-text); font-size: 0.95em; }
+.config-item-code  { font-size: 0.72em; color: var(--theme-text-faint); font-family: monospace; }
+.level-picker {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 6px; margin-bottom: 10px;
+}
+.level-btn {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; padding: 8px 4px;
+    background: var(--theme-card);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-sm);
+    color: var(--theme-text-dim);
+    font-size: 0.85em; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+}
+.level-btn small {
+    font-size: 0.68em; font-weight: 400;
+    opacity: .75;
+}
+.level-btn:hover { border-color: var(--theme-border); }
+.level-btn.active {
+    background: var(--theme-accent-soft);
+    border-color: var(--theme-accent-border);
+    color: var(--theme-accent);
+}
+.config-item-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+}
+.switch-mini {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.82em; color: var(--theme-text-dim);
+    cursor: pointer;
+}
+.switch-mini input { accent-color: var(--theme-accent); }
+
+/* 敏感词表单 */
+.wordlist-form {
+    display: grid; grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 10px; margin-bottom: 16px;
+    padding: 14px;
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-md);
+}
+.wordlist-form input,
+.wordlist-form select {
+    height: 40px; padding: 0 12px;
+    background: var(--theme-card);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-md);
+    color: var(--theme-text);
+    font-family: inherit; font-size: 0.92em;
+    outline: none;
+}
+.wordlist-form button {
+    padding: 0 20px; height: 40px;
+    background: var(--theme-accent-soft);
+    border: 1px solid var(--theme-accent-border);
+    color: var(--theme-accent);
+    border-radius: var(--radius-md);
+    font-family: inherit; font-weight: 500;
+    cursor: pointer;
+}
+@media (max-width: 768px) {
+    .wordlist-form { grid-template-columns: 1fr; }
+}
+
+/* 成本图表 */
+.cost-bars {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 10px; align-items: end;
+    height: 160px; padding: 12px 0;
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-md);
+}
+.cost-bar-wrap {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end;
+    height: 100%; gap: 6px;
+}
+.cost-bar {
+    width: 70%; max-width: 40px;
+    min-height: 4px;
+    background: linear-gradient(180deg, var(--theme-accent), var(--theme-accent-border));
+    border-radius: 4px 4px 0 0;
+    transition: height .4s ease;
+}
+.cost-bar-label {
+    font-size: 0.7em; color: var(--theme-text-faint);
+}
+
+.status-tag.pending {
+    background: rgba(248,200,80,.12); color: #f8c850;
+    border: 1px solid rgba(248,200,80,.28);
+}

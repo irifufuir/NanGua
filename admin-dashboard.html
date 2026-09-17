@@ -34,8 +34,10 @@
 
     <link rel="stylesheet" href="other/theme.css">
     <link rel="stylesheet" href="other/admin-dashboard.css">
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="other/i18n.js"></script>
+
+    <script src="i18n/registry.js"></script>
 
     <script>
     (function () {
@@ -63,10 +65,14 @@
         try { localStorage.setItem('nangua_lang', lang); } catch (e) {}
 
         window.__NANGUA_LANG__ = lang;
-
         document.documentElement.setAttribute('data-lang', lang);
     })();
     </script>
+
+    <script src="i18n/locales/zh-CN.js"></script>
+    <script src="i18n/locales/en-US.js"></script>
+
+    <script src="i18n/index.js"></script>
 
     <script src="other/lang-helper.js" defer></script>
 </head>
@@ -113,13 +119,26 @@
                 <div class="nav-sub-item" data-tab="purchases" data-i18n="adminDash.navPurchases">📋 兑换记录</div>
             </div>
 
-            <!-- ★ 新增：成就系统入口 -->
             <div class="nav-group" data-group="achievementGroup">
                 <span class="nav-text" data-i18n="adminDash.navAchievement">🏆 成就系统</span>
                 <span class="nav-arrow" data-arrow="achievementGroup">▾</span>
             </div>
             <div class="nav-sub" data-sub="achievementGroup">
                 <div class="nav-sub-item" data-tab="achievements" data-i18n="adminDash.achievementTitle">🏆 成就管理</div>
+            </div>
+
+            <!-- ★ 动态墙分组 -->
+            <div class="nav-group" data-group="wallGroup">
+                <span class="nav-text" data-i18n="adminWall.navWall">🌊 动态墙</span>
+                <span class="nav-arrow" data-arrow="wallGroup">▾</span>
+            </div>
+            <div class="nav-sub" data-sub="wallGroup">
+                <div class="nav-sub-item" data-tab="aiDecisions" data-i18n="adminWall.navDecisions">🤖 AI 决策复审</div>
+                <div class="nav-sub-item" data-tab="aiConfig"    data-i18n="adminWall.navConfig">⚙️ AI 分级配置</div>
+                <div class="nav-sub-item" data-tab="aiWordlist"  data-i18n="adminWall.navWordlist">🚫 敏感词库</div>
+                <div class="nav-sub-item" data-tab="wallPosts"   data-i18n="adminWall.navPosts">📋 动态管理</div>
+                <div class="nav-sub-item" data-tab="aiTrust"     data-i18n="adminWall.navTrust">📈 用户信任度</div>
+                <div class="nav-sub-item" data-tab="aiCost"      data-i18n="adminWall.navCost">💰 AI 成本</div>
             </div>
 
             <div class="nav-group" data-group="users">
@@ -301,7 +320,6 @@
                     </div>
                 </div>
 
-                <!-- 添加成就表单 -->
                 <div class="shop-add-form">
                     <div class="form-section-title" data-i18n="adminDash.achievementAddTitle">➕ 添加新成就</div>
                     <div class="form-row">
@@ -346,7 +364,6 @@
                     </div>
                 </div>
 
-                <!-- 成就列表 -->
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -365,6 +382,160 @@
                     </table>
                 </div>
             </div>
+
+            <!-- ★ AI 决策复审 -->
+            <div class="card" id="cardAiDecisions">
+                <div class="card-head">
+                    <h2 data-i18n="adminWall.decisionsTitle">🤖 AI 决策复审</h2>
+                    <div class="head-actions">
+                        <select id="aiDecisionsFilter" class="feedback-filter-select">
+                            <option value="all"      data-i18n="adminWall.decisionsFilterAll">全部</option>
+                            <option value="pending"  data-i18n="adminWall.decisionsFilterPending">待复审</option>
+                            <option value="applied"  data-i18n="adminWall.decisionsFilterApplied">已应用</option>
+                            <option value="reverted" data-i18n="adminWall.decisionsFilterReverted">已回滚</option>
+                        </select>
+                        <span class="badge" id="badgeAiDecisions">—</span>
+                        <button class="refresh-btn-mini" id="refreshAiDecisionsBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="feedback-list" id="aiDecisionsList">
+                    <div class="empty" data-i18n="common.loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- ★ AI 分级配置 -->
+            <div class="card" id="cardAiConfig">
+                <div class="card-head">
+                    <h2 data-i18n="adminWall.configTitle">⚙️ AI 分级配置</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeAiConfig">—</span>
+                        <button class="refresh-btn-mini" id="refreshAiConfigBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="theme-section-hint" data-i18n="adminWall.configHint">每个模块 / 动作可独立设置 AI 决策级别。</div>
+                <div id="aiConfigList">
+                    <div class="empty" data-i18n="common.loading">加载中...</div>
+                </div>
+            </div>
+
+            <!-- ★ 敏感词库 -->
+            <div class="card" id="cardAiWordlist">
+                <div class="card-head">
+                    <h2 data-i18n="adminWall.wordlistTitle">🚫 敏感词库</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeAiWordlist">—</span>
+                        <button class="refresh-btn-mini" id="refreshAiWordlistBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="wordlist-form">
+                    <input type="text" id="wordlistWord" data-i18n-placeholder="adminWall.wordlistPlaceholder" placeholder="输入敏感词"/>
+                    <input type="text" id="wordlistCategory" placeholder="分类" value="general"/>
+                    <select id="wordlistLevel">
+                        <option value="0">L0 全自动</option>
+                        <option value="1">L1 半自动</option>
+                        <option value="2" selected>L2 仅建议</option>
+                        <option value="3">L3 全手动</option>
+                    </select>
+                    <button id="addWordlistBtn" data-i18n="adminWall.wordlistAdd">➕ 添加</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="adminWall.wordlistPlaceholder">敏感词</th>
+                                <th data-i18n="adminWall.wordlistCategory">分类</th>
+                                <th data-i18n="adminWall.wordlistLevel">级别</th>
+                                <th data-i18n="adminWall.wordlistEnabled">启用</th>
+                                <th data-i18n="adminDash.pointLogsTableTime">时间</th>
+                                <th data-i18n="adminDash.pointsTableAction">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="aiWordlistBody">
+                            <tr><td colspan="6" class="loading" data-i18n="common.loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ★ 动态管理 -->
+            <div class="card" id="cardWallPosts">
+                <div class="card-head">
+                    <h2 data-i18n="adminWall.postsTitle">📋 动态管理</h2>
+                    <div class="head-actions">
+                        <select id="wallPostsStatus" class="feedback-filter-select">
+                            <option value="all"       data-i18n="adminWall.postsStatusAll">全部</option>
+                            <option value="pending"   data-i18n="adminWall.postsStatusPending">待审核</option>
+                            <option value="published" data-i18n="adminWall.postsStatusPublished">已发布</option>
+                            <option value="hidden"    data-i18n="adminWall.postsStatusHidden">已隐藏</option>
+                        </select>
+                        <span class="badge" id="badgeWallPosts">—</span>
+                        <button class="refresh-btn-mini" id="refreshWallPostsBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="adminDash.pointsTableUser">用户</th>
+                                <th data-i18n="adminWall.postsTitle">内容</th>
+                                <th data-i18n="adminWall.postsStatusAll">状态</th>
+                                <th>❤️</th>
+                                <th>💬</th>
+                                <th data-i18n="adminDash.pointLogsTableTime">时间</th>
+                                <th data-i18n="adminDash.pointsTableAction">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wallPostsBody">
+                            <tr><td colspan="7" class="loading" data-i18n="common.loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ★ 用户信任度 -->
+            <div class="card" id="cardAiTrust">
+                <div class="card-head">
+                    <h2 data-i18n="adminWall.trustTitle">📈 用户信任度</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeAiTrust">—</span>
+                        <button class="refresh-btn-mini" id="refreshAiTrustBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th data-i18n="adminDash.pointsTableUid">UID</th>
+                                <th data-i18n="adminDash.pointsTableUser">用户</th>
+                                <th data-i18n="adminWall.trustScore">信任分</th>
+                                <th data-i18n="adminWall.trustViolations">违规次数</th>
+                                <th data-i18n="adminWall.trustForcedManual">强制人工审</th>
+                                <th data-i18n="adminDash.pointsTableAction">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="aiTrustBody">
+                            <tr><td colspan="6" class="loading" data-i18n="common.loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ★ AI 成本 -->
+            <div class="card" id="cardAiCost">
+                <div class="card-head">
+                    <h2 data-i18n="adminWall.costTitle">💰 AI 成本监控</h2>
+                    <div class="head-actions">
+                        <span class="badge" id="badgeAiCost">—</span>
+                        <button class="refresh-btn-mini" id="refreshAiCostBtn" title="刷新">🔄</button>
+                    </div>
+                </div>
+                <div id="aiCostStats">
+                    <div class="empty" data-i18n="common.loading">加载中...</div>
+                </div>
+                <div class="stat-section-title" data-i18n="adminWall.costChartTitle" style="margin-top:20px;">近 7 天趋势</div>
+                <div id="aiCostChart"></div>
+            </div>
+
             <!-- 注册用户列表 -->
             <div class="card" id="cardProfiles">
                 <div class="card-head">
@@ -375,7 +546,6 @@
                     </div>
                 </div>
                 
-                <!-- 批量操作工具栏 -->
                 <div class="fb-toolbar" style="margin-bottom: 12px;">
                     <label class="fb-select-all"><input type="checkbox" id="profilesSelectAll"><span data-i18n="adminDash.feedbackSelectAll">全选</span></label>
                     <span class="fb-selected-count" id="profilesSelectedCount">已选 0 人</span>
@@ -417,8 +587,8 @@
                         <div class="preview-name" id="previewName" data-i18n="adminDash.manageNoUser">未选择用户</div>
                         <div class="preview-email" id="previewEmail" data-i18n="adminDash.manageSelectHint">请从右侧下拉框选择</div>
                         <span class="preview-status" id="previewStatus" style="display:none;">正常</span>
-                                                <div class="preview-divider"></div>
-                                                <div class="preview-hint">
+                        <div class="preview-divider"></div>
+                        <div class="preview-hint">
                             <span data-i18n="adminDash.manageHint1">修改后点击右侧「保存修改」</span><br>
                             <span data-i18n="adminDash.manageHint2">昵称、手机号、邮箱、密码、UID 将实时同步</span>
                         </div>
@@ -427,7 +597,7 @@
                         <div class="form-section-title" data-i18n="adminDash.manageStep1">① 选择目标用户</div>
                         <div class="form-group">
                             <label data-i18n="adminDash.manageStep1">用户</label>
-                                                        <select id="manageUserSelect">
+                            <select id="manageUserSelect">
                                 <option value="" data-i18n="adminDash.manageSelectPlaceholder">-- 请选择用户 --</option>
                             </select>
                         </div>
@@ -611,7 +781,7 @@
                         <span class="setting-title" data-i18n="adminDash.themeFontTitle">字号大小</span>
                         <span class="setting-desc" data-i18n="adminDash.themeFontDesc">调整界面文字和间距的大小</span>
                     </div>
-                        <div class="setting-options" data-setting="fontSize">
+                    <div class="setting-options" data-setting="fontSize">
                         <button class="setting-btn" data-value="small" data-i18n="common.themeFontSmall">小</button>
                         <button class="setting-btn" data-value="medium" data-i18n="common.themeFontMedium">标准</button>
                         <button class="setting-btn" data-value="large" data-i18n="common.themeFontLarge">大</button>
@@ -623,7 +793,7 @@
                         <span class="setting-title" data-i18n="adminDash.themeRadiusTitle">圆角风格</span>
                         <span class="setting-desc" data-i18n="adminDash.themeRadiusDesc">调整卡片、输入框和按钮的圆润程度</span>
                     </div>
-                        <div class="setting-options" data-setting="radius">
+                    <div class="setting-options" data-setting="radius">
                         <button class="setting-btn" data-value="small" data-i18n="common.themeRadiusSmall">直角</button>
                         <button class="setting-btn" data-value="medium" data-i18n="common.themeRadiusMedium">标准</button>
                         <button class="setting-btn" data-value="large" data-i18n="common.themeRadiusLarge">圆润</button>
@@ -634,7 +804,7 @@
                         <span class="setting-title" data-i18n="adminDash.themeAnimTitle">过渡动效</span>
                         <span class="setting-desc" data-i18n="adminDash.themeAnimDesc">关闭后切换页面和主题时不再有动画</span>
                     </div>
-                        <div class="setting-options" data-setting="animations">
+                    <div class="setting-options" data-setting="animations">
                         <button class="setting-btn" data-value="on" data-i18n="common.themeAnimOn">开启</button>
                         <button class="setting-btn" data-value="off" data-i18n="common.themeAnimOff">关闭</button>
                     </div>
@@ -847,9 +1017,7 @@
             <div class="field" style="width:100%; text-align: left;">
                 <label style="text-align: left; margin-bottom: 8px; display:block;"
                        data-i18n="common.achGrantPickLabel">选择目标用户 (UID / 邮箱)</label>
-                <select id="grantUserSelect" style="width: 100%; height: 42px; background: var(--theme-info-box); border: 1px solid var(--theme-border-soft); border-radius: var(--radius-md); padding: 0 12px; color: var(--theme-text); outline: none;">
-                    <!-- 用户列表动态填充 -->
-                </select>
+                <select id="grantUserSelect" style="width: 100%; height: 42px; background: var(--theme-info-box); border: 1px solid var(--theme-border-soft); border-radius: var(--radius-md); padding: 0 12px; color: var(--theme-text); outline: none;"></select>
             </div>
             <div class="dialog-actions" style="margin-top: 16px;">
                 <button type="button" class="btn-cancel" id="grantAchCancelBtn" data-i18n="common.cancel">取消</button>
@@ -875,9 +1043,10 @@
     </div>
 
     <script src="other/admin-dashboard.js"></script>
-<script src="other/theme.js"></script>
-<script src="other/sound.js"></script>
-<script src="other/message-notify.js"></script>
-<script src="other/session-guard.js"></script>
+    <script src="other/theme.js"></script>
+    <script src="other/sound.js"></script>
+    <script src="other/message-notify.js"></script>
+    <script src="other/session-guard.js"></script>
+    <script src="other/admin-wall/admin-wall.js"></script>
 </body>
 </html>

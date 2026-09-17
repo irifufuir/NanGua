@@ -10,7 +10,12 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="other/security/security-guard.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="other/i18n.js"></script>
+
+    <!-- ★ 新的 i18n 引入顺序 -->
+    <script src="i18n/registry.js"></script>
+    <script src="i18n/locales/zh-CN.js"></script>
+    <script src="i18n/locales/en-US.js"></script>
+    <script src="i18n/index.js"></script>
 </head>
 <body>
 
@@ -174,6 +179,7 @@
         ko: '🎨 배경', fr: '🎨 Fond', es: '🎨 Fondo'
     };
 
+    /* ---------- DOM 引用 ---------- */
     var bgImage        = document.getElementById('bgImage');
     var bgVideo        = document.getElementById('bgVideo');
     var bgDropdown     = document.getElementById('bgDropdown');
@@ -224,18 +230,97 @@
     var banRemaining  = document.getElementById('banRemaining');
     var banCloseBtn   = document.getElementById('banCloseBtn');
 
-    var i18n = window.I18N;
+    /* ============================================================
+     *  语言辅助：全部委托给 window.i18n 引擎
+     * ============================================================ */
     var currentLang = 'zh';
 
     function t(key, fallback) {
-        var dict = (i18n && i18n[currentLang]) || (i18n && i18n.zh) || {};
-        var parts = String(key).split('.');
-        var cur = dict;
-        for (var i = 0; i < parts.length; i++) {
-            if (cur == null || typeof cur !== 'object') { cur = null; break; }
-            cur = cur[parts[i]];
+        if (window.i18n && typeof window.i18n.t === 'function') {
+            return window.i18n.t(key, fallback);
         }
-        return (cur != null) ? cur : (fallback != null ? fallback : key);
+        return fallback != null ? fallback : key;
+    }
+
+    function getLang() {
+        if (window.i18n && typeof window.i18n.getLang === 'function') {
+            return window.i18n.getLang();
+        }
+        return currentLang;
+    }
+
+    function applyLanguage(lang) {
+        if (!window.i18n) return Promise.resolve();
+        return window.i18n.setLanguage(lang).then(function () {
+            currentLang = window.i18n.getLang();
+            refreshLoginPageTexts();
+            return currentLang;
+        });
+    }
+
+    function refreshLoginPageTexts() {
+        var lang = getLang();
+
+        // 顶部按钮
+        langBtn.textContent = '🌐 ' + t('langBtn', '简体中文');
+        bgBtn.textContent   = (BG_BTN_LABELS[lang] || BG_BTN_LABELS.zh);
+
+        // 标题
+        if (loginView.style.display !== 'none') {
+            titleEl.textContent = t('loginTitle', 'Nan Gua');
+        } else {
+            titleEl.textContent = t('registerTitle', 'Yu Mi Li');
+        }
+
+        // 登录视图
+        var loginBoxes = document.querySelectorAll('#loginView .input-box');
+        if (loginBoxes[0]) loginBoxes[0].querySelector('label').textContent = t('emailLabel', '邮箱');
+        if (loginBoxes[1]) loginBoxes[1].querySelector('label').textContent = t('pwdLabel', '密码');
+        loginEmail.placeholder = t('emailPlaceholder', '请输入邮箱地址......');
+        loginPwd.placeholder   = t('pwdPlaceholder', '请输入密码');
+        forgotLink.textContent = t('forgotPwd', '忘记密码?');
+        loginBtn.textContent   = t('loginBtn', '登录');
+        toRegisterBtn.textContent = t('registerBtn', '注册');
+
+        // 注册视图
+        var regBoxes = document.querySelectorAll('#registerView .input-box');
+        if (regBoxes[0]) regBoxes[0].querySelector('label').textContent = t('emailLabel', '邮箱');
+        if (regBoxes[1]) regBoxes[1].querySelector('label').textContent = t('nameLabel', '昵称');
+        if (regBoxes[2]) regBoxes[2].querySelector('label').textContent = t('phoneLabel', '手机号');
+        if (regBoxes[3]) regBoxes[3].querySelector('label').textContent = t('pwdLabelReg', '设置密码');
+        if (regBoxes[4]) regBoxes[4].querySelector('label').textContent = t('confirmPwdLabel', '确认密码');
+        regEmail.placeholder = t('emailPlaceholder', '请输入邮箱地址......');
+        regName.placeholder  = t('namePlaceholder', '请输入您的昵称');
+        regPhone.placeholder = t('phonePlaceholder', '请输入手机号');
+        regPwd.placeholder   = t('pwdPlaceholderReg', '至少 8 位，含大小写字母和数字');
+        regPwd2.placeholder  = t('confirmPwdPlaceholder', '再次输入密码');
+        regExistsTag.textContent = t('tipRegExists', '用户已注册');
+        backLoginLink.textContent = t('backLogin', '返回登录');
+        registerBtn.textContent   = t('registerBtn', '注册');
+
+        // 忘记密码弹窗
+        forgotTitle.textContent      = t('forgotTitle', '找回密码');
+        forgotEmailLabel.textContent = t('forgotEmailLabel', '注册邮箱');
+        forgotEmail.placeholder      = t('forgotEmailPlaceholder', '请输入注册时使用的邮箱');
+        forgotContactLbl.textContent = t('forgotContactLabel', '联系方式');
+        forgotContact.placeholder    = t('forgotContactPlaceholder', '手机号 / 其他邮箱（便于管理员联系您）');
+        forgotReasonLbl.textContent  = t('forgotReasonLabel', '问题描述');
+        forgotReason.placeholder     = t('forgotReasonPlaceholder', '简单描述您的情况（例如：忘记密码，账号是 xxx）');
+        forgotSubmitBtn.textContent  = t('forgotSubmit', '提交申请');
+        forgotCancelBtn.textContent  = t('forgotCancel', '取消');
+
+        // 封禁弹窗
+        refreshBanModalLabels();
+
+        // 设备提示
+        var deviceHintEl = document.getElementById('deviceHint');
+        if (deviceHintEl) {
+            deviceHintEl.innerHTML = t('deviceHintPrefix', '💻 当前设备：') +
+                '<span id="deviceHintName">' + getDeviceName() + '</span>';
+        }
+
+        // 背景分类标签
+        refreshBgCategoryLabels();
     }
 
     var EMAIL_RE = /^[\w.+-]+@[\w-]+(\.[\w-]+)+$/;
@@ -409,10 +494,12 @@
         if (e.target === banModal) closeBanModal();
     });
 
+    /* ============================================================
+     *  提示函数（全部走 t()）
+     * ============================================================ */
     var loginTipTimer = null;
     function showTip(key, ok) {
-        var dict = i18n[currentLang] || i18n.zh;
-        var msg = dict[key] || key;
+        var msg = t(key, key);
         loginTipEl.textContent = msg;
         loginTipEl.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
         loginTipEl.classList.add('show');
@@ -430,8 +517,7 @@
 
     var regTipTimer = null;
     function showRegTip(key, ok) {
-        var dict = i18n[currentLang] || i18n.zh;
-        var msg = dict[key] || key;
+        var msg = t(key, key);
         regTipEl.textContent = msg;
         regTipEl.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
         regTipEl.classList.add('show');
@@ -449,8 +535,7 @@
 
     var forgotTipTimer = null;
     function showForgotTip(key, ok) {
-        var dict = i18n[currentLang] || i18n.zh;
-        var msg = dict[key] || key;
+        var msg = t(key, key);
         forgotTip.textContent = msg;
         forgotTip.style.color = ok ? 'rgba(130,225,160,0.95)' : 'rgba(248,108,76,0.95)';
         forgotTip.classList.add('show');
@@ -469,69 +554,11 @@
         regExistsTag.classList.remove('show');
     }
 
-    function applyLanguage(lang) {
-        var dict = i18n[lang];
-        if (!dict) return;
-        currentLang = lang;
-
-        langBtn.textContent = '🌐 ' + dict.langBtn;
-        bgBtn.textContent   = (BG_BTN_LABELS[lang] || BG_BTN_LABELS.zh);
-
-        if (loginView.style.display !== 'none') {
-            titleEl.textContent = dict.loginTitle;
-        } else {
-            titleEl.textContent = dict.registerTitle;
-        }
-
-        document.querySelector('#loginView .input-box:nth-child(1) label').textContent = dict.emailLabel;
-        loginEmail.placeholder = dict.emailPlaceholder;
-        document.querySelector('#loginView .input-box:nth-child(2) label').textContent = dict.pwdLabel;
-        loginPwd.placeholder = dict.pwdPlaceholder;
-        forgotLink.textContent = dict.forgotPwd;
-        loginBtn.textContent = dict.loginBtn;
-        toRegisterBtn.textContent = dict.registerBtn;
-
-        var regBoxes = document.querySelectorAll('#registerView .input-box');
-        if (regBoxes[0]) regBoxes[0].querySelector('label').textContent = dict.emailLabel;
-        regEmail.placeholder = dict.emailPlaceholder;
-        if (regBoxes[1]) regBoxes[1].querySelector('label').textContent = dict.nameLabel;
-        regName.placeholder = dict.namePlaceholder;
-        if (regBoxes[2]) regBoxes[2].querySelector('label').textContent = dict.phoneLabel;
-        regPhone.placeholder = dict.phonePlaceholder;
-        if (regBoxes[3]) regBoxes[3].querySelector('label').textContent = dict.pwdLabelReg;
-        regPwd.placeholder = dict.pwdPlaceholderReg;
-        if (regBoxes[4]) regBoxes[4].querySelector('label').textContent = dict.confirmPwdLabel;
-        regPwd2.placeholder = dict.confirmPwdPlaceholder;
-
-        backLoginLink.textContent = dict.backLogin;
-        registerBtn.textContent = dict.registerBtn;
-
-        /* ★ 新增：已注册标签 */
-        regExistsTag.textContent = dict.tipRegExists || '用户已注册';
-
-        forgotTitle.textContent      = dict.forgotTitle;
-        forgotEmailLabel.textContent = dict.forgotEmailLabel;
-        forgotEmail.placeholder      = dict.forgotEmailPlaceholder;
-        forgotContactLbl.textContent = dict.forgotContactLabel;
-        forgotContact.placeholder    = dict.forgotContactPlaceholder;
-        forgotReasonLbl.textContent  = dict.forgotReasonLabel;
-        forgotReason.placeholder     = dict.forgotReasonPlaceholder;
-        forgotSubmitBtn.textContent  = dict.forgotSubmit;
-        forgotCancelBtn.textContent  = dict.forgotCancel;
-
-        refreshBanModalLabels();
-
-        var deviceHintEl = document.getElementById('deviceHint');
-        if (deviceHintEl && dict.deviceHintPrefix) {
-            deviceHintEl.innerHTML = dict.deviceHintPrefix +
-                '<span id="deviceHintName">' + getDeviceName() + '</span>';
-        }
-
-        refreshBgCategoryLabels();
-    }
-
+    /* ============================================================
+     *  视图切换
+     * ============================================================ */
     function showLoginView() {
-        titleEl.textContent = i18n[currentLang].loginTitle;
+        titleEl.textContent = t('loginTitle', 'Nan Gua');
         loginView.style.display = '';
         registerView.style.display = 'none';
         boxEl.classList.remove('box-wide');
@@ -542,7 +569,7 @@
     }
 
     function showRegisterView() {
-        titleEl.textContent = i18n[currentLang].registerTitle;
+        titleEl.textContent = t('registerTitle', 'Yu Mi Li');
         loginView.style.display = 'none';
         registerView.style.display = '';
         boxEl.classList.add('box-wide');
@@ -557,6 +584,9 @@
         showLoginView();
     });
 
+    /* ============================================================
+     *  卡片收起 / 展开
+     * ============================================================ */
     function bindBoxToggle() {
         if (!boxToggle || !boxEl) return;
         boxToggle.addEventListener('click', function (e) {
@@ -599,6 +629,9 @@
         boxEl.classList.remove('collapsed');
     }
 
+    /* ============================================================
+     *  邮箱校验
+     * ============================================================ */
     loginEmail.addEventListener('blur', function () {
         var email = this.value.trim();
         if (!email) return;
@@ -667,6 +700,9 @@
     regEmail.addEventListener('input', scheduleRegExistsCheck);
     regEmail.addEventListener('blur',  scheduleRegExistsCheck);
 
+    /* ============================================================
+     *  登录
+     * ============================================================ */
     function doLogin() {
         var email = loginEmail.value.trim();
         var pwd   = loginPwd.value;
@@ -685,7 +721,7 @@
 
         checkEmailExists(email).then(function (exists) {
             loginBtn.disabled = false;
-            loginBtn.textContent = i18n[currentLang].loginBtn;
+            loginBtn.textContent = t('loginBtn', '登录');
 
             if (exists === false) {
                 showTipMsg(t('tipEmailNotRegistered'), false);
@@ -743,17 +779,17 @@
             }
 
             loginBtn.disabled = false;
-            loginBtn.textContent = i18n[currentLang].loginBtn;
+            loginBtn.textContent = t('loginBtn', '登录');
             clearEmailCache();
             showTip('tipLoginSuccess', true);
             console.log('[登录成功]', currentUser);
             clearRegisterForm();
 
             var role = currentUser.app_metadata && currentUser.app_metadata.role;
-            
+
             try {
-    localStorage.setItem('nangua_role', role === 'admin' ? 'admin' : 'user');
-} catch (e) {}
+                localStorage.setItem('nangua_role', role === 'admin' ? 'admin' : 'user');
+            } catch (e) {}
 
             setTimeout(function () {
                 try { sessionStorage.setItem('nangua_fresh_login', '1'); } catch (e) {}
@@ -772,7 +808,7 @@
             }, 800);
         }).catch(function (err) {
             loginBtn.disabled = false;
-            loginBtn.textContent = i18n[currentLang].loginBtn;
+            loginBtn.textContent = t('loginBtn', '登录');
 
             if (err && err.__isBanned) return;
 
@@ -789,6 +825,9 @@
         doLogin();
     });
 
+    /* ============================================================
+     *  注册
+     * ============================================================ */
     function doRegister() {
         var email = regEmail.value.trim();
         var name  = regName.value.trim();
@@ -820,7 +859,7 @@
         checkEmailExists(email).then(function (exists) {
             if (exists === true) {
                 registerBtn.disabled = false;
-                registerBtn.textContent = i18n[currentLang].registerBtn;
+                registerBtn.textContent = t('registerBtn', '注册');
                 showRegExistsTag();
                 regEmail.focus();
                 return;
@@ -867,7 +906,7 @@
                 });
         }).then(function (result) {
             registerBtn.disabled = false;
-            registerBtn.textContent = i18n[currentLang].registerBtn;
+            registerBtn.textContent = t('registerBtn', '注册');
 
             if (result.profileRes && result.profileRes.error) {
                 console.warn('profiles 写入失败：', result.profileRes.error.message);
@@ -888,13 +927,14 @@
             setTimeout(showLoginView, 1800);
         }).catch(function (err) {
             registerBtn.disabled = false;
-            registerBtn.textContent = i18n[currentLang].registerBtn;
+            registerBtn.textContent = t('registerBtn', '注册');
 
             var raw = (err && err.message) ? err.message : String(err);
             var msg = (err && err.__translated) ? raw : translateAuthError(raw);
             showRegTipMsg(t('submitFailed') + msg, false);
         });
     }
+
     registerBtn.addEventListener('click', doRegister);
     regEmail.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') regName.focus();
@@ -912,6 +952,9 @@
         if (e.key === 'Enter') doRegister();
     });
 
+    /* ============================================================
+     *  忘记密码
+     * ============================================================ */
     function openForgotModal() {
         forgotModal.style.display = 'flex';
         forgotEmail.value   = '';
@@ -957,7 +1000,7 @@
             .insert([{ email: email, contact: contact, reason: reason }])
             .then(function (res) {
                 forgotSubmitBtn.disabled = false;
-                forgotSubmitBtn.textContent = i18n[currentLang].forgotSubmit;
+                forgotSubmitBtn.textContent = t('forgotSubmit', '提交申请');
 
                 if (res.error) {
                     showForgotTip('提交失败：' + res.error.message, false);
@@ -967,7 +1010,7 @@
                 setTimeout(closeForgotModal, 1500);
             }).catch(function (err) {
                 forgotSubmitBtn.disabled = false;
-                forgotSubmitBtn.textContent = i18n[currentLang].forgotSubmit;
+                forgotSubmitBtn.textContent = t('forgotSubmit', '提交申请');
                 showForgotTip('提交失败：' + (err && err.message ? err.message : err), false);
             });
     }
@@ -979,6 +1022,9 @@
         if (e.key === 'Enter') forgotReason.focus();
     });
 
+    /* ============================================================
+     *  语言下拉
+     * ============================================================ */
     langBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         var willShow = !langDropdown.classList.contains('show');
@@ -993,13 +1039,16 @@
             e.preventDefault();
             var code = this.getAttribute('data-lang');
 
-            try { localStorage.setItem('nangua_lang', code); } catch (err) {}
-
-            applyLanguage(code);
-            langDropdown.classList.remove('show');
+            // localStorage 由 i18n.setLanguage() 内部自动写入
+            applyLanguage(code).then(function () {
+                langDropdown.classList.remove('show');
+            });
         });
     });
 
+    /* ============================================================
+     *  背景切换
+     * ============================================================ */
     var BACKGROUND_CONFIG = window.BACKGROUND_CONFIG || {};
 
     function buildBgMenu() {
@@ -1016,7 +1065,7 @@
             var titleA = document.createElement('a');
             titleA.href = '#';
             titleA.className = 'bg-cat-title';
-            titleA.textContent = (CATEGORY_LABELS_I18N[currentLang] || CATEGORY_LABELS_I18N.zh)[catKey];
+            titleA.textContent = (CATEGORY_LABELS_I18N[getLang()] || CATEGORY_LABELS_I18N.zh)[catKey];
 
             titleA.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1055,7 +1104,7 @@
     }
 
     function refreshBgCategoryLabels() {
-        var labels = CATEGORY_LABELS_I18N[currentLang] || CATEGORY_LABELS_I18N.zh;
+        var labels = CATEGORY_LABELS_I18N[getLang()] || CATEGORY_LABELS_I18N.zh;
         bgDropdown.querySelectorAll('.bg-category').forEach(function (catEl) {
             var t2 = catEl.querySelector('.bg-cat-title');
             if (t2) t2.textContent = labels[catEl.dataset.cat];
@@ -1109,18 +1158,35 @@
 
     buildBgMenu();
 
+    /* ============================================================
+     *  语言初始化 & 引擎就绪后刷新页面
+     * ============================================================ */
     (function initLang() {
-        var saved = null;
-        try { saved = localStorage.getItem('nangua_lang'); } catch (e) {}
-        var supported = ['zh','en','ja','ko','fr','es'];
-        if (!saved || supported.indexOf(saved) === -1) saved = 'zh';
-        applyLanguage(saved);
+        if (!window.i18n) {
+            showLoginView();
+            return;
+        }
+
+        // 引擎会在 init() 里自动 resolve：URL > __NANGUA_LANG__ > localStorage > 浏览器
+        window.i18n.ready.then(function () {
+            currentLang = window.i18n.getLang();
+            refreshLoginPageTexts();
+        });
+
+        // 监听语言切换事件，刷新 JS 动态文本
+        window.addEventListener('langchange', function () {
+            currentLang = window.i18n.getLang();
+            refreshLoginPageTexts();
+        });
     })();
 
     showLoginView();
     bindBoxToggle();
     playBoxOpen();
 
+    /* ============================================================
+     *  设备识别
+     * ============================================================ */
     function getDeviceName() {
         var ua = navigator.userAgent || '';
         var platform = t('deviceUnknown', '未知设备');
@@ -1150,5 +1216,6 @@
 <script type="text/javascript" src="other/draggable.js"></script>
 <script src="other/security/security-roles.js"></script>
 <script src="other/security/security-guard.js"></script>
+<script src="other/lang-helper.js" defer></script>
 </body>
 </html>

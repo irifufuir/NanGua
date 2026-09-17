@@ -1,0 +1,132 @@
+/* 动态墙 · 用户端样式 */
+.wall-publish {
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-lg);
+    padding: 16px; margin-bottom: 20px;
+    position: relative;
+}
+.wall-publish::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--theme-accent) 0%, transparent 80%);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0; opacity: .7;
+}
+.wall-publish textarea {
+    width: 100%; min-height: 90px; padding: 12px 14px;
+    border-radius: var(--radius-md); background: var(--theme-card);
+    border: 1px solid var(--theme-border-soft); color: var(--theme-text);
+    font-size: 0.95em; font-family: inherit; line-height: 1.65;
+    resize: vertical; outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+.wall-publish textarea:focus {
+    border-color: var(--theme-accent);
+    box-shadow: 0 0 0 3px var(--theme-accent-soft);
+}
+.wall-publish-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 12px; flex-wrap: wrap;
+}
+.wall-anon-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.85em; color: var(--theme-text-dim);
+    cursor: pointer; user-select: none;
+}
+.wall-anon-toggle input { accent-color: var(--theme-accent); width: 15px; height: 15px; cursor: pointer; }
+.wall-publish-btn {
+    margin-left: auto; padding: 10px 26px;
+    border-radius: var(--radius-full);
+    background: var(--theme-accent-soft);
+    border: 1px solid var(--theme-accent-border);
+    color: var(--theme-accent);
+    font-size: 0.92em; font-weight: 600; font-family: inherit;
+    cursor: pointer; outline: none;
+    transition: all var(--transition-base);
+}
+.wall-publish-btn:hover:not(:disabled) {
+    border-color: var(--theme-accent);
+    box-shadow: 0 0 0 6px var(--theme-accent-soft);
+    transform: translateY(-1px);
+}
+.wall-publish-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.wall-list { display: flex; flex-direction: column; gap: 14px; }
+.wall-card {
+    background: var(--theme-info-box);
+    border: 1px solid var(--theme-border-soft);
+    border-radius: var(--radius-lg); padding: 16px;
+    transition: border-color .2s, box-shadow .2s;
+}
+.wall-card:hover { border-color: var(--theme-border); box-shadow: var(--shadow-sm); }
+.wall-card.status-pending { border-left: 3px solid #f8c850; }
+.wall-card.status-hidden  { border-left: 3px solid var(--danger); opacity: .75; }
+.wall-card.status-rejected { border-left: 3px solid var(--danger); opacity: .6; }
+
+.wall-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.wall-avatar {
+    width: 40px; height: 40px; border-radius: var(--radius-full);
+    object-fit: cover; flex-shrink: 0; background: var(--theme-card);
+    border: 1px solid var(--theme-border-soft);
+}
+.wall-meta { flex: 1; min-width: 0; }
+.wall-author { font-size: 0.92em; font-weight: 600; color: var(--theme-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wall-time { font-size: 0.76em; color: var(--theme-text-faint); margin-top: 2px; }
+.wall-badges { display: flex; gap: 6px; flex-shrink: 0; }
+.wall-badge {
+    font-size: 0.7em; padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--theme-accent-soft);
+    border: 1px solid var(--theme-accent-border);
+    color: var(--theme-accent); white-space: nowrap;
+}
+.wall-badge.warn { background: rgba(248,200,80,.12); border-color: rgba(248,200,80,.3); color: #f8c850; }
+.wall-badge.danger { background: rgba(214,139,139,.12); border-color: rgba(214,139,139,.3); color: var(--danger); }
+
+.wall-content { font-size: 0.95em; color: var(--theme-text); line-height: 1.7; white-space: pre-wrap; word-break: break-word; margin-bottom: 12px; }
+
+.wall-actions {
+    display: flex; align-items: center; gap: 6px;
+    padding-top: 10px; border-top: 1px solid var(--theme-border-soft);
+}
+.wall-action-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 12px; border-radius: var(--radius-sm);
+    background: transparent; border: 1px solid transparent;
+    color: var(--theme-text-dim); font-size: 0.82em; font-family: inherit;
+    cursor: pointer; outline: none; transition: all var(--transition-base);
+}
+.wall-action-btn:hover { background: var(--theme-accent-soft); color: var(--theme-accent); }
+.wall-action-btn.liked { color: #e0688a; }
+.wall-action-btn.danger:hover { background: rgba(214,139,139,.12); color: var(--danger); }
+
+.wall-comments { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--theme-border-soft); display: none; }
+.wall-comments.open { display: block; }
+.wall-comment-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.wall-comment { display: flex; gap: 8px; align-items: flex-start; }
+.wall-comment img { width: 28px; height: 28px; border-radius: var(--radius-full); object-fit: cover; flex-shrink: 0; border: 1px solid var(--theme-border-soft); }
+.wall-comment-body { flex: 1; min-width: 0; }
+.wall-comment-name { font-size: 0.82em; font-weight: 600; color: var(--theme-text); }
+.wall-comment-time { font-size: 0.68em; color: var(--theme-text-faint); margin-left: 6px; }
+.wall-comment-text { font-size: 0.88em; color: var(--theme-text); line-height: 1.55; margin-top: 2px; word-break: break-word; }
+.wall-comment-input { display: flex; gap: 8px; }
+.wall-comment-input input {
+    flex: 1; height: 38px; padding: 0 12px;
+    border-radius: var(--radius-md); background: var(--theme-card);
+    border: 1px solid var(--theme-border-soft);
+    color: var(--theme-text); font-size: 0.9em; font-family: inherit;
+    outline: none; transition: border-color .2s;
+}
+.wall-comment-input input:focus { border-color: var(--theme-accent); }
+.wall-comment-input button {
+    padding: 0 16px; height: 38px;
+    border-radius: var(--radius-md);
+    background: var(--theme-accent-soft);
+    border: 1px solid var(--theme-accent-border);
+    color: var(--theme-accent);
+    font-size: 0.85em; font-weight: 500; font-family: inherit;
+    cursor: pointer; outline: none; transition: all var(--transition-base);
+}
+.wall-comment-input button:hover:not(:disabled) { border-color: var(--theme-accent); }
+.wall-comment-input button:disabled { opacity: .5; cursor: not-allowed; }
+
+.wall-empty { text-align: center; color: var(--theme-text-faint); padding: 40px 20px; font-size: 0.9em; }
