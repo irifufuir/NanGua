@@ -1669,3 +1669,125 @@ body {
     color: var(--theme-text-faint);
     margin-top: 6px;
 }
+/* ============================================================
+ *  移动端底部标签栏（4 主按钮 + 弹出子菜单）
+ * ============================================================ */
+.mobile-tabbar,
+.mobile-submenu { display: none; }
+
+@media (max-width: 768px),
+       (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+
+    /* 隐藏旧的顶部导航 */
+    .sidebar .nav-menu { display: none !important; }
+
+    /* 主体加底部留白，防止内容被遮挡 */
+    body.has-mobile-tabbar .main-wrapper {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ---------- 底部固定标签栏 ---------- */
+    .mobile-tabbar {
+        display: flex;
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        height: calc(62px + env(safe-area-inset-bottom, 0px));
+        padding: 4px 6px calc(4px + env(safe-area-inset-bottom, 0px));
+        gap: 2px;
+        box-sizing: border-box;
+
+        background: var(--theme-sidebar);
+        border-top: 1px solid var(--theme-border-soft);
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
+
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        z-index: 200;
+    }
+
+    .mobile-tabbar-btn {
+        flex: 1; min-width: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 3px;
+        padding: 4px 2px;
+
+        background: transparent; border: none;
+        border-radius: 12px;
+        color: var(--theme-text-faint);
+        font-family: inherit;
+        cursor: pointer; outline: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: color .2s ease, background-color .2s ease;
+    }
+    .mobile-tabbar-btn .tabbar-icon {
+        font-size: 20px; line-height: 1;
+        transition: transform .25s cubic-bezier(.34,1.2,.64,1);
+    }
+    .mobile-tabbar-btn .tabbar-label {
+        font-size: 11px; font-weight: 500; line-height: 1;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    .mobile-tabbar-btn.active {
+        color: var(--theme-accent);
+        background: var(--theme-accent-soft);
+    }
+    .mobile-tabbar-btn.active .tabbar-icon {
+        transform: translateY(-1px) scale(1.1);
+    }
+
+    /* ---------- 弹出子菜单 ---------- */
+    .mobile-submenu {
+        display: flex; flex-wrap: wrap; gap: 6px;
+        position: fixed;
+        left: 8px; right: 8px;
+        bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+        padding: 10px;
+        max-height: 55vh; overflow-y: auto;
+        scrollbar-width: none;
+
+        background: var(--theme-elevated);
+        border: 1px solid var(--theme-border);
+        border-radius: 16px;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
+        z-index: 199;
+
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+        pointer-events: none;
+        transition:
+            opacity .22s ease,
+            transform .25s cubic-bezier(.34,1.2,.64,1);
+        -webkit-overflow-scrolling: touch;
+    }
+    .mobile-submenu::-webkit-scrollbar { display: none; }
+    .mobile-submenu.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+
+    .mobile-submenu-btn {
+        flex: 0 0 auto;
+        padding: 9px 14px;
+        background: var(--theme-info-box);
+        border: 1px solid var(--theme-border-soft);
+        border-radius: 999px;
+        color: var(--theme-text-dim);
+        font-family: inherit; font-size: 13px; font-weight: 500;
+        white-space: nowrap; cursor: pointer; outline: none;
+        -webkit-tap-highlight-color: transparent;
+        transition:
+            background-color .18s ease,
+            color .18s ease,
+            border-color .18s ease,
+            transform .12s ease;
+    }
+    .mobile-submenu-btn:active {
+        background: var(--theme-accent-soft);
+        border-color: var(--theme-accent-border);
+        color: var(--theme-accent);
+        transform: scale(.96);
+    }
+}

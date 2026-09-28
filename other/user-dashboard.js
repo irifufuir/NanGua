@@ -22,127 +22,179 @@ function applyLang() {
 window.__udLangChanged = applyLang;
 
 /* ============================================================
- *  移动端导航分组
+ *  移动端底部标签栏 · 4 主按钮
  * ============================================================ */
-(function setupMobileNav() {
+(function setupMobileTabbar() {
+    'use strict';
+
     function isMobile() { return window.innerWidth <= 768; }
 
+    /* 4 个主按钮 → 每个按钮收纳的 tab 集合
+     * 主页为特殊按钮：点击时触发 #homeNavItem.click()，
+     * 让原逻辑（切换 tab + 展开资料面板）自动复用 */
+    var TABBAR_GROUPS = [
+        {
+            key: 'home', icon: '🏠', label: '主页',
+            special: 'home'
+        },
+        {
+            key: 'msg', icon: '📬', label: '消息',
+            tabs: ['announce', 'wall', 'friends']
+        },
+        {
+            key: 'points', icon: '📊', label: '积分',
+            tabs: ['checkin', 'achievements', 'shop']
+        },
+        {
+            key: 'me', icon: '👤', label: '我的',
+            tabs: ['theme', 'feedback']
+        }
+    ];
+
+    var tabbarEl = null;
+    var submenuEl = null;
+    var activeGroupKey = null;
+
     function build() {
-        var navMenu = document.querySelector('.nav-menu');
-        if (!navMenu) return;
+        if (tabbarEl) return;
 
-        if (!isMobile()) {
-            if (navMenu.dataset.mobileGrouped === '1') {
-                var mRow = navMenu.querySelector('.nav-main-row');
-                var sRow = navMenu.querySelector('.nav-sub-row');
-                if (mRow) {
-                    Array.prototype.slice.call(mRow.children).forEach(function (el) {
-                        navMenu.appendChild(el);
-                    });
+        tabbarEl = document.createElement('nav');
+        tabbarEl.id = 'mobileTabbar';
+        tabbarEl.className = 'mobile-tabbar';
+
+        TABBAR_GROUPS.forEach(function (g) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'mobile-tabbar-btn';
+            btn.setAttribute('data-group', g.key);
+            btn.innerHTML =
+                '<span class="tabbar-icon">' + g.icon + '</span>' +
+                '<span class="tabbar-label">' + g.label + '</span>';
+
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (g.special === 'home') {
+                    /* 主页：直接触发原 nav-item 逻辑 */
+                    var homeNav = document.getElementById('homeNavItem');
+                    if (homeNav) homeNav.click();
+                    closeSubmenu();
+                    /* 主动高亮自己 */
+                    setActiveGroup('home');
+                    return;
                 }
-                if (sRow) {
-                    sRow.querySelectorAll('.nav-sub').forEach(function (sub) {
-                        sub.classList.remove('show');
-                        navMenu.appendChild(sub);
-                    });
+                toggleGroup(g.key);
+            });
+
+            tabbarEl.appendChild(btn);
+        });
+
+        submenuEl = document.createElement('div');
+        submenuEl.id = 'mobileSubmenu';
+        submenuEl.className = 'mobile-submenu';
+
+        document.body.appendChild(tabbarEl);
+        document.body.appendChild(submenuEl);
+        document.body.classList.add('has-mobile-tabbar');
+    }
+
+    function destroy() {
+        if (tabbarEl && tabbarEl.parentNode) tabbarEl.parentNode.removeChild(tabbarEl);
+        if (submenuEl && submenuEl.parentNode) submenuEl.parentNode.removeChild(submenuEl);
+        tabbarEl = null;
+        submenuEl = null;
+        activeGroupKey = null;
+        document.body.classList.remove('has-mobile-tabbar');
+    }
+
+    function setActiveGroup(key) {
+        if (!tabbarEl) return;
+        tabbarEl.querySelectorAll('.mobile-tabbar-btn').forEach(function (b) {
+            b.classList.toggle('active', b.getAttribute('data-group') === key);
+        });
+    }
+
+    function toggleGroup(key) {
+        if (activeGroupKey === key) { closeSubmenu(); return; }
+        activeGroupKey = key;
+        setActiveGroup(key);
+
+        var group = TABBAR_GROUPS.filter(function (g) { return g.key === key; })[0];
+        if (!group || !group.tabs) return;
+
+        /* 复用侧边栏里的文案，避免再造一份翻译 */
+        var nav = document.querySelector('.nav-menu');
+        var html = '';
+        group.tabs.forEach(function (tabName) {
+            var original = nav ? nav.querySelector('[data-tab="' + tabName + '"]') : null;
+            var textEl = original ? original.querySelector('.nav-text') : null;
+            var text = textEl ? textEl.textContent.trim()
+                     : (original ? original.textContent.trim() : tabName);
+            html += '<button type="button" class="mobile-submenu-btn" ' +
+                    'data-tab="' + tabName + '">' + text + '</button>';
+        });
+        submenuEl.innerHTML = html;
+        submenuEl.classList.add('show');
+
+        submenuEl.querySelectorAll('.mobile-submenu-btn').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var tab = this.getAttribute('data-tab');
+                if (typeof switchTab === 'function') switchTab(tab);
+                closeSubmenu();
+            });
+        });
+    }
+
+    function closeSubmenu() {
+        activeGroupKey = null;
+        if (submenuEl) submenuEl.classList.remove('show');
+        /* 不主动清除高亮，交给 syncActiveTab 决定 */
+    }
+
+    /* 外部调用：切 tab 时高亮对应主按钮 */
+    function syncActiveTab(tabName) {
+        if (!tabbarEl) return;
+        var group = TABBAR_GROUPS.filter(function (g) {
+            return g.tabs && g.tabs.indexOf(tabName) !== -1;
+        })[0];
+        if (group) {
+            setActiveGroup(group.key);
+        } else if (tabName === 'home') {
+            setActiveGroup('home');
+        }
+    }
+    window.syncMobileTabbar = syncActiveTab;
+
+    function start() {
+        if (isMobile()) build();
+
+        var timer = null;
+        var lastMode = isMobile();
+        window.addEventListener('resize', function () {
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+                var now = isMobile();
+                if (now !== lastMode) {
+                    lastMode = now;
+                    if (now) build(); else destroy();
                 }
-                if (mRow) mRow.remove();
-                if (sRow) sRow.remove();
-                navMenu.dataset.mobileGrouped = '0';
-            }
-            return;
-        }
-
-        if (navMenu.dataset.mobileGrouped === '1') {
-            if (window.syncMobileSubRow) window.syncMobileSubRow();
-            return;
-        }
-
-        var mainRow = document.createElement('div');
-        mainRow.className = 'nav-main-row';
-        var subRow = document.createElement('div');
-        subRow.className = 'nav-sub-row';
-
-        Array.prototype.slice.call(navMenu.children).forEach(function (el) {
-            if (el.classList && el.classList.contains('nav-sub')) {
-                subRow.appendChild(el);
-            } else {
-                mainRow.appendChild(el);
-            }
+            }, 150);
         });
 
-        navMenu.innerHTML = '';
-        navMenu.appendChild(mainRow);
-        navMenu.appendChild(subRow);
-        navMenu.dataset.mobileGrouped = '1';
-
-        function syncSubRow() {
-            var allSubs = subRow.querySelectorAll('.nav-sub');
-            if (allSubs.length === 0) return;
-            var activeSub = null;
-            allSubs.forEach(function (sub) {
-                if (sub.classList.contains('open')) activeSub = sub;
-            });
-            if (!activeSub) {
-                allSubs.forEach(function (sub) {
-                    if (sub.querySelector('.nav-sub-item.active')) activeSub = sub;
-                });
+        /* 点空白关闭子菜单 */
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.mobile-tabbar') &&
+                !e.target.closest('.mobile-submenu')) {
+                closeSubmenu();
             }
-            if (!activeSub) {
-                subRow.classList.remove('show');
-                return;
-            }
-            allSubs.forEach(function (sub) {
-                sub.classList.toggle('show', sub === activeSub);
-            });
-            subRow.classList.add('show');
-        }
-        window.syncMobileSubRow = syncSubRow;
-
-        mainRow.querySelectorAll('.nav-item, .nav-group').forEach(function (el) {
-            el.addEventListener('click', function () {
-                setTimeout(function () {
-                    if (el.classList.contains('nav-group')) {
-                        var key = el.getAttribute('data-group');
-                        var sub = subRow.querySelector('.nav-sub[data-sub="' + key + '"]');
-                        if (sub) {
-                            subRow.querySelectorAll('.nav-sub').forEach(function (s) {
-                                s.classList.toggle('show', s === sub);
-                            });
-                            subRow.classList.add('show');
-                        } else {
-                            subRow.classList.remove('show');
-                        }
-                    } else {
-                        subRow.classList.remove('show');
-                    }
-                }, 0);
-            });
         });
-
-        subRow.querySelectorAll('.nav-sub-item').forEach(function (item) {
-            item.addEventListener('click', function () {
-                setTimeout(function () { subRow.classList.add('show'); }, 0);
-            });
-        });
-
-        syncSubRow();
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', build);
-    } else { build(); }
-
-    var t2 = null;
-    var lastMode = isMobile();
-    window.addEventListener('resize', function () {
-        clearTimeout(t2);
-        t2 = setTimeout(function () {
-            var now = isMobile();
-            if (now !== lastMode) { lastMode = now; build(); }
-            else if (now && window.syncMobileSubRow) { window.syncMobileSubRow(); }
-        }, 150);
-    });
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
 })();
 
 /* ============================================================ */
@@ -394,8 +446,8 @@ function switchTab(tab) {
     if (tab === 'shop')     loadShop();
     if (tab === 'friends')  loadFriends();
 
-    if (window.syncMobileSubRow) {
-        setTimeout(window.syncMobileSubRow, 0);
+        if (window.syncMobileTabbar) {
+        window.syncMobileTabbar(tab);
     }
 }
 

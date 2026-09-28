@@ -1,0 +1,278 @@
+/* ============================================================
+ *  ju-bounce.css · 弹跳小老虎挂件
+ *  去 Wallpaper Engine 化，独立于项目主题
+ * ============================================================ */
+
+#ju-bounce-root {
+    /* 默认全屏；data-mode="widget" 时改为右下角 */
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    pointer-events: none;
+    overflow: hidden;
+    font-family: monospace;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#ju-bounce-root[data-mode="widget"] {
+    inset: auto 12px 12px auto;
+    width: 380px;
+    height: 300px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px dashed rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+}
+
+/* 小老虎本体 */
+#jufufu {
+    position: absolute;
+    width: 150px;
+    height: auto;
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+    will-change: left, top;
+    transition: filter 0.15s;
+}
+
+/* 分数统计条 */
+.ju-stats {
+    position: absolute;
+    top: 40px;
+    left: 24px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.65);
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #444;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+    z-index: 998;
+    transition: background 0.2s, box-shadow 0.2s;
+    line-height: 1.5;
+}
+
+/* 左下角容器（音量） */
+#ju-bottom-left {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transform-origin: bottom left;
+    pointer-events: auto;
+    z-index: 999;
+}
+
+/* 右下角（Chaos 按钮） */
+#ju-bottom-right {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    transform-origin: bottom right;
+    pointer-events: auto;
+    z-index: 999;
+}
+
+/* 右上角（开发者按钮） */
+#ju-top-right {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    transform-origin: top right;
+    pointer-events: auto;
+    z-index: 999;
+}
+
+/* Chaos 按钮 */
+#chaos-toggle {
+    padding: 10px 15px;
+    background: #ffb3c1;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-family: inherit;
+    font-size: clamp(11px, 1.6vmin, 15px);
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.15s;
+}
+#chaos-toggle:hover { transform: translateY(-1px); }
+#chaos-toggle:active { transform: scale(0.96); }
+
+/* 开发者按钮（切换隐藏 UI） */
+#ju-dev-disable {
+    padding: 6px 14px;
+    background: #444;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+}
+#ju-dev-disable:hover { opacity: 0.7; }
+
+/* 音量控制面板 */
+#ju-volume-control {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.13);
+    transition: box-shadow 0.2s;
+    animation: juPopIn 0.5s cubic-bezier(.5, 1.8, .5, 1) 0.2s 1 both;
+}
+#ju-volume-control:hover {
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+#volume-icon {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    cursor: pointer;
+    transition: filter 0.2s;
+    display: block;
+}
+#volume-icon:active { filter: brightness(0.8); }
+
+#ju-volume-sliders {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: #444;
+}
+#ju-volume-sliders label {
+    margin-bottom: -2px;
+    font-family: inherit;
+}
+
+/* 滑块 */
+#volume-slider-bgm,
+#volume-slider-sfx {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 14px;
+    width: 140px;
+    background: linear-gradient(90deg, #ffb3c1 0%, #fee1a7 100%);
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+#volume-slider-bgm::-webkit-slider-thumb,
+#volume-slider-sfx::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 32px;
+    height: 32px;
+    background: url("img/jufuSlider.png") no-repeat center center;
+    background-size: contain;
+    border: none;
+    margin-top: -10px;
+    cursor: grab;
+}
+#volume-slider-bgm::-moz-range-thumb,
+#volume-slider-sfx::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+    background: url("img/jufuSlider.png") no-repeat center center;
+    background-size: contain;
+    border: none;
+    cursor: grab;
+}
+
+@keyframes juPopIn {
+    0%   { transform: scale(0.7) translateY(30px); opacity: 0; }
+    80%  { transform: scale(1.08) translateY(-4px); opacity: 1; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* 移动端小屏：把音量面板缩一点 */
+@media (max-width: 600px) {
+    #ju-volume-control { padding: 8px 12px; gap: 12px; }
+    #volume-icon { width: 40px; height: 40px; }
+    #volume-slider-bgm, #volume-slider-sfx { width: 110px; }
+    .ju-stats { font-size: 0.85rem; padding: 4px 10px; top: 20px; left: 12px; }
+}
+/* ============================================================
+ *  大小控制面板
+ * ============================================================ */
+#ju-size-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.13);
+    font-size: 0.8rem;
+    color: #444;
+    transition: box-shadow 0.2s;
+    animation: juPopIn 0.5s cubic-bezier(.5, 1.8, .5, 1) 0.15s 1 both;
+}
+#ju-size-control:hover {
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+#ju-size-control label {
+    font-family: inherit;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+#size-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 14px;
+    width: 170px;
+    background: linear-gradient(90deg, #a8e6cf 0%, #ffb3c1 50%, #fee1a7 100%);
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+#size-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 26px;
+    height: 26px;
+    background: url("img/jufuSlider.png") no-repeat center center;
+    background-size: contain;
+    border: none;
+    margin-top: -8px;
+    cursor: grab;
+}
+#size-slider::-moz-range-thumb {
+    width: 26px;
+    height: 26px;
+    background: url("img/jufuSlider.png") no-repeat center center;
+    background-size: contain;
+    border: none;
+    cursor: grab;
+}
+
+#size-value {
+    min-width: 46px;
+    text-align: right;
+    font-family: 'SF Mono', Menlo, Monaco, Consolas, monospace;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+/* 移动端小屏 */
+@media (max-width: 600px) {
+    #ju-size-control { padding: 8px 12px; gap: 8px; }
+    #size-slider { width: 120px; }
+    #size-value { min-width: 38px; font-size: 0.78rem; }
+}

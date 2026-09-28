@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#fee1a7">
+    <title>橘福福 · Ju Fufu Bounce</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐯</text></svg>">
+
+    <link rel="stylesheet" href="other/ju-bounce/ju-bounce.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #fee1a7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                         "PingFang SC", "Microsoft YaHei", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ---------- 返回登录按钮 ---------- */
+        #juBackBtn {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 99999;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: #444;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #juBackBtn:hover {
+            background: #fff;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+        }
+        #juBackBtn:active {
+            transform: scale(0.96);
+        }
+
+        @media (max-width: 480px) {
+            #juBackBtn {
+                top: 10px;
+                left: 10px;
+                padding: 6px 12px;
+                font-size: 12px;
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 返回登录 -->
+    <a href="index.html" id="juBackBtn" title="返回登录">← 返回登录</a>
+
+    <!-- 橘福福（JS 会自动注入所需 DOM 与音频） -->
+    <script src="other/ju-bounce/ju-bounce.js"
+            data-mode="fullscreen"
+            data-size="150"></script>
+
+</body>
+</html>
