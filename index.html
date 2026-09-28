@@ -792,21 +792,53 @@
                 localStorage.setItem('nangua_role', role === 'admin' ? 'admin' : 'user');
             } catch (e) {}
 
-            setTimeout(function () {
+                        setTimeout(function () {
                 try { sessionStorage.setItem('nangua_fresh_login', '1'); } catch (e) {}
 
-                var langQS = '';
+                // ★ 读回跳参数
+                var redirect = null;
                 try {
-                    var curLang = localStorage.getItem('nangua_lang');
-                    if (curLang) langQS = '?lang=' + encodeURIComponent(curLang);
+                    var m = location.search.match(/[?&]redirect=([^&]+)/);
+                    if (m) redirect = decodeURIComponent(m[1]);
                 } catch (e) {}
 
+                // ★ 白名单：只允许跳站内已知页面，防开放重定向
+                var ALLOWED_REDIRECTS = [
+                    'ju-bounce.html',
+                    'user-dashboard.html',
+                    'admin-dashboard.html'
+                ];
+
+                // 语言查询串
+                var langVal = '';
+                try { langVal = localStorage.getItem('nangua_lang') || ''; } catch (e) {}
+
+                // 拼查询串（如果 redirect 已带 ? 就用 &）
+                function withLang(base) {
+                    if (!langVal) return base;
+                    return base + (base.indexOf('?') === -1 ? '?' : '&') +
+                           'lang=' + encodeURIComponent(langVal);
+                }
+
+                // ① 有回跳参数且在白名单里 → 跳回去
+                if (redirect && ALLOWED_REDIRECTS.indexOf(redirect) !== -1) {
+                    // 管理员仍走管理后台
+                    if (role === 'admin') {
+                        location.href = withLang('admin-dashboard.html');
+                    } else {
+                        location.href = withLang(redirect);
+                    }
+                    return;
+                }
+
+                // ② 默认跳转
                 if (role === 'admin') {
-                    location.href = 'admin-dashboard.html' + langQS;
+                    location.href = withLang('admin-dashboard.html');
                 } else {
-                    location.href = 'user-dashboard.html' + langQS;
+                    location.href = withLang('user-dashboard.html');
                 }
             }, 800);
+            
         }).catch(function (err) {
             loginBtn.disabled = false;
             loginBtn.textContent = t('loginBtn', '登录');
